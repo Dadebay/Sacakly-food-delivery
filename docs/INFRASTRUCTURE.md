@@ -11,3 +11,8 @@ PostgreSQL, Redis and MinIO. Use separate project names, databases, ports and
 volumes from any A7 environment. A platform release needs its own host and
 origin, isolated data and credentials, backups, tenant migration validation,
 and rollback plan before a deployment workflow is enabled.
+
+The local Compose MinIO and `mc` images use Docker Hub digests. The imported
+Quay URLs did not authenticate on the new GitHub runner, so the registry host
+was changed without changing the pinned image digests. This affects local/CI
+containers only; no platform production registry is configured.
