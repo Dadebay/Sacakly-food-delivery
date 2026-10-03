@@ -143,7 +143,8 @@ Firebase Messaging согласно официальной инструкции.
 Из корня монорепозитория:
 
 ```bash
-docker compose up -d postgres redis minio minio-init
+docker compose up -d postgres redis minio
+node apps/api/scripts/init-local-s3.mjs
 npm --prefix apps/api run db:deploy
 npm --prefix apps/api run db:seed
 npm --prefix apps/api run start:dev

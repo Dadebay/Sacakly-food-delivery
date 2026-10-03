@@ -34,7 +34,7 @@ npm ci --prefix apps/api
 npm ci --prefix apps/merchant
 cp apps/api/.env.example apps/api/.env
 docker compose up -d --wait postgres redis minio
-docker compose run --rm minio-init
+node apps/api/scripts/init-local-s3.mjs
 npm --prefix apps/api run db:deploy
 npm run api:client
 npm run dev:api

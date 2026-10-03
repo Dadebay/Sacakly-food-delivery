@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: apps/api/package-lock.json
       - run: npm ci --prefix apps/api --no-audit --no-fund
       - run: docker compose up -d --wait postgres redis minio
-      - run: docker compose run --rm minio-init
+      - run: node apps/api/scripts/init-local-s3.mjs
       - run: npm --prefix apps/api run lint
       - run: npm --prefix apps/api run build
       - run: npm --prefix apps/api test
