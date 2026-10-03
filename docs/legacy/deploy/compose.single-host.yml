@@ -1,0 +1,275 @@
+# Full production stack for the current single VDS. Database, cache, object
+# storage, map tiles, routing and geocoding remain private to this Compose
+# network; only API/admin/tiles loopback ports are exposed to host Nginx.
+services:
+  postgres:
+    image: ${ALOWALOW_POSTGRES_IMAGE:-postgres:18-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15}
+    env_file:
+      - ${ALOWALOW_ENV_FILE:-.env.production}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - max_connections=30
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 192m
+    mem_reservation: 96m
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: ${ALOWALOW_REDIS_IMAGE:-redis:8.8.0-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005}
+    user: "999:1000"
+    env_file:
+      - ${ALOWALOW_ENV_FILE:-.env.production}
+    command:
+      - /bin/sh
+      - -ec
+      - >-
+        exec redis-server
+        --port 0
+        --tls-port 6379
+        --tls-cert-file /tls/redis.crt
+        --tls-key-file /tls/redis.key
+        --tls-ca-cert-file /tls/ca.crt
+        --tls-auth-clients no
+        --requirepass "$${REDIS_PASSWORD}"
+        --save ""
+        --appendonly no
+        --maxmemory 64mb
+        --maxmemory-policy volatile-ttl
+    restart: unless-stopped
+    volumes:
+      - ./redis-tls:/tls:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$${REDIS_PASSWORD}\" redis-cli --tls --cacert /tls/ca.crt ping | grep -qx PONG",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 96m
+    mem_reservation: 48m
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  minio:
+    image: ${ALOWALOW_MINIO_IMAGE:-minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e}
+    env_file:
+      - ${ALOWALOW_ENV_FILE:-.env.production}
+    command: server /data
+    restart: unless-stopped
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 192m
+    mem_reservation: 96m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  minio-init:
+    image: ${ALOWALOW_MINIO_MC_IMAGE:-minio/mc:latest@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727}
+    env_file:
+      - ${ALOWALOW_ENV_FILE:-.env.production}
+    environment:
+      MC_CONFIG_DIR: /tmp/.mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - >-
+        mc alias set local http://minio:9000
+        "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}" &&
+        mc mb --ignore-existing "local/$${S3_BUCKET}"
+    restart: "no"
+    mem_limit: 64m
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  migrate:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 384m
+    mem_reservation: 128m
+
+  api:
+    environment:
+      NODE_EXTRA_CA_CERTS: /run/alowalow/redis-ca.crt
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      routing:
+        condition: service_healthy
+    volumes:
+      - ./redis-tls/ca.crt:/run/alowalow/redis-ca.crt:ro
+    mem_limit: 384m
+    mem_reservation: 192m
+
+  admin:
+    mem_limit: 64m
+    mem_reservation: 32m
+
+  tileserver:
+    image: ${ALOWALOW_TILESERVER_IMAGE:-maptiler/tileserver-gl:v5.6.0@sha256:3a9ccdb24820b6814c8119bcc8a4376c39867cb0ffe69d62919ef898b90c2427}
+    init: true
+    restart: unless-stopped
+    command:
+      - --config
+      - /data/config.json
+      - --bind
+      - 0.0.0.0
+      - --port
+      - "8080"
+    environment:
+      TILESERVER_GL_ALLOWED_HOSTS: localhost,127.0.0.1
+      XDG_CACHE_HOME: /tmp/cache
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./maps-runtime:/data:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    healthcheck:
+      test: ["CMD", "node", "/usr/src/app/src/healthcheck.js"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 12
+    mem_limit: 1024m
+    mem_reservation: 256m
+    cpus: 2.0
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  geocoding:
+    image: ${ALOWALOW_GEOCODING_IMAGE:-nexus.telecom.tm/mediagis/nominatim:5.3@sha256:7923a8e67197fc6d4f4ecb7c0e8bbedffeddcfdf4519596fe946e46a28f5a9f8}
+    init: true
+    restart: unless-stopped
+    env_file:
+      - ${ALOWALOW_ENV_FILE:-.env.production}
+    environment:
+      PBF_PATH: /osm-data/turkmenistan-latest.osm.pbf
+      UPDATE_MODE: none
+      FREEZE: "false"
+      IMPORT_STYLE: full
+      IMPORT_WIKIPEDIA: "false"
+      THREADS: "2"
+      GUNICORN_WORKERS: "2"
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 384MB
+      POSTGRES_AUTOVACUUM_WORK_MEM: 128MB
+      POSTGRES_WORK_MEM: 10MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_MAX_WAL_SIZE: 512MB
+      POSTGRES_MAX_CONNECTIONS: "20"
+    volumes:
+      - ./routing-runtime/current/turkmenistan-latest.osm.pbf:/osm-data/turkmenistan-latest.osm.pbf:ro
+      - nominatim_data:/var/lib/postgresql/16/main
+    shm_size: 256m
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS 'http://127.0.0.1:8080/status?format=json' >/dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 10m
+      retries: 60
+    mem_limit: 1536m
+    mem_reservation: 384m
+    cpus: 2.0
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  routing:
+    image: ghcr.io/project-osrm/osrm-backend:latest@sha256:3ac496ff8fd7e1af53846179d73d06a97f719c8ad2217d008ed868942398665c
+    command:
+      - osrm-routed
+      - --algorithm
+      - mld
+      - /data/turkmenistan-latest.osrm
+    init: true
+    restart: unless-stopped
+    user: "65532:65532"
+    read_only: true
+    volumes:
+      - ./routing-runtime/current:/data:ro
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - exec 3<>/dev/tcp/127.0.0.1/5000
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpus: 2.0
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    external: true
+    name: alowalow-production_postgres_data
+  minio_data:
+    external: true
+    name: alowalow-production_minio_data
+  nominatim_data:
+    external: true
+    name: alowalow-production_nominatim_data

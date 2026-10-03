@@ -1,0 +1,20 @@
+{
+  "dispatchId": "receipt-preview-only",
+  "orderId": "00000000-0000-4000-8000-000000000061",
+  "orderNumber": 61,
+  "documentType": "ORDER",
+  "summary": {"subtotal": 410, "discount": 0, "deliveryFee": 20, "total": 430},
+  "metadata": {
+    "createdAt": "2026-09-03T10:18:00.000Z",
+    "businessPhone": "+993 XX XX-XX-XX",
+    "customerPhone": "+993 (XX) XX-XX-XX"
+  },
+  "jobs": [{
+    "printerIp": "192.168.123.100", "printerPort": 9100, "transport": "RAW_TCP", "copyType": "MAIN",
+    "items": [
+      {"id":"1", "name":"SAÇ GOWURMA", "quantity":1, "unitPrice":400},
+      {"id":"2", "name":"TM ÇÖREK", "quantity":1, "unitPrice":10}
+    ]
+  }],
+  "unassignedItems": []
+}

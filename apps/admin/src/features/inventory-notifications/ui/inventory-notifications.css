@@ -1,0 +1,90 @@
+.inventory-notifications {
+  margin: 0 0 16px;
+  min-width: 0;
+}
+.inventory-notifications-trigger-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.inventory-notifications-trigger-row > button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.inventory-notification-preview {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.inventory-notifications-panel {
+  margin-top: 10px;
+  padding: 20px;
+  background: #fef7e7;
+  border: 1px solid #ec7a1b;
+  border-radius: 16px;
+}
+.inventory-notifications-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.inventory-notifications-heading p {
+  font-size: 13px;
+  margin-top: 4px;
+}
+.inventory-notifications-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 20px;
+  max-height: 360px;
+  overflow: auto;
+}
+.inventory-notifications-panel li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 10px;
+  border-bottom: 1px solid color-mix(in srgb, #062f5e 15%, #fef7e7);
+}
+.inventory-notifications-panel li > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.inventory-notifications-panel time,
+.inventory-notifications-panel small {
+  font-size: 12px;
+}
+.inventory-notification-unread {
+  border-left: 3px solid #ec7a1b;
+}
+@media (max-width: 600px) {
+  .inventory-notifications-panel {
+    padding: 14px;
+  }
+  .inventory-notifications-panel li {
+    flex-direction: column;
+  }
+}
+
+.inventory-notifications-trigger-row {
+  min-height: 74px;
+}
+.inventory-notification-preview {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+@media (max-width: 600px) {
+  .inventory-notification-preview {
+    flex-basis: 100%;
+  }
+  .inventory-notifications-trigger-row {
+    gap: 8px;
+  }
+}

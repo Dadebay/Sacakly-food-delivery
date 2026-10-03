@@ -1,0 +1,43 @@
+.receipt-queue {
+  margin: 8px 0 16px;
+  border: 1px solid var(--border-color, #ddcfc4);
+  border-radius: 12px;
+  background: var(--surface, #fffaf6);
+  font-size: 13px;
+}
+.receipt-queue > summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+.receipt-queue-content {
+  padding: 0 16px 16px;
+}
+.receipt-queue-content p {
+  margin: 8px 0;
+}
+.receipt-queue-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e8ded5;
+  overflow-wrap: anywhere;
+}
+.receipt-queue-item small {
+  flex-basis: 100%;
+}
+.receipt-queue-content button {
+  min-height: 36px;
+  border: 1px solid #c9b8aa;
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: #fff;
+  color: #57391f;
+  cursor: pointer;
+}
+.receipt-queue-content button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}

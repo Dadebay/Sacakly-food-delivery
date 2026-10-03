@@ -1,0 +1,41 @@
+name: alowalow-routing
+
+services:
+  routing:
+    image: ghcr.io/project-osrm/osrm-backend:latest@sha256:3ac496ff8fd7e1af53846179d73d06a97f719c8ad2217d008ed868942398665c
+    command:
+      - osrm-routed
+      - --algorithm
+      - mld
+      - /data/turkmenistan-latest.osrm
+    init: true
+    restart: unless-stopped
+    user: "65532:65532"
+    read_only: true
+    volumes:
+      - ./runtime/current:/data:ro
+    ports:
+      - "127.0.0.1:${ROUTING_PORT:-5000}:5000"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - exec 3<>/dev/tcp/127.0.0.1/5000
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpus: 2
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

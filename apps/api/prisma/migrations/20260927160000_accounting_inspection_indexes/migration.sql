@@ -1,0 +1,3 @@
+CREATE INDEX "Order_createdAt_id_idx" ON "Order"("createdAt", "id");
+CREATE INDEX "AuditLog_createdAt_id_idx" ON "AuditLog"("createdAt", "id");
+CREATE INDEX "AuditLog_action_createdAt_idx" ON "AuditLog"("action", "createdAt");

@@ -1,0 +1,40 @@
+.new-order-alert-control {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  border-radius: 18px;
+}
+
+.new-order-alert-control .new-order-sound-toggle {
+  min-height: 44px;
+  color: var(--brand-navy);
+  gap: 6px;
+}
+
+.new-order-alert-control .new-order-sound-toggle[aria-pressed="true"] {
+  color: color-mix(in srgb, var(--brand-orange) 55%, var(--brand-navy));
+}
+
+.new-order-sound-toggle svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.new-order-alert-control button:focus-visible {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: -3px;
+  border-radius: 14px;
+}
+
+.new-order-alert-control .new-order-sound-test {
+  min-height: 44px;
+}
+
+.new-order-alert-control .new-order-sound-help {
+  flex-basis: 100%;
+  padding: 0 14px 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: right;
+}

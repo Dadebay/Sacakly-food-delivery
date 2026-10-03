@@ -1,0 +1,334 @@
+.inventory-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.inventory-filters > label:last-child {
+  display: grid;
+  gap: 6px;
+  min-width: 200px;
+  margin-left: auto;
+}
+.inventory-filters > label > span:not(.sr-only) {
+  color: #65758a;
+  font-size: 10px;
+  font-weight: 600;
+}
+.stock-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stock-stat {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  position: relative;
+  padding: 22px;
+  border: 1px solid #062f5e20;
+  border-radius: 14px;
+  color: #062f5e;
+  background: #fffdf78c;
+  cursor: pointer;
+}
+.stock-stat-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.stock-stat-label i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b8656;
+}
+.stock-stat strong {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.3;
+  margin-top: 10px;
+}
+.stock-stat > span:last-child {
+  font-size: 11px;
+  color: #65758a;
+}
+.stock-stat-OUT_OF_STOCK {
+  background: #fbefe680;
+}
+.stock-stat-OUT_OF_STOCK .stock-stat-label i {
+  background: #be5f47;
+}
+.stock-stat-LOW_STOCK {
+  background: #fff0d480;
+}
+.stock-stat-LOW_STOCK .stock-stat-label i {
+  background: #d98b29;
+}
+.stock-stat[aria-pressed="true"] {
+  border-color: #062f5e;
+  box-shadow: inset 0 0 0 1px #062f5e;
+}
+.stock-list-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #65758a;
+}
+.stock-list-head p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.stock-list-head .text-button {
+  margin-left: 8px;
+}
+.inventory-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+.inventory-live i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #6b8656;
+}
+.stock-list {
+  border: 1px solid #062f5e18;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fffdf780;
+}
+.stock-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 22px;
+  border-bottom: 1px solid #062f5e12;
+}
+.stock-row:last-child {
+  border-bottom: 0;
+}
+.stock-name,
+.stock-amount,
+.stock-threshold {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.stock-name strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.stock-name span {
+  color: #65758a;
+  font-size: 10px;
+}
+.stock-amount strong {
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+.stock-threshold span,
+.stock-threshold small {
+  font-size: 10px;
+  color: #65758a;
+}
+.stock-meter {
+  background: #062f5e0b;
+  height: 4px;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 180px;
+}
+.stock-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: #81976e;
+}
+.stock-meter-LOW_STOCK i {
+  background: #dd9a3d;
+}
+.stock-meter-OUT_OF_STOCK i {
+  background: #be5f47;
+}
+.stock-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.stock-receive {
+  border: 1px solid #062f5e20;
+  background: #fffdf7;
+  color: #062f5e;
+  padding: 10px 13px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 650;
+  min-height: 40px;
+  cursor: pointer;
+}
+.stock-receive:hover {
+  background: #f1ecdf;
+}
+.inventory-onboarding {
+  padding: 36px;
+  border: 1px solid #062f5e18;
+  border-radius: 18px;
+  background: #fffdf77a;
+}
+.inventory-onboarding h2 {
+  font-size: 25px;
+  letter-spacing: -0.035em;
+}
+.inventory-onboarding > p {
+  font-size: 13px;
+  color: #65758a;
+  margin-top: 10px;
+  line-height: 1.7;
+}
+.inventory-onboarding ol {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding: 0;
+  margin: 32px 0 0;
+}
+.inventory-onboarding li {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inventory-onboarding li > b {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+  border: 1px solid #062f5e25;
+  border-radius: 50%;
+}
+.inventory-onboarding li:first-child > b {
+  background: #062f5e;
+  color: #fffdf7;
+}
+.inventory-onboarding h3 {
+  font-size: 14px;
+}
+.inventory-onboarding li p {
+  color: #65758a;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 10px 0 14px;
+}
+@media (max-width: 1050px) {
+  .stock-row {
+    gap: 16px;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    padding: 18px;
+  }
+  .stock-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    margin-top: -4px;
+  }
+  .inventory-onboarding {
+    padding: 24px;
+  }
+  .inventory-onboarding ol {
+    gap: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .inventory-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .inventory-filters > label:last-child {
+    margin: 0;
+  }
+  .stock-summary {
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .stock-stat {
+    padding: 14px 9px;
+    gap: 3px;
+    border-radius: 10px;
+  }
+  .stock-stat-label {
+    gap: 5px;
+    font-size: 9px;
+    line-height: 1.5;
+    min-height: 27px;
+    align-items: flex-start;
+  }
+  .stock-stat-label i {
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    margin-top: 4px;
+  }
+  .stock-stat strong {
+    font-size: 30px;
+    margin-top: 4px;
+  }
+  .stock-stat > span:last-child {
+    font-size: 9px;
+  }
+  .stock-list-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .stock-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 12px;
+    padding: 18px;
+  }
+  .stock-amount {
+    justify-items: end;
+  }
+  .stock-threshold {
+    grid-column: 1 / -1;
+  }
+  .stock-meter {
+    max-width: none;
+  }
+  .stock-actions {
+    justify-content: flex-start;
+    padding-top: 2px;
+  }
+  .inventory-onboarding {
+    padding: 24px 20px;
+  }
+  .inventory-onboarding h2 {
+    font-size: 23px;
+  }
+  .inventory-onboarding ol {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 26px;
+  }
+  .inventory-onboarding li {
+    flex-direction: row;
+    gap: 14px;
+  }
+  .inventory-onboarding li > b {
+    flex-shrink: 0;
+  }
+  .inventory-onboarding li p {
+    margin-top: 7px;
+  }
+}

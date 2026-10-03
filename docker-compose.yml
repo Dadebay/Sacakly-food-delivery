@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:18-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
+    environment:
+      POSTGRES_DB: alofood
+      POSTGRES_USER: alofood
+      POSTGRES_PASSWORD: alofood
+    ports:
+      - "5432:5432"
+    volumes:
+      - alofood_postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alofood -d alofood"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:8.8.0-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - volatile-ttl
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/minio:latest@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e}
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: alofood
+      MINIO_ROOT_PASSWORD: alofood-local-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - alofood_minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-quay.io/minio/mc:latest@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727}
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >
+        mc alias set local http://minio:9000 alofood alofood-local-secret &&
+        mc mb --ignore-existing local/alowalow-media
+
+volumes:
+  alofood_postgres:
+  alofood_minio:

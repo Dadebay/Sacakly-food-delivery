@@ -1,0 +1,89 @@
+.inventory-flow {
+  display: grid;
+  gap: 1.25rem;
+}
+.flow-branch {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+.flow-branch select {
+  flex: 1;
+}
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+.flow-card {
+  padding: 1.25rem;
+  border: 1px solid var(--border-color, #d9dfe3);
+  border-radius: 1rem;
+  background: var(--surface, #fff);
+  min-width: 0;
+}
+.flow-card h3 {
+  margin: 0 0 0.5rem;
+}
+.flow-card p {
+  margin: 0.5rem 0 1rem;
+}
+.flow-card form {
+  display: grid;
+  gap: 0.7rem;
+}
+.flow-card label {
+  display: grid;
+  gap: 0.3rem;
+}
+.flow-card input,
+.flow-card select,
+.flow-card textarea {
+  width: 100%;
+  min-width: 0;
+}
+.flow-card ul {
+  padding-left: 1.2rem;
+}
+.flow-lot-list {
+  max-height: 39rem;
+  overflow: auto;
+}
+.flow-lot-list li {
+  margin-bottom: 0.8rem;
+}
+.flow-lot-list small {
+  display: block;
+}
+.flow-warning {
+  color: #8d4b00;
+}
+.flow-documents {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 35rem;
+  overflow: auto;
+}
+.flow-documents details {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-color, #d9dfe3);
+  border-radius: 0.5rem;
+}
+.flow-documents summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.flow-documents li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+@media (max-width: 850px) {
+  .flow-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,1 @@
+export const PLATFORM_OWNER_PHONE = "+99362969614";

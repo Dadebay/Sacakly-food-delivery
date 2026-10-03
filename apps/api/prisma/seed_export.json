@@ -1,0 +1,2304 @@
+{
+  "exportedAt": "2026-09-05T10:28:41.000Z",
+  "categories": [
+    {
+      "slug": "corbalar",
+      "name": "Çorbalar",
+      "sortOrder": 10,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "palawlar",
+      "name": "Palawlar",
+      "sortOrder": 20,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "et-tagamlary",
+      "name": "Et tagamlary",
+      "sortOrder": 30,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "un-tagamlary",
+      "name": "Un tagamlary",
+      "sortOrder": 40,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "salatlar",
+      "name": "Salatlar",
+      "sortOrder": 50,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "garnirler",
+      "name": "Garnirler",
+      "sortOrder": 60,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "suyji-tagamlar",
+      "name": "Süýji tagamlar",
+      "sortOrder": 70,
+      "isActive": true,
+      "imageFile": null
+    },
+    {
+      "slug": "ichgiler",
+      "name": "Içgiler",
+      "sortOrder": 80,
+      "isActive": true,
+      "imageFile": null
+    }
+  ],
+  "products": [
+    {
+      "slug": "unash-corbasy",
+      "name": "Unaş çorbasy",
+      "description": "Öý ýumurtgaly unaşdan taýýarlanan ýeňil we tagamly çorba.",
+      "price": 15,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 25,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "yarma-corbasy",
+      "name": "Ýarma çorbasy",
+      "description": "Bugdaý ýarmasyndan we etden bişirilen ýokumly çorba.",
+      "price": 14,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 14,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 24,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "mastawa",
+      "name": "Mastawa",
+      "description": "Tüwi, pomidor we etden taýýarlanan tagamly çorba.",
+      "price": 16,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 26,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "shule",
+      "name": "Şüle",
+      "description": "Tüwi we et bilen bişirilen galyň, ýokumly çorba.",
+      "price": 17,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 17,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 27,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "dograma",
+      "name": "Dograma",
+      "description": "Ownuk döwülen çörek we et bulýonyndan taýýarlanan milli tagam.",
+      "price": 18,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 18,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 28,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "et-corbasy",
+      "name": "Et çorbasy",
+      "description": "Täze etden bişirilen, gök otlar bilen bezelen adaty çorba.",
+      "price": 15,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 25,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "nohutly-corba",
+      "name": "Nohutly çorba",
+      "description": "Nohut we etden taýýarlanan ýokumly, galyň çorba.",
+      "price": 14,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 14,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 24,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "kelle-pacha-corbasy",
+      "name": "Kelle-paça çorbasy",
+      "description": "Milli usulda taýýarlanan, ir bilen halanýan tagamly çorba.",
+      "price": 20,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 20,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 30,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "mekgejowen-corbasy",
+      "name": "Mekgejöwen çorbasy",
+      "description": "Süýji mekgejöwenden taýýarlanan ýeňil we tagamly çorba.",
+      "price": 14,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 14,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 22,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "gowurma-corbasy",
+      "name": "Gowurma çorbasy",
+      "description": "Gowrulan et we gök önümlerden bişirilen baý tagamly çorba.",
+      "price": 18,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 18,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 28,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "corbalar",
+      "images": []
+    },
+    {
+      "slug": "adaty-palaw",
+      "name": "Adaty palaw",
+      "description": "Käşir, sogan we et bilen bişirilen milli türkmen palawy.",
+      "price": 25,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 25,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 40,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "towuk-palaw",
+      "name": "Towuk palaw",
+      "description": "Ýumşak towuk eti bilen taýýarlanan tagamly palaw.",
+      "price": 24,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 24,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 38,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "miweli-palaw",
+      "name": "Miweli palaw",
+      "description": "Mişmiş we üzümli, süýjümtik tagamy bolan palaw.",
+      "price": 26,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 26,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 42,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "gara-et-palaw",
+      "name": "Gara et palaw",
+      "description": "Goýun etinden taýýarlanan baý tagamly adaty palaw.",
+      "price": 27,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 27,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 44,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "nohutly-palaw",
+      "name": "Nohutly palaw",
+      "description": "Nohut goşulyp bişirilen ýokumly palaw görnüşi.",
+      "price": 24,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 24,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 38,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "kashirli-palaw",
+      "name": "Käşirli palaw",
+      "description": "Köp mukdarda käşir bilen bişirilen süýjümtik palaw.",
+      "price": 23,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 23,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 37,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "balykly-palaw",
+      "name": "Balykly palaw",
+      "description": "Derýa balygy bilen taýýarlanan tapawutly palaw.",
+      "price": 28,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 28,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 45,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "toy-palawy",
+      "name": "Toý palawy",
+      "description": "Toýlarda hödürlenýän uly porsiýaly baýramçylyk palawy.",
+      "price": 30,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 30,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 48,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "tunjeme-palaw",
+      "name": "Tünjeme palaw",
+      "description": "Ýuka kesilen et bilen ýörite bişirilen palaw görnüşi.",
+      "price": 26,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 26,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 42,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "gowurmaly-palaw",
+      "name": "Gowurmaly palaw",
+      "description": "Öňünden gowrulan et bilen taýýarlanan tagamly palaw.",
+      "price": 27,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 27,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 44,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "palawlar",
+      "images": []
+    },
+    {
+      "slug": "gowurma",
+      "name": "Gowurma",
+      "description": "Ýagly etden taýýarlanan, çörek bilen hödürlenýän milli tagam.",
+      "price": 35,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 35,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 55,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "shashlyk",
+      "name": "Şaşlyk",
+      "description": "Kömürde bişirilen mysgally et şişleri.",
+      "price": 40,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 40,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 65,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "manty",
+      "name": "Manty",
+      "description": "Bugda bişirilen etli hamyr tagamy.",
+      "price": 30,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 30,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 48,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "cekdirme",
+      "name": "Çekdirme",
+      "description": "Kartoşka we et bilen bişirilen ýapyk gap tagamy.",
+      "price": 33,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 33,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 52,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "jigar-gowurma",
+      "name": "Jigär gowurma",
+      "description": "Ýumşak sogan bilen gowrulan mal jigäri.",
+      "price": 32,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 32,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 50,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "lyulya-kebap",
+      "name": "Lýulýa kebap",
+      "description": "Bugdaý çöregi bilen hödürlenýän mysgally kebap.",
+      "price": 38,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 38,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 60,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "bozbash",
+      "name": "Bozbaş",
+      "description": "Nohut we et bilen bişirilen galyň tagam.",
+      "price": 34,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 34,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 54,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "mampar",
+      "name": "Mampar",
+      "description": "El bilen çekilen hamyr böleklerinden taýýarlanan et tagamy.",
+      "price": 33,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 33,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 52,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "kowurdak",
+      "name": "Kowurdak",
+      "description": "Sogan bilen gowrulan ownuk kesilen et tagamy.",
+      "price": 32,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 32,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 50,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "toklyly-gowurma",
+      "name": "Toklyly gowurma",
+      "description": "Ýaş toklynyň etinden taýýarlanan ýumşak gowurma.",
+      "price": 36,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 36,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 58,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "et-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "etli-gutap",
+      "name": "Etli gutap",
+      "description": "Ýuka hamyrda gowrulan etli gutap.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "kashirli-gutap",
+      "name": "Käşirli gutap",
+      "description": "Süýjümtik käşir içi bilen taýýarlanan gutap.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "yeshillikli-gutap",
+      "name": "Ýeşillikli gutap",
+      "description": "Täze gök önümler bilen taýýarlanan ýeňil gutap.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "etli-somsa",
+      "name": "Etli somsa",
+      "description": "Tamdyrda bişirilen hyçal etli somsa.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 20,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "kashirli-somsa",
+      "name": "Käşirli somsa",
+      "description": "Süýji käşir içli, tamdyrda bişirilen somsa.",
+      "price": 11,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 11,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 18,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "etli-borek",
+      "name": "Etli börek",
+      "description": "Köp gatly hamyrda bişirilen etli börek.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 20,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "kashirli-borek",
+      "name": "Käşirli börek",
+      "description": "Ýumşak käşir içli, hoştagamly börek.",
+      "price": 11,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 11,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 18,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "celpek",
+      "name": "Çelpek",
+      "description": "Ýagda gowrulan ýumşak we ýeňil çörek görnüşi.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 14,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "petir",
+      "name": "Petir",
+      "description": "Tamdyrda bişirilen ýognja türkmen çöregi.",
+      "price": 6,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 6,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 10,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "fatir",
+      "name": "Fatir",
+      "description": "Gatlak-gatlak, ýagly hamyrdan taýýarlanan çörek.",
+      "price": 7,
+      "receiptPrinterIp": null,
+      "variantLabel": "Sany",
+      "variants": [
+        {
+          "name": "3 sany",
+          "description": null,
+          "price": 7,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "5 sany",
+          "description": null,
+          "price": 12,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "un-tagamlary",
+      "images": []
+    },
+    {
+      "slug": "gok-salat",
+      "name": "Gök salat",
+      "description": "Täze gök otlardan taýýarlanan ýeňil salat.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "pomidor-hyyar-salaty",
+      "name": "Pomidor-hyýar salaty",
+      "description": "Täze pomidor we hyýardan taýýarlanan adaty salat.",
+      "price": 11,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 11,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 17,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "kashir-salaty",
+      "name": "Käşir salaty",
+      "description": "Ýitije tagamly, üwelen käşirden taýýarlanan salat.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "lobio-salaty",
+      "name": "Lobio salaty",
+      "description": "Kelem görnüşli noýbadan taýýarlanan salat.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 18,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "krap-tayajykly-salat",
+      "name": "Krap taýajykly salat",
+      "description": "Krap taýajyklary we mekgejöwen bilen taýýarlanan salat.",
+      "price": 14,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 14,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 22,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "olivye-salat",
+      "name": "Olivýe salat",
+      "description": "Kartoşka, hyýar-turşy we towuk etli meşhur salat.",
+      "price": 15,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 24,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "winegret-salat",
+      "name": "Winegret salat",
+      "description": "Gyzylja şugundyr esasly, gök önümli salat.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 19,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "badamjanly-salat",
+      "name": "Badamjanly salat",
+      "description": "Gowrulan badamjandan taýýarlanan tagamly salat.",
+      "price": 13,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 13,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 20,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "ak-kelem-salaty",
+      "name": "Ak kelem salaty",
+      "description": "Ownuk dogralan ak kelemden taýýarlanan ýeňil salat.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "mekgejowenli-salat",
+      "name": "Mekgejöwenli salat",
+      "description": "Süýji mekgejöwen bilen taýýarlanan ter salat.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 19,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "salatlar",
+      "images": []
+    },
+    {
+      "slug": "gowrulan-kartoshka",
+      "name": "Gowrulan kartoşka",
+      "description": "Altyn reňke gowrulan kartoşka bölekleri.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "kartoshka-pyuresi",
+      "name": "Kartoşka pýuresi",
+      "description": "Ýumşak we mayonly kartoşka pýuresi.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "tuwi-garnir",
+      "name": "Tüwi garnir",
+      "description": "Bugda bişirilen, ýanaşyk hödürlenýän tüwi.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 13,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "gowrulan-gok-onumler",
+      "name": "Gowrulan gök önümler",
+      "description": "Dürli gök önümlerden taýýarlanan gowrulan garnir.",
+      "price": 11,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 11,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 17,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "grechka-garnir",
+      "name": "Griçka garnir",
+      "description": "Ýokumly griçka ýarmasyndan taýýarlanan garnir.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "makaron-garnir",
+      "name": "Makaron garnir",
+      "description": "Ýagly sary ýag bilen garylan makaron.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "fri-kartoshka",
+      "name": "Fri kartoşka",
+      "description": "Kraş ýagda gowrulan ýuka kartoşka bölekleri.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "bugda-kartoshka",
+      "name": "Bugda kartoşka",
+      "description": "Bugda bişirilen, ýeňil kartoşka garnir.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 13,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "kashir-sogan-gowurma",
+      "name": "Käşir-sogan gowurma",
+      "description": "Gowrulan käşir we sogandan taýýarlanan garnir.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "nohut-garnir",
+      "name": "Nohut garnir",
+      "description": "Bişirilen nohutdan taýýarlanan ýokumly garnir.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Porsiýa",
+      "variants": [
+        {
+          "name": "Kiçi porsiýa",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "Uly porsiýa",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "garnirler",
+      "images": []
+    },
+    {
+      "slug": "pishme",
+      "name": "Pişme",
+      "description": "Ýagda gowrulan, süýji şerbede batyrylan hamyr tagamy.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 15,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "halwa",
+      "name": "Halwa",
+      "description": "Ýag we şekerden taýýarlanan däp bolan süýji tagam.",
+      "price": 10,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 10,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 18,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "pahlawa",
+      "name": "Pahlawa",
+      "description": "Hoz içli, bal şerbetli gatlak-gatlak süýji tagam.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 22,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "nowat",
+      "name": "Nowat",
+      "description": "Üzüm şiresinden taýýarlanan tebigy türkmen süýjüsi.",
+      "price": 9,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 9,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 16,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "napoleon-tort",
+      "name": "Napoleon tort",
+      "description": "Krem bilen gatlanan ýumşak tort bölegi.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 20,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "medowik-tort",
+      "name": "Medowik tort",
+      "description": "Bal tagamly, ýumşak gatlakly tort.",
+      "price": 12,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 12,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 20,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "shokolad-tort",
+      "name": "Şokolad tort",
+      "description": "Baý şokolad tagamly, ýumşak tort bölegi.",
+      "price": 13,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 13,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 22,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "gushgursak",
+      "name": "Guşgursak",
+      "description": "Ýagda gowrulan kiçijik süýji hamyr bölekleri.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 14,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "shekerli-celpek",
+      "name": "Şekerli çelpek",
+      "description": "Şeker bilen bezelen ýumşak çelpek.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 14,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "miweli-tort",
+      "name": "Miweli tort",
+      "description": "Täze miweler bilen bezelen ýeňil tort.",
+      "price": 13,
+      "receiptPrinterIp": null,
+      "variantLabel": "Agram",
+      "variants": [
+        {
+          "name": "100 gr",
+          "description": null,
+          "price": 13,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "200 gr",
+          "description": null,
+          "price": 22,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "suyji-tagamlar",
+      "images": []
+    },
+    {
+      "slug": "gara-cay",
+      "name": "Gara çaý",
+      "description": "Ir bilen hem agşam halanýan gyzgyn gara çaý.",
+      "price": 4,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 4,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 7,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 10,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "yashyl-cay",
+      "name": "Ýaşyl çaý",
+      "description": "Ýeňil we tagamly gyzgyn ýaşyl çaý.",
+      "price": 4,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 4,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 7,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 20,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "cal",
+      "name": "Çal",
+      "description": "Düýe süýdünden taýýarlanan ýokumly, turşumtyk milli içgi.",
+      "price": 8,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 8,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 14,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 30,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "ayran",
+      "name": "Aýran",
+      "description": "Sowadyjy, ýeňil tagamly gatykly içgi.",
+      "price": 6,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 6,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 10,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 40,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "kompot",
+      "name": "Kompot",
+      "description": "Guradylan miwelerden gaýnadylyp taýýarlanan içgi.",
+      "price": 6,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 6,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 10,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 50,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "sherbet",
+      "name": "Şerbet",
+      "description": "Süýji miwe şerbetinden taýýarlanan sowuk içgi.",
+      "price": 7,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 7,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 12,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 60,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "mineral-suw",
+      "name": "Mineral suw",
+      "description": "Gazsyz arassa agyz suwy.",
+      "price": 3,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 3,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 5,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 70,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "gazly-suw",
+      "name": "Gazly suw",
+      "description": "Sowadyjy, gazly içgi.",
+      "price": 4,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 4,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 7,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 80,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "limonly-suw",
+      "name": "Limonly suw",
+      "description": "Täze limon bilen taýýarlanan ter suw.",
+      "price": 5,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 5,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 8,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 90,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    },
+    {
+      "slug": "miwe-shiresi",
+      "name": "Miwe şiresi",
+      "description": "Tebigy miwelerden sykylan täze şire.",
+      "price": 7,
+      "receiptPrinterIp": null,
+      "variantLabel": "Göwrüm",
+      "variants": [
+        {
+          "name": "0.5 L",
+          "description": null,
+          "price": 7,
+          "sortOrder": 10,
+          "isActive": true
+        },
+        {
+          "name": "1 L",
+          "description": null,
+          "price": 12,
+          "sortOrder": 20,
+          "isActive": true
+        }
+      ],
+      "sortOrder": 100,
+      "isActive": true,
+      "categorySlug": "ichgiler",
+      "images": []
+    }
+  ],
+  "banners": []
+}

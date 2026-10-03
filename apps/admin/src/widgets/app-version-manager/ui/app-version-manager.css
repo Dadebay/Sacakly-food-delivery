@@ -1,0 +1,172 @@
+.app-version-manager {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.app-version-heading h1 {
+  margin: 8px 0 12px;
+}
+.app-version-heading p {
+  max-width: 900px;
+  margin: 0;
+  line-height: 1.6;
+}
+.app-version-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.app-version-card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper);
+}
+.app-version-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.app-version-card-head h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.app-version-status {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #062f5e0d;
+  color: #062f5e;
+}
+.app-version-status.is-configured {
+  background: #ec7a1b20;
+}
+.app-version-card form,
+.app-version-card fieldset {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.app-version-card fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.app-version-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.app-version-card label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+.app-version-card input:not([type="checkbox"]),
+.app-version-card textarea {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--field-surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+.app-version-card input:focus-visible,
+.app-version-card textarea:focus-visible {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: 2px;
+}
+.app-version-card textarea {
+  resize: vertical;
+}
+.app-version-help {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 12px 0 20px;
+}
+.app-version-card fieldset .app-version-help {
+  margin: -6px 0 0;
+}
+.app-version-card .app-version-publication {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.app-version-publication input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 2px;
+  accent-color: #062f5e;
+}
+.app-version-success {
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: #ec7a1b20;
+  margin: 0;
+  line-height: 1.5;
+}
+.app-version-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(520px, calc(100vw - 32px));
+  box-sizing: border-box;
+  border: 1px solid #062f5e20;
+  border-radius: 20px;
+  padding: 28px;
+  color: #062f5e;
+  background: #fef7e7;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+.app-version-dialog::backdrop {
+  background: #062f5e80;
+}
+.app-version-dialog p {
+  line-height: 1.6;
+}
+.app-version-dialog h2 {
+  margin: 10px 0 16px;
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.app-version-dialog .modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+@media (max-width: 1100px) {
+  .app-version-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .app-version-card {
+    padding: 18px;
+  }
+  .app-version-fields {
+    grid-template-columns: 1fr;
+  }
+  .app-version-dialog {
+    padding: 20px;
+  }
+  .app-version-dialog .modal-actions > button {
+    width: 100%;
+  }
+}

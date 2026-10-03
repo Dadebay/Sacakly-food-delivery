@@ -1,0 +1,725 @@
+.inventory-workspace {
+  --inv-ink: #062f5e;
+  --inv-muted: #65758a;
+  --inv-line: #062f5e18;
+  --inv-paper: #fffdf7;
+  color: var(--inv-ink);
+  gap: 0;
+}
+.inventory-workspace *,
+.inventory-dialog * {
+  box-sizing: border-box;
+}
+.inventory-workspace h1,
+.inventory-workspace h2,
+.inventory-workspace h3,
+.inventory-workspace h4,
+.inventory-workspace p,
+.inventory-dialog h2,
+.inventory-dialog p {
+  margin: 0;
+}
+.inventory-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 8px 0 26px;
+}
+.inventory-kicker {
+  display: block;
+  color: #a45218;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+.inventory-page-head h1 {
+  font-size: clamp(26px, 3vw, 34px);
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.inventory-page-head p {
+  color: var(--inv-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.inventory-help {
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 21px;
+  z-index: 5;
+}
+.inventory-help summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
+  list-style: none;
+}
+.inventory-help summary::-webkit-details-marker {
+  display: none;
+}
+.inventory-help summary span {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #062f5e38;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+.inventory-help > div {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  width: min(370px, 80vw);
+  background: #fffdf7;
+  border: 1px solid var(--inv-line);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 18px 40px #062f5e18;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.inventory-help ol {
+  padding-left: 18px;
+  margin: 10px 0;
+}
+.inventory-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid #062f5e24;
+  padding-bottom: 0;
+  margin-bottom: 28px;
+}
+.inventory-tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 16px 20px;
+  margin-bottom: -1px;
+  color: #627187;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.inventory-tabs button span {
+  display: inline-block;
+  margin-right: 8px;
+  opacity: 0.55;
+  font-size: 10px;
+}
+.inventory-tabs button[aria-current="page"] {
+  color: #062f5e;
+  border-bottom-color: #ec7a1b;
+}
+.inventory-tabs button:hover {
+  background: #062f5e05;
+}
+.inventory-tab-content {
+  min-width: 0;
+}
+.inventory-view-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.inventory-view-head h2 {
+  font-size: 21px;
+  letter-spacing: -0.025em;
+}
+.inventory-view-head p {
+  font-size: 12px;
+  color: #65758a;
+  margin-top: 7px;
+  line-height: 1.6;
+}
+.inventory-workspace button,
+.inventory-dialog button {
+  touch-action: manipulation;
+}
+.inventory-workspace .primary-button,
+.inventory-workspace .secondary-button,
+.inventory-dialog .primary-button,
+.inventory-dialog .secondary-button {
+  min-height: 42px;
+  border-radius: 10px;
+  font-size: 12px;
+  padding: 11px 16px;
+  white-space: normal;
+}
+.inventory-workspace .primary-button,
+.inventory-dialog .primary-button {
+  background: #062f5e;
+  color: #fffdf7;
+  border: 1px solid #062f5e;
+}
+.inventory-workspace .primary-button:hover,
+.inventory-dialog .primary-button:hover {
+  background: #11487f;
+}
+.inventory-workspace .secondary-button,
+.inventory-dialog .secondary-button {
+  background: transparent;
+  color: #062f5e;
+  border: 1px solid #062f5e30;
+}
+.inventory-workspace .text-button,
+.inventory-dialog .text-button {
+  color: #174c7e;
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 36px;
+  padding: 6px 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.inventory-workspace input,
+.inventory-workspace select,
+.inventory-dialog input,
+.inventory-dialog select {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #062f5e26;
+  border-radius: 9px;
+  background: #fffdf9;
+  color: #062f5e;
+  font: inherit;
+  font-size: 13px;
+}
+.inventory-workspace input::placeholder,
+.inventory-dialog input::placeholder {
+  color: #8a939c;
+}
+.inventory-workspace :is(input, select, button, summary):focus-visible,
+.inventory-dialog :is(input, select, button):focus-visible {
+  outline: 2px solid #ec7a1b;
+  outline-offset: 3px;
+}
+.inventory-workspace button:disabled,
+.inventory-dialog button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.inventory-search {
+  display: block;
+  max-width: 470px;
+  width: 100%;
+}
+.inventory-counter {
+  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--inv-line);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.inventory-empty,
+.inventory-skeleton {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 12px;
+  min-height: 270px;
+  padding: 36px 24px;
+  text-align: center;
+  border: 1px dashed #062f5e26;
+  border-radius: 16px;
+  background: #fffdf74d;
+}
+.inventory-empty h3 {
+  font-size: 20px;
+}
+.inventory-empty p {
+  color: #65758a;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 420px;
+}
+.inventory-notice {
+  background: #eaf1e4;
+  border: 1px solid #557c4030;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #345926;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 18px !important;
+}
+.inventory-hint {
+  color: #65758a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.inventory-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 5px 9px;
+  background: #062f5e08;
+  color: #65758a;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+.inventory-badge-IN_STOCK {
+  color: #416537;
+  background: #edf2e7;
+}
+.inventory-badge-LOW_STOCK {
+  color: #975512;
+  background: #fff0d3;
+}
+.inventory-badge-OUT_OF_STOCK {
+  color: #a84538;
+  background: #fbece7;
+}
+.inventory-form fieldset {
+  display: grid;
+  gap: 18px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.inventory-form label {
+  display: grid;
+  gap: 8px;
+  color: #062f5e;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 0;
+}
+.inventory-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding-top: 6px;
+}
+.inventory-two-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.inventory-dialog {
+  position: fixed;
+  color: #062f5e;
+  width: min(540px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  border: 1px solid #062f5e26;
+  padding: 28px;
+  border-radius: 20px;
+  background: #fffdf7;
+  box-shadow: 0 30px 90px #062f5e40;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.inventory-dialog::backdrop {
+  background: #06284b70;
+  backdrop-filter: blur(3px);
+}
+.inventory-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
+}
+.inventory-dialog-head h2 {
+  font-size: 23px;
+  letter-spacing: -0.03em;
+}
+.inventory-dialog-head p {
+  color: #65758a;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.inventory-icon-button {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #062f5e1c;
+  background: transparent;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 22px;
+  color: #65758a;
+  cursor: pointer;
+}
+.inventory-balance-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-radius: 12px;
+  background: #062f5e06;
+  gap: 12px;
+}
+.inventory-balance-preview > div {
+  display: grid;
+  gap: 8px;
+}
+.inventory-balance-preview span {
+  font-size: 11px;
+  color: #65758a;
+}
+.inventory-balance-preview strong {
+  font-size: 20px;
+}
+.inventory-balance-preview > b {
+  color: #8997a5;
+}
+.ingredient-list {
+  margin-top: 20px;
+  border: 1px solid var(--inv-line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fffdf780;
+}
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 22px;
+  border-bottom: 1px solid var(--inv-line);
+}
+.ingredient-row:last-child {
+  border-bottom: 0;
+}
+.ingredient-row > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.ingredient-row strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.ingredient-row span {
+  font-size: 11px;
+  color: #65758a;
+}
+.ingredient-row small {
+  font-size: 11px;
+  font-weight: 500;
+}
+.recipe-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 24px;
+  align-items: start;
+}
+.recipe-products {
+  min-width: 0;
+}
+.recipe-product-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  max-height: 640px;
+  overflow: auto;
+  padding: 3px;
+}
+.recipe-product {
+  display: grid;
+  text-align: left;
+  gap: 7px;
+  position: relative;
+  border: 1px solid #062f5e15;
+  border-radius: 12px;
+  padding: 18px 42px 18px 16px;
+  background: #fffdf760;
+  color: #062f5e;
+  cursor: pointer;
+}
+.recipe-product strong {
+  font-size: 13px;
+}
+.recipe-product span {
+  font-size: 11px;
+  color: #65758a;
+}
+.recipe-product i {
+  position: absolute;
+  right: 16px;
+  top: 22px;
+  font-size: 17px;
+  font-style: normal;
+  color: #778870;
+}
+.recipe-product.selected {
+  background: #062f5e;
+  border-color: #062f5e;
+  color: #fffdf7;
+}
+.recipe-product.selected span,
+.recipe-product.selected i {
+  color: #d5dfeb;
+}
+.recipe-placeholder {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  border: 1px dashed #062f5e24;
+  border-radius: 16px;
+}
+.recipe-placeholder > span {
+  font-size: 42px;
+  color: #b7afa0;
+}
+.recipe-placeholder h3 {
+  font-size: 21px;
+}
+.recipe-placeholder p {
+  font-size: 13px;
+  color: #65758a;
+  line-height: 1.8;
+}
+.recipe-editor {
+  padding: 24px;
+  border: 1px solid var(--inv-line);
+  border-radius: 16px;
+  background: #fffdf7a6;
+}
+.recipe-editor-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.recipe-editor-title h3 {
+  font-size: 22px;
+  letter-spacing: -0.025em;
+}
+.recipe-editor-title .inventory-badge {
+  white-space: nowrap;
+}
+.recipe-back {
+  justify-self: start;
+}
+.recipe-yield {
+  max-width: 240px;
+}
+.inventory-input-unit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.inventory-input-unit input {
+  width: 110px;
+}
+.inventory-input-unit span {
+  font-size: 13px;
+  color: #65758a;
+  font-weight: 400;
+}
+.recipe-lines-head h4 {
+  font-size: 13px;
+}
+.recipe-lines-head p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #65758a;
+  margin-top: 6px;
+}
+.recipe-lines {
+  display: grid;
+  gap: 14px;
+}
+.recipe-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 38px;
+  gap: 10px;
+  align-items: start;
+}
+.recipe-line > button {
+  margin-top: 25px;
+}
+.recipe-line label {
+  font-size: 10px;
+}
+.recipe-cost {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 12px;
+  background: #f5eddc;
+}
+.recipe-cost > div {
+  display: grid;
+  gap: 8px;
+}
+.recipe-cost span {
+  font-size: 11px;
+  color: #65758a;
+}
+.recipe-cost strong {
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+.recipe-cost strong small {
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.recipe-cost b {
+  font-size: 15px;
+  align-self: center;
+}
+.recipe-cost p {
+  grid-column: 1 / -1;
+  color: #65758a;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.recipe-save {
+  width: 100%;
+}
+@media (max-width: 1050px) {
+  .inventory-tabs button {
+    padding: 15px 12px;
+  }
+  .recipe-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .recipe-editor {
+    padding: 18px;
+  }
+  .ingredient-row {
+    gap: 14px;
+    padding: 18px;
+  }
+  .recipe-line {
+    grid-template-columns: minmax(0, 1fr) 85px 34px;
+  }
+}
+@media (max-width: 760px) {
+  .inventory-page-head {
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+  .inventory-page-head h1 {
+    font-size: 27px;
+  }
+  .inventory-help {
+    margin: 0;
+  }
+  .inventory-help > div {
+    right: auto;
+    left: 0;
+  }
+  .inventory-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    border-bottom: 0;
+    margin-bottom: 24px;
+  }
+  .inventory-tabs button {
+    text-align: left;
+    border: 1px solid #062f5e20;
+    border-radius: 9px;
+    margin: 0;
+    padding: 13px 10px;
+    font-size: 12px;
+  }
+  .inventory-tabs button[aria-current="page"] {
+    background: #062f5e;
+    color: #fffdf7;
+    border-color: #062f5e;
+  }
+  .inventory-view-head {
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+  .inventory-view-head h2 {
+    font-size: 20px;
+  }
+  .ingredient-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 12px;
+  }
+  .ingredient-row > div:first-child {
+    grid-column: 1 / -1;
+  }
+  .ingredient-row > button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .recipe-layout {
+    grid-template-columns: 1fr;
+  }
+  .recipe-layout-selected .recipe-products {
+    display: none;
+  }
+  .recipe-placeholder {
+    display: none;
+  }
+  .recipe-product-list {
+    max-height: none;
+  }
+  .recipe-editor-title {
+    flex-wrap: wrap;
+  }
+  .recipe-line {
+    grid-template-columns: minmax(0, 1fr) 85px 34px;
+    gap: 8px;
+  }
+  .recipe-line .inventory-icon-button {
+    width: 34px;
+  }
+  .recipe-cost {
+    padding: 16px;
+    gap: 12px;
+  }
+  .recipe-cost strong {
+    font-size: 27px;
+  }
+  .inventory-dialog {
+    padding: 22px 18px;
+  }
+  .inventory-dialog-head h2 {
+    font-size: 21px;
+  }
+  .inventory-two-fields {
+    grid-template-columns: 1fr;
+  }
+  .inventory-form-actions {
+    flex-wrap: wrap;
+  }
+  .inventory-form-actions .primary-button {
+    flex: 1;
+  }
+  .inventory-balance-preview {
+    padding: 15px 12px;
+  }
+  .inventory-balance-preview strong {
+    font-size: 18px;
+  }
+}
+.inventory-dialog {
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+}

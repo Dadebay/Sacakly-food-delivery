@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A7-tagam · Печать</title>
+<style nonce="{{.Token}}">
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#062f5e;background:#fef7e7}*{box-sizing:border-box}body{margin:0}main{max-width:880px;margin:40px auto;padding:0 24px}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:28px}.brand{font-weight:850;font-size:24px}.badge{font-size:13px;background:#e4eedb;padding:8px 12px;border-radius:24px;color:#285421}h1{font-size:30px;margin:0 0 12px;letter-spacing:-.7px}h2{font-size:18px;margin:0 0 16px}p{line-height:1.55}.intro{color:#526477;max-width:720px}.card{background:#fffdf7;border:1px solid #dddcca;border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 4px 18px #062f5e05}label{display:block;font-size:14px;font-weight:650;margin-bottom:8px}textarea,select{font:inherit;border:1px solid #b8c3cb;border-radius:10px;background:white;color:#062f5e;width:100%;padding:11px}textarea{min-height:110px;resize:vertical}small{display:block;color:#65717f;line-height:1.5;margin:8px 0 16px}.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{font:inherit;font-weight:650;cursor:pointer;border:1px solid #bac5ca;border-radius:10px;padding:12px 17px;background:#fff;color:#062f5e}button.primary{background:#ec7a1b;color:#fff;border-color:#ec7a1b}button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ec7a1b;outline-offset:3px}.notice{padding:14px;border-radius:10px;background:#edf1f4;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.error{background:#fff0e9;color:#883512}.ok{background:#eef5e8;color:#285421}.row{padding:12px 0;border-bottom:1px solid #e8e8df;display:flex;justify-content:space-between;gap:15px}.row:last-child{border:0}.row span{overflow-wrap:anywhere}.muted{color:#65717f}footer{font-size:12px;color:#65717f;margin:22px 0}#adapter-info{white-space:pre-wrap}#result:empty{display:none}@media(max-width:580px){main{margin-top:20px;padding:0 14px}.card{padding:18px}.grid{grid-template-columns:1fr}.actions button{width:100%}h1{font-size:25px}.row{display:block}.row span{display:block;margin-top:4px}header{align-items:flex-start}}
+</style></head><body><main data-testid="network-settings">
+<header><div class="brand">A7-tagam</div><div class="badge">Программа печати работает</div></header>
+<h1>Подключение чековых аппаратов</h1><p class="intro">Интернет через Wi-Fi, печать — по кабелю через switch. Здесь можно проверить связь и добавить компьютеру адрес для второй сети аппаратов.</p>
+<section class="card"><h2>1. Проверить связь</h2><label for="targets">IP аппаратов</label><textarea id="targets" data-testid="network-targets" placeholder="Например: 192.168.0.86:9100">{{.Targets}}</textarea><small>По одному адресу в строке. Без указанного порта используется 9100. После попытки печати список подставляется из последнего задания — обновите это окно.</small><button id="check" data-testid="network-check">Проверить без печати</button><div data-testid="network-check-results" id="checks" aria-live="polite"></div></section>
+<section class="card"><h2>2. Настроить кабельное подключение</h2><div class="grid"><div><label for="adapter">Кабель к switch</label><select id="adapter" data-testid="network-adapter"><option value="">Сначала выполните проверку</option></select></div><div><label for="prefix">Маска аппаратов</label><select id="prefix" data-testid="network-prefix"><option value="24">255.255.255.0 (/24)</option><option value="25">255.255.255.128 (/25)</option><option value="26">255.255.255.192 (/26)</option><option value="27">255.255.255.224 (/27)</option><option value="28">255.255.255.240 (/28)</option><option value="29">255.255.255.248 (/29)</option></select></div></div><small id="adapter-info">Настройки компьютера ещё не проверены.</small><p class="intro">Используйте маску из настроек аппаратов. Агент проверит их присутствие на кабеле, проверит дополнительный IP через ARP и сохранит результат для отката. Исходные адреса, DHCP, шлюзы и DNS сохраняются.</p><small>Автоматическая настройка доступна для Ethernet со статическим IP без шлюза. Она не перенастраивает Wi-Fi, роутер или аппараты. ARP проверяет занятые адреса среди включённых устройств; выбранный адрес следует исключить из DHCP-пула, если в этой сети есть DHCP-сервер.</small><div class="actions"><button id="setup" class="primary" disabled data-testid="network-setup">Настроить подключение</button><button id="rollback" data-testid="network-rollback">Откатить настройку агента</button></div><small>Для настройки и отката появится системный запрос прав администратора. Если связь после добавления адреса не появится, агент удалит добавленные адреса.</small></section>
+<div data-testid="network-result" id="result" class="notice" role="status" aria-live="polite"></div><footer>Локальная программа · версия {{.Version}} · проверки не отправляют чеки</footer>
+</main><script nonce="{{.Token}}">
+const token = {{.Token}};
+const el = id => document.getElementById(id);
+let adapters = [];
+let busy = false;
+let verifiedTargets = null;
+
+function show(message, error = false) {
+  el('result').textContent = message;
+  el('result').className = 'notice ' + (error ? 'error' : 'ok');
+}
+
+function selected() {
+  return adapters.find(adapter => adapter.name === el('adapter').value);
+}
+
+function update() {
+  const adapter = selected();
+  el('adapter-info').textContent = adapter
+    ? `${adapter.name} · ${adapter.mac}\nIP: ${(adapter.addresses || []).join(', ') || 'не назначен'}\nDHCP: ${adapter.dhcp ? 'включён' : 'выключен'} · Шлюз: ${adapter.gateway || 'нет'}`
+    : 'Подходящий Ethernet не найден. Проверьте кабель.';
+  el('setup').disabled = busy || !adapter || adapter.dhcp || !!adapter.gateway
+    || !(adapter.addresses || []).length || !verifiedTargets
+    || verifiedTargets !== el('targets').value.trim();
+}
+
+function renderChecks(data, targets) {
+  adapters = data.adapters.filter(adapter => adapter.wired && adapter.up);
+  const chosen = el('adapter').value;
+  el('adapter').replaceChildren();
+  for (const adapter of adapters) {
+    const option = document.createElement('option');
+    option.value = adapter.name;
+    option.textContent = adapter.name + ' · ' + (adapter.addresses || []).join(', ');
+    el('adapter').appendChild(option);
+  }
+  if (adapters.some(adapter => adapter.name === chosen)) el('adapter').value = chosen;
+  for (const check of data.checks) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const name = document.createElement('strong');
+    name.textContent = check.target;
+    const status = document.createElement('span');
+    status.textContent = check.reachable ? 'Доступен · ' + check.localAddress : 'Нет соединения';
+    status.className = check.reachable ? 'ok' : 'error';
+    row.append(name, status);
+    el('checks').appendChild(row);
+  }
+  verifiedTargets = targets;
+  show(data.stateError || data.state?.message || 'Проверка завершена. Данные на печать не отправлялись.', !!data.stateError);
+}
+
+async function call(action) {
+  if (busy) return;
+  busy = true;
+  const targets = el('targets').value.trim();
+  if (action === 'check') {
+    el('checks').replaceChildren();
+    verifiedTargets = null;
+  }
+  document.querySelectorAll('button, select, textarea').forEach(control => control.disabled = true);
+  show(action === 'setup' || action === 'rollback'
+    ? 'Ожидается системное подтверждение, затем проверка сети…' : 'Проверяем подключения…');
+  try {
+    const adapter = selected();
+    const response = await fetch('/network/' + action, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Network-Token': token},
+      body: JSON.stringify({targets, interface: adapter?.name || '', mac: adapter?.mac || '', prefix: Number(el('prefix').value)})
+    });
+    const data = await response.json();
+    if (!response.ok) throw Error(data.message || 'Не удалось выполнить действие');
+    if (action === 'check') renderChecks(data, targets);
+    else { verifiedTargets = null; show(data.message + ' Нажмите «Проверить без печати», чтобы обновить состояние.'); }
+  } catch (error) {
+    show(error.message, true);
+  } finally {
+    busy = false;
+    document.querySelectorAll('button, select, textarea').forEach(control => control.disabled = false);
+    update();
+  }
+}
+
+el('check').onclick = () => call('check');
+el('setup').onclick = () => call('setup');
+el('rollback').onclick = () => call('rollback');
+el('adapter').onchange = update;
+el('targets').oninput = () => { el('checks').replaceChildren(); update(); };
+call('check');
+</script></body></html>
