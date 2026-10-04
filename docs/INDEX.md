@@ -6,6 +6,8 @@ runtime and CI changes and [Deployment](DEPLOYMENT.md) before any release work.
 
 - [Roadmap](ROADMAP.md): implemented features and work before onboarding cafes.
 - [Browser E2E](PLAYWRIGHT_E2E.md): isolated Playwright setup, coverage and limits.
+- [Mobile handoff](mobile/README.md): two app boundaries, shared API/auth/push rules;
+  [customer app](mobile/CUSTOMER_APP.md) and [courier app](mobile/COURIER_APP.md).
 - [Receipt queue](RECEIPT_QUEUE.md): durable print behavior inherited from the
   legacy system; current cafe isolation is in project context.
 - [Legacy source context](legacy/PROJECT_CONTEXT.md): historical A7 decisions,

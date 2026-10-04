@@ -18,6 +18,13 @@ existing apps/admin is a legacy operations interface until tenant scoping is
 complete. Native mobile clients may have separate release artifacts, but their
 backend contract is generated from this API.
 
+The mobile handoff defines **two separate applications**, one for customers and
+one for couriers. Cafe staff and OWNER use the web portal. The native clients
+are planned releases, not existing Saçakly apps; their current API coverage and
+release blockers are documented in `docs/mobile/`. In particular, imported
+global order and tracking endpoints need tenant authorization checks before
+they become supported native marketplace workflows.
+
 The customer selects one cafe and places one order with products from that
 cafe. Changing cafe starts a separate cart. A merchant sees only its own
 branches, menu, staff, orders, kitchen tickets, receipts and accounting. A
@@ -185,6 +192,7 @@ role matrices, courier races and receipt state transitions.
 - apps/desktop: Imported workstation source, not a merchant release.
 - packages/api-contract: Generated API contract.
 - docs/legacy: Previous single-operator context, README and inactive deployment scripts.
+- docs/mobile: Customer and courier application handoff, API coverage and release blockers.
 
 The baseline source is the clean origin/main snapshot of Guvanch99/alowalow
 at 0eb18f7. Uncommitted work in that checkout was not copied. The source

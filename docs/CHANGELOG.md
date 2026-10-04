@@ -6,6 +6,19 @@ the authority for current business rules. Record the PR URL when available,
 the affected surfaces, verification, migrations, and any release limitation.
 Never put customer data, OTP values, agent tokens or other secrets here.
 
+## 2026-10-04 — Handoff for two mobile applications
+
+- [PR #6](https://github.com/Guvanch99/sacakly-platform/pull/6): added Russian
+  mobile handoff for separate customer and courier apps, with current API
+  routes, screens, courier timing and claim rules, FCM integration, acceptance
+  checks and explicit backend blockers. Linked the documents from the index
+  and recorded the two-app architecture in project context.
+- Documentation only. No schema migration, mobile release or production
+  deployment. Verification: checked routes, DTOs, Prisma enums and order policy
+  against the API source; Markdown links and `git diff --check` checked locally.
+- Full native release still requires tenant-safe assigned-order and tracking
+  APIs, courier availability/workflow, and the customer history cafe snapshot.
+
 ## 2026-10-04 — Browser E2E and mandatory PR history
 
 - [PR #6](https://github.com/Guvanch99/sacakly-platform/pull/6), branch
