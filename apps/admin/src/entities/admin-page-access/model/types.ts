@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 
 export type AdminRolePageAccess =
   components["schemas"]["AdminRolePageAccessResponseDto"];

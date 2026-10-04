@@ -38,7 +38,7 @@ export type TopicPushResult = Pick<
   "ok" | "providerMessageId" | "errorCode"
 >;
 
-const FCM_APP_NAME = "alowalow-push";
+const FCM_APP_NAME = "sacakly-push";
 const FCM_BATCH_SIZE = 500;
 // FCM sends usually settle in well under a second; occasional network
 // interference (seen from some deployments' networks) can otherwise leave

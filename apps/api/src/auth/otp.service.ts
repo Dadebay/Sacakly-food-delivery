@@ -152,7 +152,7 @@ export class OtpService {
     const phoneHash = createHmac("sha256", this.pepper)
       .update(phone)
       .digest("hex");
-    return `alowalow:otp:challenge:${phoneHash}`;
+    return `sacakly:otp:challenge:${phoneHash}`;
   }
 
   private codeHash(phone: string, code: string) {

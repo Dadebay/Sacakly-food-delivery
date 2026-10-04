@@ -7,7 +7,7 @@
 > рассылки/inbox остаются отдельной аудиторией. Фактическая доставка на телефоне
 > требует проверки после обновления подписки.
 
-Эта инструкция описывает полный локальный flow для мобильной команды AlowAlow:
+Эта инструкция описывает полный локальный flow для мобильной команды Saçakly:
 
 ```text
 Firebase SDK -> FCM registration token
@@ -22,7 +22,7 @@ ADMIN/SUPER_ADMIN -> notification campaign
 
 Firebase используется только как транспорт push-уведомлений. Телефонная
 авторизация, OTP, JWT, пользователи, роли и история уведомлений принадлежат
-NestJS/PostgreSQL AlowAlow. Мобильное приложение не должно содержать Firebase
+NestJS/PostgreSQL Saçakly. Мобильное приложение не должно содержать Firebase
 service account, `FCM_SERVICE_ACCOUNT_BASE64` или другие серверные секреты.
 
 ## Быстрый чек-лист
@@ -39,7 +39,7 @@ service account, `FCM_SERVICE_ACCOUNT_BASE64` или другие серверн
 
 ## Какой идентификатор отправлять backend
 
-AlowAlow использует **FCM registration token**. Не отправляйте Firebase
+Saçakly использует **FCM registration token**. Не отправляйте Firebase
 Installation ID (FID) или сырой APNs device token: Firebase Admin SDK адресует
 конкретное устройство именно FCM token. Он приходит из стандартного callback:
 
@@ -71,9 +71,9 @@ Backend отправляет сообщения через поле `token` Fire
 Минимальный callback регистрации:
 
 ```kotlin
-class AlowAlowMessagingService : FirebaseMessagingService() {
+class SaçaklyMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        // Сохранить локально и после входа отправить в AlowAlow API.
+        // Сохранить локально и после входа отправить в Saçakly API.
         pushRegistrationRepository.syncFcmToken(token)
     }
 
@@ -121,7 +121,7 @@ extension AppDelegate: MessagingDelegate {
         didReceiveRegistrationToken fcmToken: String?
     ) {
         guard let fcmToken else { return }
-        // Сохранить локально и после входа отправить в AlowAlow API.
+        // Сохранить локально и после входа отправить в Saçakly API.
         pushRegistrationRepository.syncFcmToken(fcmToken)
     }
 }
@@ -229,7 +229,7 @@ Content-Type: application/json
 `refreshToken` в platform-secure storage. `devCode` никогда не существует в
 production-ответе.
 
-## Регистрация FCM token в AlowAlow
+## Регистрация FCM token в Saçakly
 
 Сразу после успешного входа клиента или курьера и после каждого `onNewToken` /
 `didReceiveRegistrationToken` отправьте актуальный token:
@@ -299,7 +299,7 @@ Authorization: Bearer <admin-access-token>
 Content-Type: application/json
 
 {
-  "title": "Тест AlowAlow",
+  "title": "Тест Saçakly",
   "body": "Push работает",
   "deepLink": "/orders/current"
 }
@@ -430,7 +430,7 @@ login повторно вызовите `PUT /notifications/devices`: одна �
 
 1. Убедитесь, что backend работает с `PUSH_PROVIDER=fcm`, а не `console`.
 2. Проверьте, что token получен из Firebase-проекта `alowalow-c3a21` и был
-   успешно зарегистрирован в AlowAlow после customer login.
+   успешно зарегистрирован в Saçakly после customer login.
 3. Android: проверьте `onNewToken`, разрешение уведомлений и default channel
    в манифесте (`alowalow_orders` у клиента, `kurier_orders` у курьера).
 4. iOS: проверьте физическое устройство, capabilities, APNs `.p8`, Bundle ID,

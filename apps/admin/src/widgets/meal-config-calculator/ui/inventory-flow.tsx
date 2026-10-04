@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { useBranches } from "@/src/entities/branch";
 import {
   inventoryQueryKeys,

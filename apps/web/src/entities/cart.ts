@@ -1,0 +1,6 @@
+export type BasketLine = { productId: string; variantId?: string; name: string; unitPrice: number; quantity: number };
+export type Basket = { cafeId: string; cafeName: string; lines: BasketLine[] };
+const KEY = "sacakly.web.basket";
+export function readBasket(): Basket | null { if (typeof window === "undefined") return null; try { const value = JSON.parse(sessionStorage.getItem(KEY) || "null") as Basket | null; return value?.cafeId && Array.isArray(value.lines) ? value : null; } catch { return null; } }
+export function writeBasket(basket: Basket | null) { if (basket) sessionStorage.setItem(KEY, JSON.stringify(basket)); else sessionStorage.removeItem(KEY); window.dispatchEvent(new Event("basket-change")); }
+export function addToBasket(cafeId: string, cafeName: string, line: BasketLine): { switched: boolean } { const previous = readBasket(); const switched = Boolean(previous && previous.cafeId !== cafeId); const basket = !previous || switched ? { cafeId, cafeName, lines: [] } : previous; const found = basket.lines.find((item) => item.productId === line.productId && item.variantId === line.variantId); if (found) found.quantity = Math.min(50, found.quantity + 1); else basket.lines.push(line); writeBasket(basket); return { switched }; }

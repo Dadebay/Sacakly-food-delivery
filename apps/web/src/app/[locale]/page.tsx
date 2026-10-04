@@ -1,0 +1,17 @@
+import Link from "next/link";
+import Image from "next/image";
+import type { Metadata } from "next";
+import { publicApi, type Cafe, type SitePage } from "@/shared/api";
+import { copy, isLocale, type Locale } from "@/shared/i18n";
+import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> { const { locale } = await params; return { alternates: { canonical: `/${locale}` } }; }
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params; if (!isLocale(raw)) notFound(); const locale: Locale = raw; const t = copy[locale];
+  let cafes: Cafe[] = []; let page: SitePage | null = null; let unavailable = false;
+  try { cafes = await publicApi.cafes(); } catch { unavailable = true; }
+  try { page = await publicApi.page(locale, "home"); } catch { /* optional home copy */ }
+  const title = page?.title || t.hero; const text = page?.description || t.heroText;
+  return <main><section className="hero"><div className="container hero-layout"><div className="hero-copy"><p className="eyebrow"><span className="red-dot" /> {t.heroTag}</p><h1>{title}</h1><p className="hero-subtitle">{text}</p><Link href={`/${locale}#cafes`} className="button button-red">{t.explore} <span>↗</span></Link><div className="hero-footnote"><span>01 <b>—</b> {t.cafes}</span><span>02 <b>—</b> {t.menu}</span><span>03 <b>—</b> {t.delivery}</span></div></div><div className="hero-visual" aria-hidden="true"><div className="hero-ring"><div className="hero-plate"><span className="food-leaf leaf-one">✦</span><span className="food-leaf leaf-two">✦</span><span className="food-dish">S</span><span className="food-berry">●</span></div></div><div className="hero-stamp">TÄZE<br />TAGAM</div><div className="hero-caption">Saçakly · Aşgabat</div></div></div></section><section id="cafes" className="cafes-section container"><div className="section-heading"><div><p className="eyebrow">SAÇAKLY / {t.cafes}</p><h2>{t.cafeHeading}</h2><p>{t.cafeText}</p></div><span className="section-index">01 / 03</span></div>{unavailable ? <div className="empty-panel" role="alert">{t.unavailable}</div> : cafes.length === 0 ? <div className="empty-panel">{t.noCafes}</div> : <div className="cafe-grid">{cafes.map((cafe, index) => <Link className="cafe-card" href={`/${locale}/cafes/${cafe.slug}`} key={cafe.id}><div className={`cafe-photo cafe-photo-${index % 3}`}>{cafe.imageUrl ? <Image src={cafe.imageUrl} alt="" width={420} height={265} unoptimized /> : <span className="cafe-monogram">{cafe.name.slice(0, 1)}</span>}<span className="cafe-number">{String(index + 1).padStart(2, "0")}</span></div><div className="cafe-details"><div><h3>{cafe.name}</h3><p>{cafe.description || t.menu}</p></div><span className="cafe-arrow">↗</span></div></Link>)}</div>}</section><section className="how-section"><div className="container how-inner"><div><p className="eyebrow">SAÇAKLY</p><h2>{t.how}</h2><p>{t.heroText}</p></div><div className="how-steps"><div><strong>01</strong><span>{t.cafes}</span></div><div><strong>02</strong><span>{t.cart}</span></div><div><strong>03</strong><span>{t.delivery}</span></div></div></div></section></main>;
+}

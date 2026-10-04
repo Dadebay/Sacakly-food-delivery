@@ -25,9 +25,9 @@ export class GrantCafeMemberDto {
   @IsUUID()
   userId: string;
 
-  @ApiProperty({ enum: [Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT] })
+  @ApiProperty({ enum: [Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT, Role.COURIER] })
   @IsEnum(Role)
-  @IsIn([Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT])
+  @IsIn([Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT, Role.COURIER])
   role: Role;
 
   @ApiPropertyOptional({ description: "False revokes cafe access without deleting history" })

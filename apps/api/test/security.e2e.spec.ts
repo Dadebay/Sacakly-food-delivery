@@ -2897,7 +2897,7 @@ describe("backend security and critical workflow", () => {
   });
 
   it("delivers admin-created notifications only to registered customer devices", async () => {
-    const installationId = "alowalow_customer_installation_0001";
+    const installationId = "sacakly_customer_installation_0001";
 
     await request(server)
       .put("/api/v1/notifications/devices")
@@ -4311,7 +4311,7 @@ describe("backend security and critical workflow", () => {
     expect(job).not.toHaveProperty("otpRequestId");
 
     const encrypted = await redis.hGet(
-      `alowalow:sms:job:${job.id}`,
+      `sacakly:sms:job:${job.id}`,
       "envelope",
     );
     expect(encrypted).toEqual(expect.any(String));
@@ -4487,9 +4487,9 @@ describe("backend security and critical workflow", () => {
     const phoneHash = createHmac("sha256", process.env.OTP_PEPPER!)
       .update(phone)
       .digest("hex");
-    const challengeKey = `alowalow:otp:challenge:${phoneHash}`;
-    const cooldownKey = `alowalow:otp:cooldown:${phoneHash}`;
-    const hourlyKey = `alowalow:otp:hourly:${phoneHash}`;
+    const challengeKey = `sacakly:otp:challenge:${phoneHash}`;
+    const cooldownKey = `sacakly:otp:cooldown:${phoneHash}`;
+    const hourlyKey = `sacakly:otp:hourly:${phoneHash}`;
     await redis.evalNumber(
       'redis.call("SET", KEYS[1], "old-request", "EX", 60); redis.call("SET", KEYS[2], "5", "EX", 3600); return 1',
       [cooldownKey, hourlyKey],

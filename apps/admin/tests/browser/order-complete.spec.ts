@@ -96,7 +96,7 @@ async function setup(
   };
   await page.addInitScript(
     (value) =>
-      sessionStorage.setItem("alowalow.session.v1", JSON.stringify(value)),
+      sessionStorage.setItem("sacakly.session.v1", JSON.stringify(value)),
     session,
   );
   const state = {

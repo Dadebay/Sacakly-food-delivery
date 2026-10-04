@@ -50,7 +50,7 @@ export function configureApp(app: INestApplication) {
 
 export function createOpenApiDocument(app: INestApplication): OpenAPIObject {
   const options = new DocumentBuilder()
-    .setTitle("AlowLink Platform API")
+    .setTitle("Saçakly Platform API")
     .setDescription(
       "SMS phone authentication backed by Redis, food catalog, marketing, role-gated order workflow, courier tracking and routes, cash handover and reconciliation.",
     )

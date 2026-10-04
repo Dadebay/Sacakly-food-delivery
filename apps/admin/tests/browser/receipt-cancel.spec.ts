@@ -9,7 +9,7 @@ test("administrator cancels a waiting manta ticket from the queue", async ({ pag
     accessExpiresAt: Date.now() + 3_600_000,
     user: { id: "33333333-3333-4333-8333-333333333333", phone: "+99365120000", firstName: "Admin", lastName: null, role: "ADMIN" },
   };
-  await page.addInitScript((value) => sessionStorage.setItem("alowalow.session.v1", JSON.stringify(value)), session);
+  await page.addInitScript((value) => sessionStorage.setItem("sacakly.session.v1", JSON.stringify(value)), session);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("dialog", (dialog) => void dialog.accept());

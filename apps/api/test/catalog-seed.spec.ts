@@ -39,8 +39,8 @@ function rawSeed(
     ],
     products: [
       {
-        slug: options.productSlug ?? "alowalow-burger",
-        name: "AlowAlow Burger",
+        slug: options.productSlug ?? "sacakly-burger",
+        name: "Saçakly Burger",
         description: "Говяжья котлета",
         price: 48,
         receiptPrinterIp: "192.168.123.100",

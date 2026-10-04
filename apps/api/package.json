@@ -1,5 +1,5 @@
 {
-  "name": "@alowalow/api",
+  "name": "@sacakly/api",
   "version": "0.1.0",
   "private": true,
   "license": "UNLICENSED",
@@ -20,6 +20,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:seed:marketplace-demo": "tsx prisma/seed-marketplace-demo.ts",
     "catalog:seed": "tsx prisma/import-catalog-seed.ts",
     "demo:couriers": "node scripts/local-courier-flow-demo.mjs setup",
     "openapi": "npm run build --silent && node scripts/generate-openapi.mjs"

@@ -28,7 +28,7 @@ export function Login({ onSuccess }: { onSuccess: (session: Session) => void }) 
   return <main className="login-layout">
     <div className="login-story">
       <span className="story-orbit" aria-hidden="true">✳</span>
-      <p className="eyebrow">AlowLink / партнёрам</p>
+      <p className="eyebrow">Saçakly / партнёрам</p>
       <h1>Каждый заказ<br /><em>на своём месте.</em></h1>
       <p>Отдельный кабинет для кафе. Единая сеть курьеров. Всё под вашим контролем.</p>
       <div className="story-points"><span>01 / Ваше меню</span><span>02 / Ваши заказы</span><span>03 / Общая доставка</span></div>

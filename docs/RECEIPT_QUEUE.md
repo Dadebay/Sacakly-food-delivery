@@ -153,7 +153,7 @@ with `npm run api:client`.
   admin audits report zero vulnerabilities. The admin dependency tree is unchanged.
 - The ignored `outputs/receipt-queue-20260904/` directory contains the local QA
   script/report/screenshots and release packages. It runs the production admin,
-  actual NestJS API against isolated `alofood_test`, actual Go binary and a TCP
+  actual NestJS API against isolated `sacakly_test`, actual Go binary and a TCP
   sink bound to this Mac. It never sends to physical receipt printers.
 - Seven measured delivery scenarios: phone order before first page load; two
   competing tabs; disconnected/reconnected printer; lost agent reply plus page

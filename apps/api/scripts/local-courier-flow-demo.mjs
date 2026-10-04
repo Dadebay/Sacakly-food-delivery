@@ -5,7 +5,7 @@ import { join } from "node:path";
 const baseUrl = process.env.API_BASE_URL ?? "http://127.0.0.1:4000/api/v1";
 const statePath =
   process.env.COURIER_DEMO_STATE_PATH ??
-  join(tmpdir(), "alowalow-local-courier-demo.json");
+  join(tmpdir(), "sacakly-local-courier-demo.json");
 const command = process.argv[2] ?? "setup";
 
 const courierPaths = [

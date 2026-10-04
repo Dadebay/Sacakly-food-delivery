@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 
 export type Category = components["schemas"]["CatalogAdminCategoryResponseDto"];
 export type Cafe = components["schemas"]["CatalogAdminCafeResponseDto"];

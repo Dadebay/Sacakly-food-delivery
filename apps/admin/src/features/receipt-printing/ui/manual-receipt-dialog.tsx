@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { useForm, useWatch } from "react-hook-form";
 import { useReceiptPrinters } from "@/src/entities/catalog";
 import type { Order } from "@/src/entities/order";

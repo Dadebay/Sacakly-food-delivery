@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 FROM dependencies AS build
 ARG VITE_API_URL=/api/v1
-ARG VITE_MAP_TILE_URL=/tiles/styles/alowalow/{z}/{x}/{y}.png
+ARG VITE_MAP_TILE_URL=/tiles/styles/sacakly/{z}/{x}/{y}.png
 ARG VITE_MAP_ATTRIBUTION="© OpenStreetMap contributors"
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_MAP_TILE_URL=${VITE_MAP_TILE_URL}

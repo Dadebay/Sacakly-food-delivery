@@ -9,6 +9,8 @@ import { createHash } from "node:crypto";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   CashSettlementStatus,
+  CourierApplicationStatus,
+  MarketplaceDeliveryStatus,
   OrderSource,
   OrderStatus,
   Prisma,
@@ -22,7 +24,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import { InventoryService } from "../inventory/inventory.service";
 import { AddressesService } from "../users/addresses.service";
 import { BranchesService } from "../branches/branches.service";
-import { assertApprovedCourier, assertModuleEnabled, requireSingleCafe } from "../marketplace/marketplace-policy";
+import { assertApprovedCourier, assertCafeMember, assertModuleEnabled, requireSingleCafe } from "../marketplace/marketplace-policy";
+import { PLATFORM_OWNER_PHONE } from "../marketplace/platform-owner";
 import { NotificationsService } from "../notifications/notifications.service";
 import { DeliveryService } from "../delivery/delivery.service";
 import {
@@ -251,6 +254,15 @@ export class OrdersService {
     private readonly orderingHours: OrderingHoursService,
     private readonly loyalty: LoyaltyService,
   ) {}
+
+  private async assertMarketplaceManager(tx: Prisma.TransactionClient, actor: AuthUser, cafeId: string) {
+    if (actor.role === Role.SUPER_ADMIN && actor.phone === PLATFORM_OWNER_PHONE) {
+      const owner = await tx.platformOwner.findUnique({ where: { userId: actor.id } });
+      if (owner?.isActive && owner.phone === PLATFORM_OWNER_PHONE) return;
+    }
+    const membership = await tx.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } } });
+    assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR]);
+  }
 
   quoteMarketplace(user: AuthUser, dto: QuoteOrderDto & { cafeId: string }) {
     return this.quote(user, dto, dto.cafeId);
@@ -1838,12 +1850,6 @@ export class OrdersService {
     id: string,
     dto: ConfirmOrderPackingDto,
   ) {
-    if (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN) {
-      throw new ForbiddenException(
-        "Only an administrator can confirm order packing",
-      );
-    }
-
     let notifyTarget: { customerId: string; number: number } | null = null;
     const response = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
@@ -1854,6 +1860,10 @@ export class OrdersService {
         },
       });
       if (!order) throw new NotFoundException("Order not found");
+      if (order.cafeId) await this.assertMarketplaceManager(tx, user, order.cafeId);
+      else if (user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN) {
+        throw new ForbiddenException("Only an administrator can confirm order packing");
+      }
       if (order.version !== dto.version) {
         throw new ConflictException("Order changed; reload and try again");
       }
@@ -1966,15 +1976,22 @@ export class OrdersService {
         throw new BadRequestException("Courier is unavailable");
       }
       if (order.cafeId) {
-        assertApprovedCourier(
-          await tx.courierApplication.findUnique({ where: { userId: courier.id } }),
-          courier.id,
-        );
-      }
-      if (!canManageCourierAssignment(user.role)) {
-        throw new ForbiddenException(
-          "This role cannot manage courier assignments",
-        );
+        const [approved, own, request] = await Promise.all([
+          tx.courierApplication.findUnique({ where: { userId: courier.id } }),
+          tx.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId: order.cafeId, userId: courier.id } } }),
+          tx.marketplaceDeliveryRequest.findUnique({ where: { orderId: id } }),
+        ]);
+        if (approved?.status !== CourierApplicationStatus.APPROVED && !(own?.isActive && own.role === Role.COURIER)) {
+          throw new ForbiddenException("Courier is not approved for this cafe or the network");
+        }
+        if (request?.status === MarketplaceDeliveryStatus.CLAIMED && request.courierId !== courier.id) {
+          throw new ConflictException("Delivery is reserved for another courier");
+        }
+        if (!(user.id === courier.id && request?.status === MarketplaceDeliveryStatus.CLAIMED && request.courierId === user.id)) {
+          await this.assertMarketplaceManager(tx, user, order.cafeId);
+        }
+      } else if (!canManageCourierAssignment(user.role)) {
+        throw new ForbiddenException("This role cannot manage courier assignments");
       }
       if (!canEditCourierAssignment(order.status)) {
         throw new ConflictException(
@@ -2004,6 +2021,12 @@ export class OrdersService {
       });
       if (updated.count !== 1) {
         throw new ConflictException("Order changed; reload and try again");
+      }
+      if (order.cafeId) {
+        await tx.marketplaceDeliveryRequest.updateMany({
+          where: { orderId: id },
+          data: { status: MarketplaceDeliveryStatus.ASSIGNED, courierId: courier.id, version: { increment: 1 } },
+        });
       }
       if (!isReassignment) {
         await tx.orderTransition.create({
@@ -2061,6 +2084,7 @@ export class OrdersService {
       );
       const order = await tx.order.findUnique({ where: { id }, include: { items: true } });
       if (!order) throw new NotFoundException("Order not found");
+      if (order.cafeId && user.role !== Role.CUSTOMER) await this.assertMarketplaceManager(tx, user, order.cafeId);
       if (order.version !== dto.version) {
         throw new ConflictException("Order changed; reload and try again");
       }
@@ -2103,6 +2127,10 @@ export class OrdersService {
       });
       if (cancelled.count !== 1) {
         throw new ConflictException("Order changed; reload and try again");
+      }
+      if (order.cafeId) {
+        await tx.marketplaceDeliveryRequest.updateMany({ where: { orderId: id, status: { not: MarketplaceDeliveryStatus.CANCELLED } },
+          data: { status: MarketplaceDeliveryStatus.CANCELLED, version: { increment: 1 } } });
       }
       if (returnsInventoryOnCancellation(order.status)) {
         await this.inventory.releaseOrderReservation(tx, user, order);

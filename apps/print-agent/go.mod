@@ -1,4 +1,4 @@
-module github.com/Guvanch99/alowalow/apps/print-agent
+module github.com/Guvanch99/sacakly-platform/apps/print-agent
 
 go 1.26.0
 

@@ -28,6 +28,7 @@ import { AccountingModule } from "./accounting/accounting.module";
 import { AppVersionsModule } from "./app-versions/app-versions.module";
 import { LoyaltyModule } from "./loyalty/loyalty.module";
 import { MarketplaceModule } from "./marketplace/marketplace.module";
+import { SitePagesModule } from "./site-pages/site-pages.module";
 
 @Module({
   imports: [
@@ -46,12 +47,12 @@ import { MarketplaceModule } from "./marketplace/marketplace.module";
           expiresIn: config.get("ACCESS_TOKEN_TTL", {
             infer: true,
           }),
-          issuer: "alowalow-api",
-          audience: "alowalow-clients",
+          issuer: "sacakly-api",
+          audience: "sacakly-clients",
         },
         verifyOptions: {
-          issuer: "alowalow-api",
-          audience: "alowalow-clients",
+          issuer: "sacakly-api",
+          audience: "sacakly-clients",
         },
       }),
     }),
@@ -75,6 +76,7 @@ import { MarketplaceModule } from "./marketplace/marketplace.module";
     InventoryModule,
     LoyaltyModule,
     MarketplaceModule,
+    SitePagesModule,
   ],
   controllers: [HealthController],
   providers: [

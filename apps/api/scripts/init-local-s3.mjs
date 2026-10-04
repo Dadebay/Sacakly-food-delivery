@@ -1,14 +1,14 @@
 import { S3Client, CreateBucketCommand } from "@aws-sdk/client-s3";
 
 const endpoint = process.env.S3_ENDPOINT || "http://127.0.0.1:9000";
-const bucket = process.env.S3_BUCKET || "alowalow-media";
+const bucket = process.env.S3_BUCKET || "sacakly-media";
 const client = new S3Client({
   endpoint,
   region: process.env.S3_REGION || "us-east-1",
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID || "alofood",
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "alofood-local-secret",
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || "sacakly",
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "sacakly-local-secret",
   },
 });
 

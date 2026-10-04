@@ -1,4 +1,4 @@
-# Локальный OpenStreetMap для AlowAlow
+# Локальный OpenStreetMap для Saçakly
 
 Этот отдельно разворачиваемый сервис самостоятельно отдаёт базовую карту
 Туркменистана веб-клиентам и мобильным приложениям и не использует публичные
@@ -30,16 +30,16 @@ npm run maps:up
 
 ```bash
 curl --fail http://127.0.0.1:8080/health
-curl --fail --output /tmp/alowalow-map-tile.png \
-  http://127.0.0.1:8080/styles/alowalow/10/677/395.png
+curl --fail --output /tmp/sacakly-map-tile.png \
+  http://127.0.0.1:8080/styles/sacakly/10/677/395.png
 ```
 
 Endpoints:
 
 - preview: `http://127.0.0.1:8080/`;
 - необязательный MapLibre style для продвинутых клиентов:
-  `http://127.0.0.1:8080/styles/alowalow/style.json`;
-- Leaflet XYZ: `http://127.0.0.1:8080/styles/alowalow/{z}/{x}/{y}.png`;
+  `http://127.0.0.1:8080/styles/sacakly/style.json`;
+- Leaflet XYZ: `http://127.0.0.1:8080/styles/sacakly/{z}/{x}/{y}.png`;
 - vector TileJSON: `http://127.0.0.1:8080/data/turkmenistan.json`;
 - raw vector PBF: `http://127.0.0.1:8080/data/turkmenistan/{z}/{x}/{y}.pbf`;
 - healthcheck: `http://127.0.0.1:8080/health`.
@@ -63,7 +63,7 @@ npm run maps:up
 ```
 
 Замените `192.168.1.20` на LAN IP компьютера. Мобильное приложение использует
-`http://192.168.1.20:8080/styles/alowalow/{z}/{x}/{y}.png`. Не открывайте этот порт
+`http://192.168.1.20:8080/styles/sacakly/{z}/{x}/{y}.png`. Не открывайте этот порт
 в Интернет на рабочем ноутбуке; ограничьте его локальной сетью firewall.
 
 В DEV/PROD это отдельный Compose service (или отдельная машина позднее) с

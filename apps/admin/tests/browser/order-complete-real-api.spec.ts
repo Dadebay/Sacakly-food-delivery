@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 
 type Order = components["schemas"]["OrderResponseDto"];
 type Session = components["schemas"]["AuthSessionResponseDto"] & {
@@ -12,7 +12,7 @@ test("courier without an app is completed through the real Nest API and appears 
 }, info) => {
   test.skip(
     !process.env.ORDER_COMPLETE_QA_FIXTURE,
-    "Requires the isolated alofood_test QA API",
+    "Requires the isolated sacakly_test QA API",
   );
   const fixture = JSON.parse(
     await readFile(process.env.ORDER_COMPLETE_QA_FIXTURE!, "utf8"),
@@ -32,7 +32,7 @@ test("courier without an app is completed through the real Nest API and appears 
       errors.push(message.text());
   });
   await page.addInitScript((session) => {
-    sessionStorage.setItem("alowalow.session.v1", JSON.stringify(session));
+    sessionStorage.setItem("sacakly.session.v1", JSON.stringify(session));
     Object.assign(window, {
       completionMetrics: { lcp: 0, cls: 0, maxEventMs: 0 },
     });

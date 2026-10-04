@@ -42,9 +42,9 @@ export function App() {
 
   return <div className="app-shell" data-testid="merchant-app-root">
     <header className="topbar">
-      <a className="brand" href="/" aria-label="AlowLink — главная">
-        <span className="brand-mark">a<span>.</span></span>
-        <span>Alow<span>Link</span><small>для партнёров</small></span>
+      <a className="brand" href="/" aria-label="Saçakly — главная">
+        <span className="brand-mark">S<span>.</span></span>
+        <span>Saçak<span>ly</span><small>для партнёров</small></span>
       </a>
       {session && <div className="top-actions">
         <span className="account-phone">{session.user.phone}</span>
@@ -67,6 +67,6 @@ export function App() {
         {section === "owner" && access.owner ? <OwnerDashboard /> : access.cafes.length > 0 ? <MerchantDashboard cafes={access.cafes} /> : access.owner ? <OwnerDashboard /> : <div className="empty-state"><h2>Нет подключённых кафе</h2><p>Владелец платформы должен назначить вам доступ к вашему кафе.</p></div>}
       </>}
     </main>}
-    <footer>AlowLink · кафе, заказы и курьеры в одной сети</footer>
+    <footer>Saçakly · кафе, заказы и курьеры в одной сети</footer>
   </div>;
 }

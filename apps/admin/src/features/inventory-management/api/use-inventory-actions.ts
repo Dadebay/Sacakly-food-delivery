@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { useSession } from "@/src/shared/auth";
 import type {
   AdjustStock,

@@ -9,6 +9,8 @@ import { OtpService } from "../src/auth/otp.service";
 import { configureApp } from "../src/bootstrap";
 import { OrderStatus, Role } from "../src/generated/prisma/client";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { MarketplaceDispatchService } from "../src/marketplace/marketplace-dispatch.service";
+import { MarketplaceDeliveryStatus } from "../src/generated/prisma/client";
 
 describe("marketplace HTTP tenant boundaries", () => {
   let app: INestApplication;
@@ -150,6 +152,110 @@ describe("marketplace HTTP tenant boundaries", () => {
       .get(`/api/v1/marketplace/merchant/cafes/${cafeA}/orders`)
       .set("Authorization", await auth(otherId))
       .expect(403);
+  });
+
+  it("lists only orderable cafes and lets only OWNER publish versioned pages", async () => {
+    const cafes = await request(server).get("/api/v1/marketplace/cafes").expect(200);
+    expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).toContain(cafeA);
+    expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).not.toContain(cafeB);
+
+    const path = "/api/v1/site/owner/pages/ru/about";
+    const data = { expectedVersion: 0, title: "О платформе", description: "Доставка из местных кафе Ашхабада", body: "Свежая еда рядом.", published: false };
+    await request(server).put(path).send(data).expect(401);
+    await request(server).put(path).set("Authorization", await auth(merchantId)).send(data).expect(403);
+    await request(server).put(path).set("Authorization", await auth(ownerId)).send(data).expect(200);
+    await request(server).get("/api/v1/site/pages/ru/about").expect(404);
+    await request(server).put(path).set("Authorization", await auth(ownerId))
+      .send({ ...data, expectedVersion: 1, published: true }).expect(200);
+    await request(server).put(path).set("Authorization", await auth(ownerId))
+      .send({ ...data, expectedVersion: 1, published: false }).expect(409);
+    const published = await request(server).get("/api/v1/site/pages/ru/about").expect(200);
+    expect((published.body as { title: string; version: number }).title).toBe(data.title);
+    expect((published.body as { version: number }).version).toBe(2);
+    const listed = await request(server).get("/api/v1/site/pages").expect(200);
+    expect((listed.body as Array<{ slug: string }>).some((page) => page.slug === "about")).toBe(true);
+    expect(await prisma.auditLog.count({ where: { action: "site.page.saved", entityId: "ru/about" } })).toBe(2);
+  });
+
+  it("schedules an external offer, awards it to one courier, and assigns only after packing", async () => {
+    const suffix = Math.random().toString(36).slice(2, 9);
+    const category = await prisma.category.create({ data: { cafeId: cafeA, name: "Delivery test", slug: `delivery-${suffix}` } });
+    const product = await prisma.product.create({ data: { categoryId: category.id, name: "Meal", slug: `meal-${suffix}`, description: "Food", price: 25 } });
+    const second = await prisma.user.create({ data: { phone: `+993651${Math.floor(100000 + Math.random() * 899999)}`, role: Role.COURIER } });
+    await prisma.courierApplication.create({ data: { userId: second.id, status: "APPROVED" } });
+    const createdAt = new Date(Date.now() - 21 * 60_000);
+    const order = await prisma.order.create({ data: { customerId: otherId, cafeId: cafeA, subtotal: 25, total: 25, address: "A", latitude: 37.96, longitude: 58.33, createdAt,
+      items: { create: [{ cafeId: cafeA, productId: product.id, productName: "Meal", preparationMinutes: 60, unitPrice: 25, quantity: 1, lineTotal: 25 }] } }, include: { items: true } });
+    const path = `/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/route`;
+    await request(server).post(path).set("Authorization", await auth(otherId)).send({ mode: "NETWORK", expectedOrderVersion: 1 }).expect(403);
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeB}/orders/${order.id}/route`).set("Authorization", await auth(merchantId)).send({ mode: "NETWORK", expectedOrderVersion: 1 }).expect(403);
+    const scheduled = await request(server).post(path).set("Authorization", await auth(merchantId)).send({ mode: "NETWORK", expectedOrderVersion: 1 }).expect(200);
+    expect((scheduled.body as { offerAt: string }).offerAt).toBe(new Date(createdAt.getTime() + 20 * 60_000).toISOString());
+    await app.get(MarketplaceDispatchService).publishDue();
+    expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.OFFERED);
+    const offer = await request(server).get("/api/v1/marketplace/delivery/courier/offers").set("Authorization", await auth(applicantId)).expect(200);
+    expect((offer.body as Array<{ orderId: string }>).some((entry) => entry.orderId === order.id)).toBe(true);
+    const claimPath = `/api/v1/marketplace/delivery/courier/offers/${order.id}/claim`;
+    const [first, secondClaim] = await Promise.all([
+      request(server).post(claimPath).set("Authorization", await auth(applicantId)),
+      request(server).post(claimPath).set("Authorization", await auth(second.id)),
+    ]);
+    expect([first.status, secondClaim.status].sort()).toEqual([200, 409]);
+    const winner = (await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).courierId;
+    expect([applicantId, second.id]).toContain(winner);
+    expect((await prisma.order.findUniqueOrThrow({ where: { id: order.id } })).status).toBe("COOKING");
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/ready`)
+      .set("Authorization", await auth(otherId)).send({ version: 2, checkedItemIds: order.items.map((item) => item.id) }).expect(403);
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/ready`)
+      .set("Authorization", await auth(merchantId)).send({ version: 2, checkedItemIds: order.items.map((item) => item.id) }).expect(200);
+    const assigned = await prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(assigned.status).toBe("ASSIGNED_TO_COURIER");
+    expect(assigned.courierId).toBe(winner);
+    expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.ASSIGNED);
+  });
+
+  it("lets a cafe reserve its own courier without offering the order to the network", async () => {
+    const suffix = Math.random().toString(36).slice(2, 9);
+    const own = await prisma.user.create({ data: { phone: `+993652${Math.floor(100000 + Math.random() * 899999)}`, role: Role.CUSTOMER } });
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafeA}/members`)
+      .set("Authorization", await auth(ownerId)).send({ userId: own.id, role: Role.COURIER, expectedVersion: 0 }).expect(200);
+    expect((await prisma.user.findUniqueOrThrow({ where: { id: own.id } })).role).toBe(Role.COURIER);
+    const ownCouriers = await request(server).get(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/couriers`)
+      .set("Authorization", await auth(merchantId)).expect(200);
+    expect((ownCouriers.body as Array<{ id: string }>).some((courier) => courier.id === own.id)).toBe(true);
+    await request(server).get(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/couriers`)
+      .set("Authorization", await auth(otherId)).expect(403);
+    const category = await prisma.category.create({ data: { cafeId: cafeA, name: "Own delivery", slug: `own-${suffix}` } });
+    const product = await prisma.product.create({ data: { categoryId: category.id, name: "Own meal", slug: `own-meal-${suffix}`, description: "Food", price: 30 } });
+    const order = await prisma.order.create({ data: { customerId: otherId, cafeId: cafeA, subtotal: 30, total: 30, address: "B", latitude: 37.96, longitude: 58.33,
+      items: { create: [{ cafeId: cafeA, productId: product.id, productName: "Own meal", preparationMinutes: 15, unitPrice: 30, quantity: 1, lineTotal: 30 }] } }, include: { items: true } });
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/route`)
+      .set("Authorization", await auth(merchantId)).send({ mode: "OWN", courierId: own.id, expectedOrderVersion: 1 }).expect(200);
+    expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.CLAIMED);
+    const offers = await request(server).get("/api/v1/marketplace/delivery/courier/offers")
+      .set("Authorization", await auth(applicantId)).expect(200);
+    expect((offers.body as Array<{ orderId: string }>).some((entry) => entry.orderId === order.id)).toBe(false);
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/ready`)
+      .set("Authorization", await auth(merchantId)).send({ version: 2, checkedItemIds: order.items.map((item) => item.id) }).expect(200);
+    const assigned = await prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+    expect(assigned.status).toBe("ASSIGNED_TO_COURIER");
+    expect(assigned.courierId).toBe(own.id);
+  });
+
+  it("withdraws a network offer when OWNER cancels the order", async () => {
+    const suffix = Math.random().toString(36).slice(2, 9);
+    const category = await prisma.category.create({ data: { cafeId: cafeA, name: "Cancel delivery", slug: `cancel-delivery-${suffix}` } });
+    const product = await prisma.product.create({ data: { categoryId: category.id, name: "Quick meal", slug: `quick-meal-${suffix}`, description: "Food", price: 20 } });
+    const order = await prisma.order.create({ data: { customerId: otherId, cafeId: cafeA, subtotal: 20, total: 20, address: "C", latitude: 37.96, longitude: 58.33,
+      items: { create: [{ cafeId: cafeA, productId: product.id, productName: "Quick meal", preparationMinutes: 10, unitPrice: 20, quantity: 1, lineTotal: 20 }] } } });
+    await request(server).post(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/orders/${order.id}/route`)
+      .set("Authorization", await auth(merchantId)).send({ mode: "NETWORK", expectedOrderVersion: 1 }).expect(200);
+    expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.OFFERED);
+    await request(server).patch(`/api/v1/orders/${order.id}/cancel`).set("Authorization", await auth(ownerId))
+      .send({ version: 2, reason: "Test cancellation" }).expect(200);
+    expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.CANCELLED);
+    await request(server).post(`/api/v1/marketplace/delivery/courier/offers/${order.id}/claim`)
+      .set("Authorization", await auth(applicantId)).expect(409);
   });
 
   it("lets OWNER onboard a cafe and manage only versioned memberships", async () => {

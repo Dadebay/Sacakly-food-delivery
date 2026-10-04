@@ -63,7 +63,7 @@ SPA bootstrap thin: route composition and provider wiring only.
   views when it improves a measured navigation path.
 - Use the Swagger-generated TypeScript contract. Do not hand-write duplicate
   API response types or silently cast responses to `any`.
-- Import generated types only from the local `@alowalow/api-contract` package;
+- Import generated types only from the local `@sacakly/api-contract` package;
   never introduce a second generated schema inside the admin.
 - Keep one HTTP client responsible for base URL, bearer token attachment,
   refresh serialization, normalized errors, and request cancellation.

@@ -1,6 +1,6 @@
 # Mobile map and courier routing
 
-The mobile application uses two AlowAlow services for different jobs:
+The mobile application uses two Saçakly services for different jobs:
 
 1. TileServer GL renders the shared OpenStreetMap base map.
 2. The authenticated NestJS API accepts GPS and returns orders plus a real
@@ -17,7 +17,7 @@ development Mac's LAN address:
 
 ```text
 API_BASE_URL=http://192.168.1.20:4000/api/v1
-MAP_TILE_URL=http://192.168.1.20:8080/styles/alowalow/{z}/{x}/{y}.png
+MAP_TILE_URL=http://192.168.1.20:8080/styles/sacakly/{z}/{x}/{y}.png
 ```
 
 For production, mobile uses the HTTPS API and one simple raster XYZ URL on the

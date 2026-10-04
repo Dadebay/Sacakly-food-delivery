@@ -145,6 +145,6 @@ instructions.
 - Unit-test complete policy matrices, including deny-by-default cases.
 - HTTP e2e-test every critical workflow across allowed and forbidden roles.
 - Add concurrency tests for one-time tokens and versioned order mutations.
-- Use only the isolated `alofood_test` database and Redis DB 15 in tests.
+- Use only the isolated `sacakly_test` database and Redis DB 15 in tests.
 - A backend change is incomplete until lint, build, tests, coverage thresholds,
   and both development/production dependency audits pass.

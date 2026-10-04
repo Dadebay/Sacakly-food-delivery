@@ -9,7 +9,7 @@ export class ContactService {
   constructor(private readonly prisma: PrismaService) {}
   async get() {
     const value = await this.prisma.contactSettings.upsert({
-      where: { id: "default" }, create: { id: "default", displayName: "AloWAlow Destek", phone: "+99312000000" }, update: {},
+      where: { id: "default" }, create: { id: "default", displayName: "Saçakly Destek", phone: "+99312000000" }, update: {},
     });
     return toApiResponse(value);
   }

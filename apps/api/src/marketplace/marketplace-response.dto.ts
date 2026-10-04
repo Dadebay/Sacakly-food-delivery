@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { CourierApplicationStatus, OrderStatus, Role } from "../generated/prisma/client";
+import { DeliveryRequestResponseDto } from "./marketplace-dispatch.dto";
 
 export class OwnerStatusResponseDto {
   @ApiProperty()
@@ -118,8 +119,11 @@ export class MarketplaceCafeResponseDto {
   @ApiProperty()
   slug: string;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   description: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  imageUrl: string | null;
 
   @ApiProperty()
   isActive: boolean;
@@ -173,6 +177,17 @@ export class DispatchCourierResponseDto {
   lastName: string | null;
 }
 
+export class MerchantOrderItemResponseDto {
+  @ApiProperty({ format: "uuid" }) id: string;
+  @ApiProperty() productName: string;
+  @ApiProperty() quantity: number;
+  @ApiProperty() preparationMinutes: number;
+}
+
+export class MerchantOrderGiftResponseDto {
+  @ApiProperty({ format: "uuid" }) id: string;
+}
+
 export class MerchantOrderResponseDto {
   @ApiProperty({ format: "uuid" })
   id: string;
@@ -183,6 +198,12 @@ export class MerchantOrderResponseDto {
   @ApiProperty({ enum: OrderStatus })
   status: OrderStatus;
 
+  @ApiProperty()
+  version: number;
+
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
+  packingConfirmedAt: Date | null;
+
   @ApiProperty({ type: String })
   total: string;
 
@@ -191,4 +212,13 @@ export class MerchantOrderResponseDto {
 
   @ApiProperty({ format: "date-time" })
   createdAt: Date;
+
+  @ApiProperty({ type: [MerchantOrderItemResponseDto] })
+  items: MerchantOrderItemResponseDto[];
+
+  @ApiProperty({ type: [MerchantOrderGiftResponseDto] })
+  gifts: MerchantOrderGiftResponseDto[];
+
+  @ApiPropertyOptional({ type: DeliveryRequestResponseDto, nullable: true })
+  deliveryRequest: DeliveryRequestResponseDto | null;
 }

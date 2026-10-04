@@ -7128,10 +7128,399 @@
           "marketplace"
         ]
       }
+    },
+    "/api/v1/marketplace/cafes": {
+      "get": {
+        "operationId": "MarketplacePublicController_publicCafes_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceCafeResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List active cafes with ordering enabled",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/couriers": {
+      "get": {
+        "operationId": "MarketplaceDispatchController_ownCouriers_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OwnCafeCourierResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "marketplace delivery"
+        ]
+      }
+    },
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/orders/{orderId}/route": {
+      "post": {
+        "operationId": "MarketplaceDispatchController_choose_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChooseMarketplaceDeliveryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryRequestResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "marketplace delivery"
+        ]
+      }
+    },
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/orders/{orderId}/ready": {
+      "post": {
+        "operationId": "MarketplaceDispatchController_ready_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmOrderPackingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "marketplace delivery"
+        ]
+      }
+    },
+    "/api/v1/marketplace/delivery/courier/offers": {
+      "get": {
+        "operationId": "MarketplaceDispatchController_offers_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalDeliveryOfferResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "marketplace delivery"
+        ]
+      }
+    },
+    "/api/v1/marketplace/delivery/courier/offers/{orderId}/claim": {
+      "post": {
+        "operationId": "MarketplaceDispatchController_claim_v1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryRequestResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "marketplace delivery"
+        ]
+      }
+    },
+    "/api/v1/site/pages": {
+      "get": {
+        "operationId": "SitePagesController_publishedPages_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SitePageSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "site pages"
+        ]
+      }
+    },
+    "/api/v1/site/pages/{locale}/{slug}": {
+      "get": {
+        "operationId": "SitePagesController_publishedPage_v1",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tk",
+                "ru",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "site pages"
+        ]
+      }
+    },
+    "/api/v1/site/owner/pages": {
+      "get": {
+        "operationId": "SitePagesController_ownerPages_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SitePageResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "site pages"
+        ]
+      }
+    },
+    "/api/v1/site/owner/pages/{locale}/{slug}": {
+      "put": {
+        "operationId": "SitePagesController_save_v1",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tk",
+                "ru",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveSitePageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "site pages"
+        ]
+      }
     }
   },
   "info": {
-    "title": "AlowLink Platform API",
+    "title": "Saçakly Platform API",
     "description": "SMS phone authentication backed by Redis, food catalog, marketing, role-gated order workflow, courier tracking and routes, cash handover and reconciliation.",
     "version": "1.0",
     "contact": {}
@@ -7417,7 +7806,7 @@
           },
           "message": {
             "type": "string",
-            "example": "AlowAlow: код входа 123456."
+            "example": "Saçakly: код входа 123456."
           },
           "expiresAt": {
             "type": "string",
@@ -13369,7 +13758,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "AlowAlow Berkarar"
+            "example": "Saçakly Berkarar"
           },
           "address": {
             "type": "string",
@@ -13409,7 +13798,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "AlowAlow Berkarar"
+            "example": "Saçakly Berkarar"
           },
           "address": {
             "type": "string",
@@ -13550,7 +13939,7 @@
           },
           "name": {
             "type": "string",
-            "example": "AlowAlow Berkarar"
+            "example": "Saçakly Berkarar"
           },
           "address": {
             "type": "string"
@@ -17603,7 +17992,11 @@
             "type": "string"
           },
           "description": {
-            "type": "object",
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
             "nullable": true
           },
           "isActive": {
@@ -17795,7 +18188,8 @@
               "ADMIN",
               "OPERATOR",
               "COOK",
-              "ACCOUNTANT"
+              "ACCOUNTANT",
+              "COURIER"
             ]
           },
           "isActive": {
@@ -17887,6 +18281,102 @@
           "version"
         ]
       },
+      "MerchantOrderItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "preparationMinutes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "productName",
+          "quantity",
+          "preparationMinutes"
+        ]
+      },
+      "MerchantOrderGiftResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "DeliveryRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cafeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "OWN",
+              "NETWORK"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "WAITING",
+              "OFFERED",
+              "CLAIMED",
+              "ASSIGNED",
+              "CANCELLED"
+            ]
+          },
+          "courierId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "offerAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "offeredAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          },
+          "claimedAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "orderId",
+          "cafeId",
+          "mode",
+          "status",
+          "offerAt",
+          "version"
+        ]
+      },
       "MerchantOrderResponseDto": {
         "type": "object",
         "properties": {
@@ -17910,6 +18400,14 @@
               "CANCELLED"
             ]
           },
+          "version": {
+            "type": "number"
+          },
+          "packingConfirmedAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          },
           "total": {
             "type": "string"
           },
@@ -17921,14 +18419,235 @@
           "createdAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MerchantOrderItemResponseDto"
+            }
+          },
+          "gifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MerchantOrderGiftResponseDto"
+            }
+          },
+          "deliveryRequest": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryRequestResponseDto"
+              }
+            ]
           }
         },
         "required": [
           "id",
           "number",
           "status",
+          "version",
           "total",
-          "createdAt"
+          "createdAt",
+          "items",
+          "gifts"
+        ]
+      },
+      "OwnCafeCourierResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "object",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "phone"
+        ]
+      },
+      "ChooseMarketplaceDeliveryDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "OWN",
+              "NETWORK"
+            ]
+          },
+          "courierId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required for OWN delivery"
+          },
+          "expectedOrderVersion": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "mode",
+          "expectedOrderVersion"
+        ]
+      },
+      "ExternalDeliveryOfferResponseDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNumber": {
+            "type": "number"
+          },
+          "cafeName": {
+            "type": "string"
+          },
+          "offeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "estimatedReadyAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "orderNumber",
+          "cafeName",
+          "offeredAt",
+          "estimatedReadyAt"
+        ]
+      },
+      "SitePageSummaryDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": [
+              "tk",
+              "ru",
+              "en"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "slug",
+          "title",
+          "description",
+          "published",
+          "version",
+          "updatedAt"
+        ]
+      },
+      "SitePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": [
+              "tk",
+              "ru",
+              "en"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale",
+          "slug",
+          "title",
+          "description",
+          "body",
+          "published",
+          "version",
+          "updatedAt"
+        ]
+      },
+      "SaveSitePageDto": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "number",
+            "minimum": 0
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 20000,
+            "description": "Plain text; the web client never renders it as HTML"
+          },
+          "published": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expectedVersion",
+          "title",
+          "description",
+          "body",
+          "published"
         ]
       }
     }

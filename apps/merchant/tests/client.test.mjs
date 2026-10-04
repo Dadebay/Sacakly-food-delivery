@@ -28,7 +28,7 @@ test("OTP login stores the returned session and sends no Authorization header", 
   assert.equal(client.getSession().accessToken, "access");
   assert.equal(calls[0].options.headers.Authorization, undefined);
   assert.equal(calls[1].options.headers.Authorization, undefined);
-  assert.equal(JSON.parse(values.get("alowlink.merchant.session")).refreshToken, "refresh");
+  assert.equal(JSON.parse(values.get("sacakly.merchant.session")).refreshToken, "refresh");
 });
 
 test("parallel expired requests use one refresh and retry with the new access token", async () => {

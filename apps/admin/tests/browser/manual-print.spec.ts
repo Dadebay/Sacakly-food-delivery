@@ -45,7 +45,7 @@ async function openPrint(page: Page, itemCount = 2) {
     accessExpiresAt: Date.now() + 3_600_000,
     user: { id: "88888888-8888-4888-8888-888888888888", phone: "+99365120000", firstName: "Admin", lastName: null, role: "ADMIN" },
   };
-  await page.addInitScript((value) => sessionStorage.setItem("alowalow.session.v1", JSON.stringify(value)), session);
+  await page.addInitScript((value) => sessionStorage.setItem("sacakly.session.v1", JSON.stringify(value)), session);
   const requests: Record<string, unknown>[] = [];
   let planRequests = 0;
   let printerRequests = 0;

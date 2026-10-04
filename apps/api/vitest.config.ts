@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 
 const testDatabaseUrl =
   process.env.TEST_DATABASE_URL ??
-  "postgresql://alofood:alofood@localhost:5432/alofood_test";
+  "postgresql://sacakly:sacakly@localhost:5432/sacakly_test";
 const testRedisUrl = process.env.TEST_REDIS_URL ?? "redis://localhost:6379/15";
 const testS3Endpoint = process.env.TEST_S3_ENDPOINT ?? "http://localhost:9000";
 const testOtpExpiry = new Date(
@@ -41,8 +41,8 @@ export default defineConfig({
         "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=",
       CORS_ORIGINS: "http://localhost:3000",
       S3_ENDPOINT: testS3Endpoint,
-      S3_ACCESS_KEY_ID: "alofood",
-      S3_SECRET_ACCESS_KEY: "alofood-local-secret",
+      S3_ACCESS_KEY_ID: "sacakly",
+      S3_SECRET_ACCESS_KEY: "sacakly-local-secret",
       S3_FORCE_PATH_STYLE: "true",
     },
     coverage: {

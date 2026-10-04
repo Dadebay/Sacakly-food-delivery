@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { PageManager } from "./page-manager";
 import { api, type Cafe, type CafeMember, type CourierApplication, type DispatchCourier, type DispatchOrder, type Module, type ModuleKey } from "../api/client";
 
 const moduleLabels: Record<ModuleKey, string> = {
@@ -17,7 +18,7 @@ export function OwnerDashboard() {
   const [dispatchCouriers, setDispatchCouriers] = useState<DispatchCourier[]>([]);
   const [courierSelection, setCourierSelection] = useState<Record<string, string>>({});
   const [memberPhone, setMemberPhone] = useState("");
-  const [memberRole, setMemberRole] = useState<"ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT">("ADMIN");
+  const [memberRole, setMemberRole] = useState<"ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT" | "COURIER">("ADMIN");
   const [newCafeName, setNewCafeName] = useState("");
   const [newCafeSlug, setNewCafeSlug] = useState("");
   const [pending, setPending] = useState("");
@@ -120,7 +121,7 @@ export function OwnerDashboard() {
   }
 
   return <section className="dashboard" data-testid="owner-dashboard-root">
-    <div className="section-intro"><div><p className="eyebrow">Управление платформой</p><h2>Центр AlowLink</h2><p>Подключайте кафе, настраивайте модули и проверяйте будущих курьеров.</p></div><span className="owner-chip">OWNER</span></div>
+    <div className="section-intro"><div><p className="eyebrow">Управление платформой</p><h2>Центр Saçakly</h2><p>Подключайте кафе, настраивайте модули и проверяйте будущих курьеров.</p></div><span className="owner-chip">OWNER</span></div>
     {error && <p className="notice error" role="alert">{error}</p>}{success && <p className="notice success" role="status">{success}</p>}
     <div className="owner-grid">
       <div className="panel member-panel"><div className="panel-heading"><h3>Новое кафе</h3><span>Отдельный контур заказов</span></div><form onSubmit={createCafe} className="member-form" data-testid="owner-create-cafe-form"><label>Название<input required minLength={2} maxLength={120} value={newCafeName} onChange={(event) => setNewCafeName(event.target.value)} placeholder="Название кафе" data-testid="owner-new-cafe-name" /></label><label>Адрес в каталоге<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={140} value={newCafeSlug} onChange={(event) => setNewCafeSlug(event.target.value.toLowerCase())} placeholder="cafe-name" data-testid="owner-new-cafe-slug" /></label><button className="primary-button" disabled={Boolean(pending)} data-testid="owner-create-cafe">Создать кафе</button></form></div>
@@ -136,9 +137,10 @@ export function OwnerDashboard() {
       <div className="panel member-panel"><div className="panel-heading"><h3>Общая доставка</h3><span>{dispatchOrders.length} заказов к назначению</span></div>
         {dispatchOrders.length === 0 ? <p className="panel-message">Готовых заказов сейчас нет.</p> : <div className="application-list" data-testid="owner-dispatch-list">{dispatchOrders.map((order) => <div className="application-row" key={order.id} data-testid={`owner-dispatch-${order.id}`}><div><strong>№{order.number} · {order.cafe.name}</strong><small>{order.address} · {order.status === "READY" ? "Готов" : "Курьер назначен"}</small></div><div className="dispatch-controls"><select aria-label={`Курьер для заказа №${order.number}`} value={courierSelection[order.id] || dispatchCouriers[0]?.id || ""} onChange={(event) => setCourierSelection((before) => ({ ...before, [order.id]: event.target.value }))} disabled={Boolean(pending) || dispatchCouriers.length === 0} data-testid={`owner-dispatch-courier-${order.id}`}>{dispatchCouriers.length === 0 ? <option value="">Нет курьеров</option> : dispatchCouriers.map((courier) => <option key={courier.id} value={courier.id}>{[courier.firstName, courier.lastName].filter(Boolean).join(" ") || courier.phone}</option>)}</select><button className="mini-primary" disabled={Boolean(pending) || dispatchCouriers.length === 0} onClick={() => assignCourier(order)} data-testid={`owner-dispatch-assign-${order.id}`}>Назначить</button></div></div>)}</div>}
       </div>
-      <div className="panel member-panel"><div className="panel-heading"><h3>Доступ сотрудников</h3><span>Только выбранное кафе</span></div><p>Сотрудник сначала входит в систему по SMS. Затем подключите его номер к этому кафе.</p><form onSubmit={grantMember} className="member-form" data-testid="owner-member-form"><label>Номер телефона<input type="tel" required placeholder="+993 6X XX XX XX" value={memberPhone} onChange={(event) => setMemberPhone(event.target.value)} data-testid="owner-member-phone" /></label><label>Роль в кафе<select value={memberRole} onChange={(event) => setMemberRole(event.target.value as typeof memberRole)} data-testid="owner-member-role"><option value="ADMIN">Менеджер</option><option value="OPERATOR">Оператор</option><option value="COOK">Кухня</option><option value="ACCOUNTANT">Бухгалтер</option></select></label><button className="primary-button" disabled={Boolean(pending) || !selectedCafeId} data-testid="owner-grant-member">Подключить</button></form>
+      <div className="panel member-panel"><div className="panel-heading"><h3>Доступ сотрудников</h3><span>Только выбранное кафе</span></div><p>Сотрудник сначала входит в систему по SMS. Затем подключите его номер к этому кафе.</p><form onSubmit={grantMember} className="member-form" data-testid="owner-member-form"><label>Номер телефона<input type="tel" required placeholder="+993 6X XX XX XX" value={memberPhone} onChange={(event) => setMemberPhone(event.target.value)} data-testid="owner-member-phone" /></label><label>Роль в кафе<select value={memberRole} onChange={(event) => setMemberRole(event.target.value as typeof memberRole)} data-testid="owner-member-role"><option value="ADMIN">Менеджер</option><option value="OPERATOR">Оператор</option><option value="COOK">Кухня</option><option value="ACCOUNTANT">Бухгалтер</option><option value="COURIER">Курьер кафе</option></select></label><button className="primary-button" disabled={Boolean(pending) || !selectedCafeId} data-testid="owner-grant-member">Подключить</button></form>
         {members.length > 0 && <div className="member-list" data-testid="owner-member-list">{members.map((member) => <div className="application-row" key={member.userId}><div><strong>{member.user.firstName || member.user.phone}</strong><small>{member.user.phone} · {member.role} · {member.isActive ? "активен" : "отключён"}</small></div><div className="application-actions"><button type="button" disabled={Boolean(pending)} onClick={() => changeMember(member, !member.isActive)} data-testid={`owner-member-toggle-${member.userId}`}>{member.isActive ? "Отключить" : "Восстановить"}</button></div></div>)}</div>}
       </div>
     </div>
+    <PageManager />
   </section>;
 }

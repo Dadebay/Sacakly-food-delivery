@@ -26,9 +26,9 @@ function makeDeliveryConfig() {
 }
 
 async function mockAdmin(page: Page) {
-  await page.route("**/styles/alowalow/**", (route) => route.fulfill({ status: 200, contentType: "image/png", body: png }));
+  await page.route("**/styles/sacakly/**", (route) => route.fulfill({ status: 200, contentType: "image/png", body: png }));
   const session = { accessToken: "test-access", refreshToken: "test-refresh", expiresInSeconds: 3600, accessExpiresAt: Date.now() + 3_600_000, user: { id: "44444444-4444-4444-8444-444444444444", phone: "+99365123456", firstName: "Admin", lastName: null, role: "ADMIN" } };
-  await page.addInitScript((value) => sessionStorage.setItem("alowalow.session.v1", JSON.stringify(value)), session);
+  await page.addInitScript((value) => sessionStorage.setItem("sacakly.session.v1", JSON.stringify(value)), session);
   const state = { gifts: [] as Record<string, unknown>[], productPosts: [] as Record<string, unknown>[], deliveryPatches: [] as Record<string, unknown>[], deliveryConfigReads: 0, delivery: makeDeliveryConfig() };
   await page.route("**/api/v1/**", async (route) => {
     const url = new URL(route.request().url());

@@ -1,4 +1,4 @@
-# AlowLink Platform deployment
+# Saçakly Platform deployment
 
 Deployment is not configured. The old A7-tagam deployment workflow was removed
 on import to prevent accidental pushes to its production VDS. Historical

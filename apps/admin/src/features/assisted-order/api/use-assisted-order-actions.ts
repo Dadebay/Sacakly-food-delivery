@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { orderQueryKeys, type Order } from "@/src/entities/order";
 import { useSession } from "@/src/shared/auth";
 

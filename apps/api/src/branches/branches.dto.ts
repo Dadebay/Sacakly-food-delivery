@@ -13,7 +13,7 @@ import {
 } from "class-validator";
 
 export class CreateBranchDto {
-  @ApiProperty({ example: "AlowAlow Berkarar" })
+  @ApiProperty({ example: "Saçakly Berkarar" })
   @IsString()
   @IsNotEmpty()
   @MaxLength(160)

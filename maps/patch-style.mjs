@@ -13,7 +13,7 @@ if (!style.sources?.[sourceId]) {
   throw new Error(`The upstream style does not define ${sourceId}`);
 }
 
-style.name = "AlowAlow Colorful OpenStreetMap";
+style.name = "Saçakly Colorful OpenStreetMap";
 style.glyphs = "{fontstack}/{range}.pbf";
 style.sprite = "basics/sprites";
 style.sources[sourceId] = {

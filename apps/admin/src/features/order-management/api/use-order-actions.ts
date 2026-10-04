@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { inventoryQueryKeys } from "@/src/entities/inventory";
 import { courierQueryKeys } from "@/src/entities/courier";
 import { accountingQueryKeys } from "@/src/entities/accounting";

@@ -10,6 +10,6 @@ export default defineConfig({
   datasource: {
     url:
       process.env.DATABASE_URL ??
-      "postgresql://alofood:alofood@localhost:5432/alofood?schema=public",
+      "postgresql://sacakly:sacakly@localhost:5432/sacakly?schema=public",
   },
 });

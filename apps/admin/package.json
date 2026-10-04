@@ -1,5 +1,5 @@
 {
-  "name": "@alowalow/admin",
+  "name": "@sacakly/admin",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -16,7 +16,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@alowalow/api-contract": "file:../../packages/api-contract",
+    "@sacakly/api-contract": "file:../../packages/api-contract",
     "@hookform/resolvers": "5.7.1",
     "@hugeicons/core-free-icons": "4.3.0",
     "@hugeicons/react": "1.1.10",

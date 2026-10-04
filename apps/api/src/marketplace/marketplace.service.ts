@@ -33,7 +33,15 @@ function rethrowCreateConflict(error: unknown): never {
 export class MarketplaceService {
   constructor(private readonly prisma: PrismaService, private readonly orders: OrdersService) {}
 
-  private async assertOwner(actor: AuthUser): Promise<void> {
+  publicCafes() {
+    return this.prisma.cafe.findMany({
+      where: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } } },
+      select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    });
+  }
+
+  async assertOwner(actor: AuthUser): Promise<void> {
     const entitlement = await this.prisma.platformOwner.findUnique({
       where: { userId: actor.id },
     });
@@ -241,6 +249,18 @@ export class MarketplaceService {
         if (!cafe?.isActive) throw new NotFoundException("Active cafe not found");
         const user = await tx.user.findUnique({ where: { id: dto.userId } });
         if (!user?.isActive) throw new NotFoundException("Active user not found");
+        if (dto.role === Role.COURIER) {
+          if (user.role !== Role.CUSTOMER && user.role !== Role.COURIER) {
+            throw new ConflictException("Only a customer or courier account can become a cafe courier");
+          }
+          if (user.role === Role.CUSTOMER) {
+            const promoted = await tx.user.updateMany({
+              where: { id: user.id, role: Role.CUSTOMER, isActive: true },
+              data: { role: Role.COURIER },
+            });
+            if (promoted.count !== 1) throw new ConflictException("Courier account changed");
+          }
+        }
         const where = { cafeId_userId: { cafeId, userId: dto.userId } };
         const previous = await tx.cafeMembership.findUnique({ where });
         if ((previous?.version ?? 0) !== dto.expectedVersion) {
@@ -286,7 +306,9 @@ export class MarketplaceService {
     assertModuleEnabled(module, cafeId);
     return this.prisma.order.findMany({
       where: { cafeId },
-      select: { id: true, number: true, status: true, total: true, branchId: true, createdAt: true },
+      select: { id: true, number: true, status: true, version: true, packingConfirmedAt: true, total: true, branchId: true, createdAt: true,
+        items: { select: { id: true, productName: true, quantity: true, preparationMinutes: true } },
+        gifts: { select: { id: true } }, deliveryRequest: true },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 100,
     });

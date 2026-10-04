@@ -910,7 +910,7 @@ describe("order ingredient reservations and courier-handoff cancellation", () =>
 
   it("rolls back stock and movement when the success audit cannot be saved, while logging the rejected request", async () => {
     const f = await fixture();
-    // PostgreSQL-specific failure injection, isolated alofood_test only. Never used in application code.
+    // PostgreSQL-specific failure injection, isolated sacakly_test only. Never used in application code.
     await prisma.$executeRawUnsafe(
       `CREATE FUNCTION inventory_test_fail_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.action = 'inventory.stock.adjusted' THEN RAISE EXCEPTION 'Test audit persistence failure'; END IF; RETURN NEW; END; $$`,
     );

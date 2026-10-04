@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import type { CourierRoute, DispatchCourier } from "@/src/entities/courier";
 
 export type { DispatchCourier };

@@ -20,8 +20,8 @@
     }
   },
   "styles": {
-    "alowalow": {
-      "style": "alowalow.json",
+    "sacakly": {
+      "style": "sacakly.json",
       "serve_rendered": true,
       "serve_data": true,
       "tilejson": {

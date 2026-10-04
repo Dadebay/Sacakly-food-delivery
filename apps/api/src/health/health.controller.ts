@@ -11,7 +11,7 @@ export class HealthController {
   health() {
     return {
       status: "ok",
-      service: "alowalow-api",
+      service: "sacakly-api",
       time: new Date().toISOString(),
     };
   }

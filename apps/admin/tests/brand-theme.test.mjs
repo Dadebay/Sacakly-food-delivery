@@ -37,7 +37,7 @@ test("admin branding uses the A7-tagam logo and exact supplied palette", async (
   assert.match(brand, /src="\/a7-tagam-logo\.webp"/);
   assert.match(dashboard, /<BrandLogo/);
   assert.match(courier, /<BrandLogo/);
-  assert.doesNotMatch(`${html}${dashboard}${courier}`, /AlowAlow|ÖÝDE|OYDE/i);
+  assert.doesNotMatch(`${html}${dashboard}${courier}`, /Saçakly|ÖÝDE|OYDE/i);
   assert.ok(logo.size > 1_000);
 
   const literals = styles.match(/#[0-9a-f]{3,8}\b/gi) ?? [];

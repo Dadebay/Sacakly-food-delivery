@@ -6,7 +6,7 @@ test("accountant month, shift transfer and audit work against the isolated Nest 
 }, testInfo) => {
   test.skip(
     !process.env.ACCOUNTING_QA_SESSION,
-    "Requires an isolated alofood_test API fixture and test-account session",
+    "Requires an isolated sacakly_test API fixture and test-account session",
   );
   const session: unknown = JSON.parse(
     await readFile(process.env.ACCOUNTING_QA_SESSION!, "utf8"),
@@ -20,7 +20,7 @@ test("accountant month, shift transfer and audit work against the isolated Nest 
       errors.push(message.text());
   });
   await page.addInitScript((value) => {
-    sessionStorage.setItem("alowalow.session.v1", JSON.stringify(value));
+    sessionStorage.setItem("sacakly.session.v1", JSON.stringify(value));
     Object.assign(window, {
       accountingQa: {
         lcp: 0,

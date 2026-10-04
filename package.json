@@ -1,5 +1,5 @@
 {
-  "name": "alowlink-platform",
+  "name": "sacakly-platform",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -9,6 +9,8 @@
     "dev": "concurrently -n admin,api -c magenta,cyan \"npm run dev:admin\" \"npm run dev:api\"",
     "dev:admin": "npm --prefix apps/admin run dev",
     "dev:merchant": "npm --prefix apps/merchant run dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:platform": "concurrently -n api,web,merchant -c cyan,green,magenta \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:merchant\"",
     "dev:api": "npm --prefix apps/api run start:dev",
     "maps:prepare": "bash maps/prepare.sh",
     "maps:up": "npm run maps:prepare && docker compose --file maps/compose.yml up -d --wait",
@@ -18,13 +20,13 @@
     "routing:up": "npm run routing:prepare && docker compose --file routing/compose.yml up -d --wait",
     "routing:update": "bash routing/prepare.sh --refresh && docker compose --file routing/compose.yml up -d --wait --force-recreate routing",
     "routing:down": "docker compose --file routing/compose.yml down --remove-orphans",
-    "build": "npm run api:client && npm --prefix apps/api run build && npm --prefix apps/admin run build && npm --prefix apps/merchant run build",
-    "lint": "npm --prefix apps/api run lint && npm --prefix apps/admin run lint && npm --prefix apps/merchant run lint",
+    "build": "npm run api:client && npm --prefix apps/api run build && npm --prefix apps/admin run build && npm --prefix apps/merchant run build && npm --prefix apps/web run build",
+    "lint": "npm --prefix apps/api run lint && npm --prefix apps/admin run lint && npm --prefix apps/merchant run lint && npm --prefix apps/web run lint",
     "test": "npm --prefix apps/admin test",
     "test:api": "npm --prefix apps/api test",
     "test:print-agent": "cd apps/print-agent && go test ./...",
     "build:print-agent": "bash apps/print-agent/build-release.sh",
-    "test:all": "npm run test:api && npm test && npm --prefix apps/merchant test && npm run test:print-agent",
+    "test:all": "npm run test:api && npm test && npm --prefix apps/merchant test && npm --prefix apps/web test && npm run test:print-agent",
     "api:client": "npm --prefix apps/api run openapi && openapi-typescript apps/api/openapi.json -o packages/api-contract/src/schema.ts"
   },
   "devDependencies": {

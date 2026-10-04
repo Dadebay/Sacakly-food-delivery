@@ -2,7 +2,7 @@
 
 ## Implemented
 
-- Imported the clean AlowAlow source into a new AlowLink monorepo; archived old context and deployment scripts.
+- Imported a clean snapshot of the original single-operator source into the Saçakly monorepo; archived old context and deployment scripts.
 - Added protected marketplace/OWNER/courier APIs, additive Prisma migration, one-cafe order path and a separate merchant portal.
 - Kept marketplace orders out of the shared legacy receipt queue; printed cafe receipts remain a release blocker.
 

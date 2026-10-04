@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { ApiError, apiRequest } from "@/src/shared/api/api-client";
 import { canAccessWebSession } from "./admin-portal-access";
 
@@ -32,7 +32,7 @@ type SessionContextValue = {
   logout: () => Promise<void>;
 };
 
-const STORAGE_KEY = "alowalow.session.v1";
+const STORAGE_KEY = "sacakly.session.v1";
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 function withExpiry(session: SessionResponse): StoredSession {

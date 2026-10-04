@@ -5,7 +5,7 @@ import type {
   LoginAttemptStatus,
   LoginAttemptsResponse,
 } from "../model/types";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 
 export type LoginAttemptFilters = {
   phone?: string;

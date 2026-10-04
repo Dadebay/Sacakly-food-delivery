@@ -24,6 +24,19 @@ enum CourierApplicationStatus {
   REJECTED
 }
 
+enum MarketplaceDeliveryMode {
+  OWN
+  NETWORK
+}
+
+enum MarketplaceDeliveryStatus {
+  WAITING
+  OFFERED
+  CLAIMED
+  ASSIGNED
+  CANCELLED
+}
+
 enum AdminPage {
   LOGIN_ATTEMPTS
   ORDERS
@@ -191,6 +204,7 @@ model User {
   courierApplication    CourierApplication? @relation("CourierApplicant")
   courierReviews        CourierApplication[] @relation("CourierReviewer")
   moduleChanges         CafeModuleEntitlement[] @relation("ModuleChanger")
+  deliveryClaims        MarketplaceDeliveryRequest[] @relation("DeliveryClaimant")
 
   @@index([role, isActive])
   @@index([lastLoginAt])
@@ -265,6 +279,7 @@ model Cafe {
   memberships CafeMembership[]
   modules     CafeModuleEntitlement[]
   printers    ReceiptPrinter[]
+  deliveryRequests MarketplaceDeliveryRequest[]
 
   @@index([isActive, sortOrder])
 }
@@ -605,6 +620,7 @@ model Order {
   inventoryRequirements InventoryOrderRequirement[]
   printTasks           ReceiptPrintTask[]
   creationRequest      OrderCreationRequest?
+  deliveryRequest      MarketplaceDeliveryRequest?
   id                   String                      @id @default(uuid()) @db.Uuid
   cafeId               String?                     @db.Uuid
   number               Int                         @unique @default(autoincrement())
@@ -849,6 +865,42 @@ model AuditLog {
   @@index([action, createdAt])
   @@index([entityType, entityId, createdAt])
   @@index([actorId, createdAt])
+}
+
+model SitePage {
+  locale      String   @db.VarChar(2)
+  slug        String   @db.VarChar(80)
+  title       String   @db.VarChar(160)
+  description String   @db.VarChar(300)
+  body        String   @db.Text
+  published   Boolean  @default(false)
+  version     Int      @default(1)
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt
+
+  @@id([locale, slug])
+  @@index([published, locale])
+}
+
+model MarketplaceDeliveryRequest {
+  orderId     String                    @id @db.Uuid
+  cafeId      String                    @db.Uuid
+  mode        MarketplaceDeliveryMode
+  status      MarketplaceDeliveryStatus @default(WAITING)
+  courierId   String?                   @db.Uuid
+  offerAt     DateTime
+  offeredAt   DateTime?
+  claimedAt   DateTime?
+  version     Int                       @default(1)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  order       Order                     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  cafe        Cafe                      @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  courier     User?                     @relation("DeliveryClaimant", fields: [courierId], references: [id], onDelete: SetNull)
+
+  @@index([status, offerAt])
+  @@index([cafeId, status])
+  @@index([courierId, status])
 }
 
 model AdminRolePageAccess {

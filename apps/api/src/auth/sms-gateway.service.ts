@@ -22,7 +22,7 @@ import {
 } from "./sms-gateway.dto";
 import { OtpService } from "./otp.service";
 
-const KEY_PREFIX = "alowalow:sms:";
+const KEY_PREFIX = "sacakly:sms:";
 const PENDING_KEY = `${KEY_PREFIX}pending`;
 const LEASES_KEY = `${KEY_PREFIX}leases`;
 const FAILURES_KEY = `${KEY_PREFIX}failures`;
@@ -236,7 +236,7 @@ export class SmsGatewayService {
     const expiresAt = now + expiresInSeconds * 1_000;
     const envelope = this.encrypt({
       phone,
-      message: `AlowAlow: код входа ${code}. Никому не сообщайте код.`,
+      message: `Saçakly: код входа ${code}. Никому не сообщайте код.`,
       otpRequestId,
     });
     const result = await this.redis.evalNumber(

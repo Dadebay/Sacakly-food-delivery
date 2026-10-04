@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { openApiEventStream } from "@/src/shared/api/api-client";
 import { useSession } from "@/src/shared/auth";
 import { courierQueryKeys } from "./dispatch-query";

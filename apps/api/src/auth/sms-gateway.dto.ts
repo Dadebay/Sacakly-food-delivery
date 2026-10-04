@@ -20,7 +20,7 @@ export class SmsGatewayJobResponseDto {
   @ApiProperty({ example: "+99365123456" })
   phone: string;
 
-  @ApiProperty({ example: "AlowAlow: код входа 123456." })
+  @ApiProperty({ example: "Saçakly: код входа 123456." })
   message: string;
 
   @ApiProperty({ format: "date-time" })

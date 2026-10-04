@@ -67,7 +67,7 @@ async function setup(page: Page) {
   await page.addInitScript(
     (user) =>
       sessionStorage.setItem(
-        "alowalow.session.v1",
+        "sacakly.session.v1",
         JSON.stringify({
           accessToken: "test-access",
           refreshToken: "test-refresh",

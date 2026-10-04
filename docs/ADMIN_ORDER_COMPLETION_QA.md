@@ -34,7 +34,7 @@ Automated verification on 2026-09-28:
   list/history and handles conflict/focus. Expected 409 resource diagnostics are
   excluded from runtime-console assertions.
 - Two additional Chromium desktop/mobile scenarios use a real local Nest API,
-  PostgreSQL `alofood_test`, Redis DB 15 and the real authorized HTTP endpoints.
+  PostgreSQL `sacakly_test`, Redis DB 15 and the real authorized HTTP endpoints.
   Both confirm durable CASH_RETURNED/history/settlement and shift inclusion.
   No production orders were changed by verification.
 - Paired baseline/current production profiles with 50 orders and sound muted:

@@ -21,7 +21,7 @@ test("admin links bottled water, receives a lot and follows its document", async
   });
   await page.addInitScript(
     (session) =>
-      sessionStorage.setItem("alowalow.session.v1", JSON.stringify(session)),
+      sessionStorage.setItem("sacakly.session.v1", JSON.stringify(session)),
     {
       accessToken: "test-access",
       refreshToken: "test-refresh",

@@ -14,7 +14,7 @@ import {
 const adapter = new PrismaPg({
   connectionString:
     process.env.DATABASE_URL ??
-    "postgresql://alofood:alofood@localhost:5432/alofood?schema=public",
+    "postgresql://sacakly:sacakly@localhost:5432/sacakly?schema=public",
 });
 const prisma = new PrismaClient({ adapter });
 
@@ -187,14 +187,14 @@ async function main() {
 
   await prisma.product.updateMany({
     where: { slug: "alo-burger" },
-    data: { name: "A7-tagam Burger", slug: "alowalow-burger" },
+    data: { name: "A7-tagam Burger", slug: "sacakly-burger" },
   });
   await prisma.product.upsert({
-    where: { slug: "alowalow-burger" },
+    where: { slug: "sacakly-burger" },
     create: {
       categoryId: burgers.id,
       name: "A7-tagam Burger",
-      slug: "alowalow-burger",
+      slug: "sacakly-burger",
       description: "Говяжья котлета, чеддер, свежие овощи и фирменный соус.",
       price: 48,
     },

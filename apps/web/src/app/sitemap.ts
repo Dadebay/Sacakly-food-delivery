@@ -1,0 +1,4 @@
+import type { MetadataRoute } from "next";
+import { publicApi } from "@/shared/api";
+import { locales } from "@/shared/i18n";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> { const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"; const cafes = await publicApi.cafes().catch(() => []); const pages = await publicApi.pages().catch(() => []); return [ ...locales.map((locale) => ({ url: `${base}/${locale}`, changeFrequency: "daily" as const, priority: 1 })), ...cafes.flatMap((cafe) => locales.map((locale) => ({ url: `${base}/${locale}/cafes/${cafe.slug}`, changeFrequency: "daily" as const, priority: 0.8 }))), ...pages.map((page) => ({ url: `${base}/${page.locale}/p/${page.slug}`, lastModified: page.updatedAt, changeFrequency: "weekly" as const, priority: 0.4 })) ]; }

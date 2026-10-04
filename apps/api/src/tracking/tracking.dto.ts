@@ -99,7 +99,7 @@ export class DispatchBranchDto {
   @ApiProperty({ format: "uuid" })
   id: string;
 
-  @ApiProperty({ example: "AlowAlow Berkarar" })
+  @ApiProperty({ example: "Saçakly Berkarar" })
   name: string;
 
   @ApiProperty()

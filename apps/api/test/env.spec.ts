@@ -3,8 +3,8 @@ import { validateEnv } from "../src/config/env";
 
 const fcmServiceAccount = Buffer.from(
   JSON.stringify({
-    project_id: "alowalow-test",
-    client_email: "push@alowalow-test.iam.gserviceaccount.com",
+    project_id: "sacakly-test",
+    client_email: "push@sacakly-test.iam.gserviceaccount.com",
     private_key:
       "-----BEGIN PRIVATE KEY-----\ntest-only\n-----END PRIVATE KEY-----\n",
   }),
@@ -13,7 +13,7 @@ const fcmServiceAccount = Buffer.from(
 const productionSecrets = {
   NODE_ENV: "production",
   DEPLOYMENT_ENVIRONMENT: "production",
-  DATABASE_URL: "postgresql://app:secret@db.example/alowalow",
+  DATABASE_URL: "postgresql://app:secret@db.example/sacakly",
   REDIS_URL: "rediss://default:secret@redis.example:6379/0",
   JWT_ACCESS_SECRET: "j".repeat(32),
   OTP_PEPPER: "o".repeat(32),

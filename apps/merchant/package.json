@@ -1,5 +1,5 @@
 {
-  "name": "@alowlink/merchant",
+  "name": "@sacakly/merchant",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@alowalow/api-contract": "file:../../packages/api-contract",
+    "@sacakly/api-contract": "file:../../packages/api-contract",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

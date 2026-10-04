@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { buildPrintAgentRequest } from "./print-agent-request.ts";
 
 type Claim = components["schemas"]["ReceiptClaimResponseDto"];

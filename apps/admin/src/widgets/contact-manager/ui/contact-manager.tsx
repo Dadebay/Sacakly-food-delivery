@@ -145,7 +145,7 @@ export function ContactManager() {
                     <input
                       data-testid="contact-telegram"
                       {...register("telegram")}
-                      placeholder="@alowalow"
+                      placeholder="@sacakly"
                     />
                   </span>
                   <FormFieldError message={errors.telegram?.message} />

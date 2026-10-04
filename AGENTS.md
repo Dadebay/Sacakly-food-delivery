@@ -1,4 +1,4 @@
-# AlowLink Platform repository instructions
+# Saçakly Platform repository instructions
 
 Read docs/PROJECT_CONTEXT.md, docs/INFRASTRUCTURE.md, and the nearest
 apps/*/AGENTS.md before changing code. Inspect git status first.

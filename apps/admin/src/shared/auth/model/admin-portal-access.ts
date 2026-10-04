@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 
 type SessionUser = components["schemas"]["AuthSessionUserDto"];
 export type AdminPortalRole = SessionUser["role"];

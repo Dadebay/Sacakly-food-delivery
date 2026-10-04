@@ -148,9 +148,9 @@ if [[ ! -f "${style_marker}" ]]; then
   node \
     "${maps_dir}/patch-style.mjs" \
     "${staging_dir}/styles/${style_variant}/style.json" \
-    "${staging_dir}/styles/alowalow.json"
+    "${staging_dir}/styles/sacakly.json"
 
-  mv "${staging_dir}/styles/alowalow.json" "${runtime_dir}/styles/alowalow.json"
+  mv "${staging_dir}/styles/sacakly.json" "${runtime_dir}/styles/sacakly.json"
   rm -rf "${staging_dir}"
   rm -f "${styles_archive}"
   touch "${style_marker}"
@@ -204,4 +204,4 @@ fi
 cp "${maps_dir}/config.json" "${runtime_dir}/config.json"
 
 echo "OpenStreetMap assets are ready in ${runtime_dir}"
-echo "Raster XYZ: http://127.0.0.1:${MAP_PORT:-8080}/styles/alowalow/{z}/{x}/{y}.png"
+echo "Raster XYZ: http://127.0.0.1:${MAP_PORT:-8080}/styles/sacakly/{z}/{x}/{y}.png"

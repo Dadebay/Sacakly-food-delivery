@@ -2663,6 +2663,167 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/marketplace/cafes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List active cafes with ordering enabled */
+        get: operations["MarketplacePublicController_publicCafes_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/couriers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceDispatchController_ownCouriers_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/orders/{orderId}/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceDispatchController_choose_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/delivery/merchant/cafes/{cafeId}/orders/{orderId}/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceDispatchController_ready_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/delivery/courier/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceDispatchController_offers_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/delivery/courier/offers/{orderId}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceDispatchController_claim_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SitePagesController_publishedPages_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/pages/{locale}/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SitePagesController_publishedPage_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/owner/pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SitePagesController_ownerPages_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/site/owner/pages/{locale}/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["SitePagesController_save_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2745,7 +2906,7 @@ export interface components {
             id: string;
             /** @example +99365123456 */
             phone: string;
-            /** @example AlowAlow: код входа 123456. */
+            /** @example Saçakly: код входа 123456. */
             message: string;
             /** Format: date-time */
             expiresAt: string;
@@ -4594,7 +4755,7 @@ export interface components {
             updatedAt: string;
         };
         CreateBranchDto: {
-            /** @example AlowAlow Berkarar */
+            /** @example Saçakly Berkarar */
             name: string;
             /** @example Atatürk köçesi, 80 */
             address: string;
@@ -4613,7 +4774,7 @@ export interface components {
             isPrimary: boolean;
         };
         UpdateBranchDto: {
-            /** @example AlowAlow Berkarar */
+            /** @example Saçakly Berkarar */
             name?: string;
             /** @example Atatürk köçesi, 80 */
             address?: string;
@@ -4680,7 +4841,7 @@ export interface components {
         DispatchBranchDto: {
             /** Format: uuid */
             id: string;
-            /** @example AlowAlow Berkarar */
+            /** @example Saçakly Berkarar */
             name: string;
             address: string;
             latitude: number;
@@ -5830,7 +5991,8 @@ export interface components {
             id: string;
             name: string;
             slug: string;
-            description?: Record<string, never> | null;
+            description?: string | null;
+            imageUrl?: string | null;
             isActive: boolean;
         };
         LookupMarketplaceUserDto: {
@@ -5884,7 +6046,7 @@ export interface components {
             /** Format: uuid */
             userId: string;
             /** @enum {string} */
-            role: "ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT";
+            role: "ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT" | "COURIER";
             /** @description False revokes cafe access without deleting history */
             isActive?: boolean;
             /** @description 0 creates a new membership */
@@ -5910,17 +6072,111 @@ export interface components {
             enabled: boolean;
             version: number;
         };
+        MerchantOrderItemResponseDto: {
+            /** Format: uuid */
+            id: string;
+            productName: string;
+            quantity: number;
+            preparationMinutes: number;
+        };
+        MerchantOrderGiftResponseDto: {
+            /** Format: uuid */
+            id: string;
+        };
+        DeliveryRequestResponseDto: {
+            /** Format: uuid */
+            orderId: string;
+            /** Format: uuid */
+            cafeId: string;
+            /** @enum {string} */
+            mode: "OWN" | "NETWORK";
+            /** @enum {string} */
+            status: "WAITING" | "OFFERED" | "CLAIMED" | "ASSIGNED" | "CANCELLED";
+            /** Format: uuid */
+            courierId?: Record<string, never> | null;
+            /** Format: date-time */
+            offerAt: string;
+            /** Format: date-time */
+            offeredAt?: Record<string, never> | null;
+            /** Format: date-time */
+            claimedAt?: Record<string, never> | null;
+            version: number;
+        };
         MerchantOrderResponseDto: {
             /** Format: uuid */
             id: string;
             number: number;
             /** @enum {string} */
             status: "COOKING" | "READY" | "ASSIGNED_TO_COURIER" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CASH_RETURNED" | "RECONCILED" | "CANCELLED";
+            version: number;
+            /** Format: date-time */
+            packingConfirmedAt?: Record<string, never> | null;
             total: string;
             /** Format: uuid */
             branchId?: Record<string, never> | null;
             /** Format: date-time */
             createdAt: string;
+            items: components["schemas"]["MerchantOrderItemResponseDto"][];
+            gifts: components["schemas"]["MerchantOrderGiftResponseDto"][];
+            deliveryRequest?: components["schemas"]["DeliveryRequestResponseDto"] | null;
+        };
+        OwnCafeCourierResponseDto: {
+            /** Format: uuid */
+            id: string;
+            phone: string;
+            firstName?: Record<string, never> | null;
+            lastName?: Record<string, never> | null;
+        };
+        ChooseMarketplaceDeliveryDto: {
+            /** @enum {string} */
+            mode: "OWN" | "NETWORK";
+            /**
+             * Format: uuid
+             * @description Required for OWN delivery
+             */
+            courierId?: string;
+            expectedOrderVersion: number;
+        };
+        ExternalDeliveryOfferResponseDto: {
+            /** Format: uuid */
+            orderId: string;
+            orderNumber: number;
+            cafeName: string;
+            /** Format: date-time */
+            offeredAt: string;
+            /** Format: date-time */
+            estimatedReadyAt: string;
+        };
+        SitePageSummaryDto: {
+            /** @enum {string} */
+            locale: "tk" | "ru" | "en";
+            slug: string;
+            title: string;
+            description: string;
+            published: boolean;
+            version: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SitePageResponseDto: {
+            /** @enum {string} */
+            locale: "tk" | "ru" | "en";
+            slug: string;
+            title: string;
+            description: string;
+            body: string;
+            published: boolean;
+            version: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SaveSitePageDto: {
+            expectedVersion: number;
+            title: string;
+            description: string;
+            /** @description Plain text; the web client never renders it as HTML */
+            body: string;
+            published: boolean;
         };
     };
     responses: never;
@@ -10009,6 +10265,224 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MerchantOrderResponseDto"][];
+                };
+            };
+        };
+    };
+    MarketplacePublicController_publicCafes_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceCafeResponseDto"][];
+                };
+            };
+        };
+    };
+    MarketplaceDispatchController_ownCouriers_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnCafeCourierResponseDto"][];
+                };
+            };
+        };
+    };
+    MarketplaceDispatchController_choose_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChooseMarketplaceDeliveryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryRequestResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceDispatchController_ready_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmOrderPackingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceDispatchController_offers_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalDeliveryOfferResponseDto"][];
+                };
+            };
+        };
+    };
+    MarketplaceDispatchController_claim_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryRequestResponseDto"];
+                };
+            };
+        };
+    };
+    SitePagesController_publishedPages_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitePageSummaryDto"][];
+                };
+            };
+        };
+    };
+    SitePagesController_publishedPage_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                locale: "tk" | "ru" | "en";
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitePageResponseDto"];
+                };
+            };
+        };
+    };
+    SitePagesController_ownerPages_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitePageResponseDto"][];
+                };
+            };
+        };
+    };
+    SitePagesController_save_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                locale: "tk" | "ru" | "en";
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSitePageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitePageResponseDto"];
                 };
             };
         };

@@ -247,7 +247,7 @@ function asImageFilename(
 }
 
 function normalizedBrandText(value: string, counters: NormalizationCounters) {
-  const normalized = value.replaceAll("AlowAlow", "A7-tagam");
+  const normalized = value.replaceAll("Saçakly", "A7-tagam");
   if (normalized !== value) counters.brandTextReplacements += 1;
   return normalized;
 }

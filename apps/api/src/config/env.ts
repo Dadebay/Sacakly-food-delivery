@@ -77,7 +77,7 @@ export function validateEnv(source: Record<string, unknown>): AppEnv {
     "DATABASE_URL",
     isProduction
       ? ""
-      : "postgresql://alofood:alofood@localhost:5432/alofood?schema=public",
+      : "postgresql://sacakly:sacakly@localhost:5432/sacakly?schema=public",
   );
   const jwtSecret = text(
     "JWT_ACCESS_SECRET",
@@ -129,7 +129,7 @@ export function validateEnv(source: Record<string, unknown>): AppEnv {
   ).replace(/\/+$/, "");
   const geocodingUserAgent = text(
     "GEOCODING_USER_AGENT",
-    "AlowAlow-Delivery/1.0",
+    "Saçakly-Delivery/1.0",
   ).trim();
   const smsProvider = text("SMS_PROVIDER", isProduction ? "" : "console");
   const smsGatewayDeviceId = text(
@@ -442,17 +442,17 @@ export function validateEnv(source: Record<string, unknown>): AppEnv {
       throw new Error(`CORS origin is not allowed: ${origin}`);
     }
   }
-  const s3AccessKeyId = text("S3_ACCESS_KEY_ID", isProduction ? "" : "alofood");
+  const s3AccessKeyId = text("S3_ACCESS_KEY_ID", isProduction ? "" : "sacakly");
   const s3SecretAccessKey = text(
     "S3_SECRET_ACCESS_KEY",
-    isProduction ? "" : "alofood-local-secret",
+    isProduction ? "" : "sacakly-local-secret",
   );
   if (Boolean(s3AccessKeyId) !== Boolean(s3SecretAccessKey)) {
     throw new Error(
       "S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY must be provided together",
     );
   }
-  const s3Bucket = text("S3_BUCKET", "alowalow-media");
+  const s3Bucket = text("S3_BUCKET", "sacakly-media");
   if (!s3Bucket) throw new Error("S3_BUCKET is required");
   return {
     NODE_ENV: nodeEnv as AppEnv["NODE_ENV"],

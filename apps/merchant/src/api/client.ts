@@ -1,4 +1,4 @@
-import type { components, operations } from "@alowalow/api-contract";
+import type { components, operations } from "@sacakly/api-contract";
 
 export type Session = components["schemas"]["AuthSessionResponseDto"];
 export type MemberCafe = components["schemas"]["MemberCafeResponseDto"];
@@ -10,9 +10,13 @@ export type CafeMember = components["schemas"]["CafeMembershipWithUserResponseDt
 export type MarketplaceUser = components["schemas"]["MarketplaceUserResponseDto"];
 export type DispatchOrder = components["schemas"]["DispatchOrderResponseDto"];
 export type DispatchCourier = components["schemas"]["DispatchCourierResponseDto"];
+export type OwnCourier = components["schemas"]["OwnCafeCourierResponseDto"];
+export type DeliveryRequest = components["schemas"]["DeliveryRequestResponseDto"];
+export type ExternalOffer = components["schemas"]["ExternalDeliveryOfferResponseDto"];
+export type SitePage = components["schemas"]["SitePageResponseDto"];
 export type ModuleKey = operations["MarketplaceController_setCafeModule_v1"]["parameters"]["path"]["key"];
 
-const SESSION_KEY = "alowlink.merchant.session";
+const SESSION_KEY = "sacakly.merchant.session";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -104,6 +108,14 @@ export class ApiClient {
     }
   }
 
+  ownCouriers(cafeId: string) { return this.request<OwnCourier[]>(`/marketplace/delivery/merchant/cafes/${encodeURIComponent(cafeId)}/couriers`); }
+  chooseDelivery(cafeId: string, orderId: string, mode: "OWN" | "NETWORK", expectedOrderVersion: number, courierId?: string) { return this.request<DeliveryRequest>(`/marketplace/delivery/merchant/cafes/${encodeURIComponent(cafeId)}/orders/${encodeURIComponent(orderId)}/route`, "POST", { mode, expectedOrderVersion, ...(mode === "OWN" ? { courierId } : {}) }); }
+  readyOrder(cafeId: string, orderId: string, version: number, checkedItemIds: string[], checkedGiftIds: string[]) { return this.request<components["schemas"]["OrderResponseDto"]>(`/marketplace/delivery/merchant/cafes/${encodeURIComponent(cafeId)}/orders/${encodeURIComponent(orderId)}/ready`, "POST", { version, checkedItemIds, checkedGiftIds }); }
+  externalOffers() { return this.request<ExternalOffer[]>("/marketplace/delivery/courier/offers"); }
+  claimOffer(orderId: string) { return this.request<DeliveryRequest>(`/marketplace/delivery/courier/offers/${encodeURIComponent(orderId)}/claim`, "POST"); }
+  sitePages() { return this.request<SitePage[]>("/site/owner/pages"); }
+  saveSitePage(locale: "tk" | "ru" | "en", slug: string, input: { title: string; description: string; body: string; published: boolean; expectedVersion: number }) { return this.request<SitePage>(`/site/owner/pages/${locale}/${encodeURIComponent(slug)}`, "PUT", input); }
+
   myCafes() { return this.request<MemberCafe[]>("/marketplace/merchant/cafes/me"); }
   ownerStatus() { return this.request<components["schemas"]["OwnerStatusResponseDto"]>("/marketplace/owner/me"); }
   cafes() { return this.request<Cafe[]>("/catalog/cafes", "GET", undefined, false); }
@@ -126,7 +138,7 @@ export class ApiClient {
   setModule(cafeId: string, key: ModuleKey, enabled: boolean, expectedVersion: number) {
     return this.request<Module>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}/modules/${key}`, "PUT", { enabled, expectedVersion });
   }
-  grantMember(cafeId: string, userId: string, role: "ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT", expectedVersion: number, isActive = true) {
+  grantMember(cafeId: string, userId: string, role: "ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT" | "COURIER", expectedVersion: number, isActive = true) {
     return this.request<components["schemas"]["CafeMembershipResponseDto"]>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}/members`, "PUT", { userId, role, expectedVersion, isActive });
   }
 }

@@ -1,4 +1,4 @@
-import type { components } from "@alowalow/api-contract";
+import type { components } from "@sacakly/api-contract";
 import { useState } from "react";
 import { useSession } from "@/src/shared/auth";
 import { useReceiptQueue } from "../api/use-receipt-queue";

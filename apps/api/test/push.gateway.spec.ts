@@ -5,7 +5,7 @@ import type { AppEnv } from "../src/config/env";
 const firebase = vi.hoisted(() => ({
   cert: vi.fn((serviceAccount: unknown) => ({ serviceAccount })),
   getApps: vi.fn(() => [] as Array<{ name: string }>),
-  initializeApp: vi.fn(() => ({ name: "alowalow-push" })),
+  initializeApp: vi.fn(() => ({ name: "sacakly-push" })),
   sendEach: vi.fn(),
   send: vi.fn(),
 }));
@@ -83,7 +83,7 @@ describe("push gateway", () => {
     );
     const serviceAccount = Buffer.from(
       JSON.stringify({
-        project_id: "alowalow-test",
+        project_id: "sacakly-test",
         client_email: "push@example.test",
         private_key: "private-key",
       }),
@@ -110,7 +110,7 @@ describe("push gateway", () => {
     expect(sendCalls[1]?.[0]).toHaveLength(1);
     expect(firebase.initializeApp).toHaveBeenCalledTimes(1);
     expect(firebase.cert).toHaveBeenCalledWith({
-      projectId: "alowalow-test",
+      projectId: "sacakly-test",
       clientEmail: "push@example.test",
       privateKey: "private-key",
     });

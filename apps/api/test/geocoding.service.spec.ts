@@ -8,7 +8,7 @@ function config() {
   const values: Partial<AppEnv> = {
     GEOCODING_PRIMARY_URL: "https://nominatim.example.test",
     GEOCODING_FALLBACK_URL: "https://photon.example.test",
-    GEOCODING_USER_AGENT: "AlowAlow-Tests/1.0",
+    GEOCODING_USER_AGENT: "Saçakly-Tests/1.0",
   };
   return {
     get: vi.fn((key: keyof AppEnv) => values[key]),
@@ -19,7 +19,7 @@ function internalConfig() {
   const values: Partial<AppEnv> = {
     GEOCODING_PRIMARY_URL: "http://geocoding:8080",
     GEOCODING_FALLBACK_URL: "https://photon.example.test",
-    GEOCODING_USER_AGENT: "AlowAlow-Tests/1.0",
+    GEOCODING_USER_AGENT: "Saçakly-Tests/1.0",
   };
   return {
     get: vi.fn((key: keyof AppEnv) => values[key]),
@@ -78,7 +78,7 @@ describe("geocoding service", () => {
     expect(requestedUrl.searchParams.get("countrycodes")).toBe("tm");
     expect(requestedUrl.searchParams.get("namedetails")).toBe("1");
     expect(options.headers).toMatchObject({
-      "user-agent": "AlowAlow-Tests/1.0",
+      "user-agent": "Saçakly-Tests/1.0",
     });
   });
 

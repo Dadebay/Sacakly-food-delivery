@@ -2,13 +2,13 @@ import { execFileSync } from "node:child_process";
 import { Client } from "pg";
 import { createClient } from "redis";
 
-const TEST_DATABASE = "alofood_test";
+const TEST_DATABASE = "sacakly_test";
 const ADMIN_DATABASE_URL =
   process.env.TEST_DATABASE_ADMIN_URL ??
-  "postgresql://alofood:alofood@localhost:5432/alofood";
+  "postgresql://sacakly:sacakly@localhost:5432/sacakly";
 const TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ??
-  `postgresql://alofood:alofood@localhost:5432/${TEST_DATABASE}`;
+  `postgresql://sacakly:sacakly@localhost:5432/${TEST_DATABASE}`;
 const TEST_REDIS_URL =
   process.env.TEST_REDIS_URL ?? "redis://localhost:6379/15";
 
