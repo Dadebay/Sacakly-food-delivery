@@ -40,8 +40,10 @@ modules deny the API mutation, not merely hide UI. Initial target modules:
 catalog, ordering, kitchen, delivery, receipts, inventory, loyalty, accounting.
 Changes use optimistic version checks and audit. Merchant managers configure
 only enabled cafe modules; they cannot activate their own entitlement.
-Only ORDERING is currently activatable in the new tenant API; other module
-keys are reserved until their tenant boundaries and workflows are implemented.
+ORDERING is activatable in the new tenant API. RECEIPTS is activatable only
+after a cafe administrator configures an active cafe printer and rotates a
+dedicated agent token. Other module keys remain reserved until their tenant
+boundaries and workflows are implemented.
 
 The platform OWNER may create an independent Cafe, find an already registered
 account by phone, assign or revoke cafe membership with a version check, and
@@ -57,13 +59,18 @@ cafe needs its own printer routes and queue visibility. No new fiscal provider
 is part of this request; the existing printed documents remain internal order
 receipts.
 
-The imported print queue and agent credential are global. Marketplace orders
-currently do not enqueue physical print tasks or inherit the legacy default
-printer or contact phone. Legacy manual reprint rejects marketplace orders.
-This is a temporary isolation gate: cafe-specific printer registration,
-queue claims, agent credentials and receipt access must be implemented and
-tested before a cafe can use printed receipts. The RECEIPTS entitlement cannot
-be activated yet.
+The imported print queue and agent credential remain for historical orders.
+Marketplace orders use cafe-owned printer records, main printer/copy/contact
+settings, product or category kitchen routes, and a dedicated cafe agent token
+stored only as a hash. The same durable receipt task engine filters every
+claim, lease, acknowledgment, list, retry, cancellation and manual reprint by
+the order's cafe. The legacy worker and legacy operations endpoints cannot see
+or claim cafe tasks. A cafe agent uses `-api-scope marketplace` and the token
+issued to that cafe; rotation immediately revokes the old token. Receipts
+preserve order-item printer snapshots and print the cafe's identity instead of
+the imported A7 header. OWNER activates RECEIPTS after setup. These are
+internal order receipts, not fiscal documents. Hardware delivery still needs
+an acceptance test at each cafe before release.
 
 Cash on delivery remains the supported payment method during the first
 migration. Online payment, platform commission, cafe payouts, taxes and refunds
@@ -93,7 +100,11 @@ marketplace order. An active cafe courier has a `COURIER` membership, and OWNER
 may grant that membership to an OTP-registered customer, promoting the global
 account to `COURIER`; revocation removes cafe access but leaves the role for
 audit. The manager may reserve an own courier before food is ready or select
-the external network. For network delivery, the maximum snapshotted item
+the external network. When a new order has no active cafe courier membership,
+checkout automatically creates an audited NETWORK request; a manager can
+change that route before it is claimed. This is based on active membership,
+because shifts and live availability are not implemented yet. For network
+delivery, the maximum snapshotted item
 preparation time determines the offer schedule: publish 40 minutes before
 estimated readiness, never before order creation. Thus a 60-minute order is
 offered 20 minutes after creation. Approved active network couriers can see a
@@ -101,13 +112,15 @@ minimal offer without customer address; the first atomic claim wins. A claim
 reserves the courier while food is cooking. After the cafe confirms every item
 is packed, the existing order state machine moves READY then assigns the
 reserved courier and sends the normal courier push. An offer is never created
-for a cancelled or already assigned order. Push notifications to approved
-network couriers are best effort; the durable offer remains available through
-the courier API when push delivery fails. The web courier page can refresh and
-claim offers.
+for a cancelled or already assigned order. The OFFERED transition and one
+Firebase direct-push outbox event per approved courier commit together.
+Transient FCM failures retry with bounded backoff, successful device tokens
+are not resent, invalid tokens are deactivated, and retries for closed offers
+are cancelled. Provider acceptance does not prove that a human saw the push;
+the durable offer remains available through the courier API. The web courier
+page can refresh and claim offers.
 
-No automatic ETA, courier shift/availability system or tenant-scoped receipt
-printing is claimed. Existing global order paths outside the new marketplace
+No automatic ETA or courier shift/availability system is claimed. Existing global order paths outside the new marketplace
 controllers still need a full tenant authorization audit before onboarding
 independent cafes.
 
@@ -154,7 +167,8 @@ No imported A7 deployment pipeline may deploy this project.
 
 - apps/api: Existing NestJS API; tenant migration target.
 - apps/api/src/marketplace: Owner, cafe membership, courier application and
-  one-cafe checkout, catalog management and delivery offer HTTP API.
+  one-cafe checkout, catalog management, delivery offers and cafe receipt HTTP API.
+- apps/api/src/notifications: Firebase delivery plus a durable direct-push retry outbox.
 - apps/api/src/site-pages: OWNER-managed localized public pages.
 - apps/admin: Imported legacy A7 operations SPA.
 - apps/merchant: Separate cafe and platform OWNER React/Vite portal.

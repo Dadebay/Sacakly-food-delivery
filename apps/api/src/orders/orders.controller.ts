@@ -144,7 +144,7 @@ export class OrdersController {
   })
   @ApiOkResponse({ type: ReceiptPrintPlanResponseDto })
   receiptPrintPlan(@Param("id", ParseUUIDPipe) id: string) {
-    return this.orders.receiptPrintPlan(id);
+    return this.orders.legacyReceiptPrintPlan(id);
   }
 
   @Get(":id")

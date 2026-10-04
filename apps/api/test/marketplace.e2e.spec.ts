@@ -11,6 +11,7 @@ import { OrderStatus, Role } from "../src/generated/prisma/client";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { MarketplaceDispatchService } from "../src/marketplace/marketplace-dispatch.service";
 import { MarketplaceDeliveryStatus } from "../src/generated/prisma/client";
+import { createHash } from "node:crypto";
 
 describe("marketplace HTTP tenant boundaries", () => {
   let app: INestApplication;
@@ -238,6 +239,7 @@ describe("marketplace HTTP tenant boundaries", () => {
     expect((scheduled.body as { offerAt: string }).offerAt).toBe(new Date(createdAt.getTime() + 20 * 60_000).toISOString());
     await app.get(MarketplaceDispatchService).publishDue();
     expect((await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId: order.id } })).status).toBe(MarketplaceDeliveryStatus.OFFERED);
+    expect(await prisma.directPushEvent.count({ where: { offerOrderId: order.id } })).toBeGreaterThanOrEqual(2);
     const offer = await request(server).get("/api/v1/marketplace/delivery/courier/offers").set("Authorization", await auth(applicantId)).expect(200);
     expect((offer.body as Array<{ orderId: string }>).some((entry) => entry.orderId === order.id)).toBe(true);
     const claimPath = `/api/v1/marketplace/delivery/courier/offers/${order.id}/claim`;
@@ -396,6 +398,130 @@ describe("marketplace HTTP tenant boundaries", () => {
       .set("Authorization", await auth(otherId))
       .send({ cafeId: cafeA, items: [{ productId: productB.id, quantity: 1 }], address: "Customer street", latitude: 37.96, longitude: 58.33 })
       .expect(400);
+  });
+
+  it("automatically schedules the external network when a new cafe has no active own courier", async () => {
+    const suffix = Math.random().toString(36).slice(2, 10);
+    const cafe = await prisma.cafe.create({ data: { name: "Unstaffed cafe", slug: `unstaffed-${suffix}` } });
+    await prisma.cafeModuleEntitlement.create({ data: { cafeId: cafe.id, key: "ORDERING", enabled: true } });
+    const category = await prisma.category.create({ data: { cafeId: cafe.id, name: "Lunch", slug: `lunch-${suffix}` } });
+    const product = await prisma.product.create({ data: { categoryId: category.id, name: "Slow meal", slug: `slow-${suffix}`, description: "Food", price: 25, preparationMinutes: 60 } });
+    await prisma.branch.create({ data: { cafeId: cafe.id, name: "Kitchen", address: "Kitchen street", latitude: 37.96, longitude: 58.33 } });
+    const created = await request(server).post("/api/v1/marketplace/checkout/orders")
+      .set("Authorization", await auth(otherId))
+      .send({ cafeId: cafe.id, items: [{ productId: product.id, quantity: 1 }], address: "Customer street", latitude: 37.96, longitude: 58.33 })
+      .expect(201);
+    const orderId = (created.body as { id: string }).id;
+    const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    const delivery = await prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId } });
+    expect(delivery.mode).toBe("NETWORK");
+    expect(delivery.status).toBe("WAITING");
+    expect(delivery.offerAt).toEqual(new Date(order.createdAt.getTime() + 20 * 60_000));
+    expect(await prisma.auditLog.count({ where: { action: "delivery.route.auto_network", entityId: orderId } })).toBe(1);
+  });
+
+  it("prints cafe receipts only through that cafe's configured agent and queue", async () => {
+    await prisma.user.update({ where: { id: ownerId }, data: { role: Role.SUPER_ADMIN } });
+    await prisma.platformOwner.upsert({ where: { userId: ownerId }, create: { userId: ownerId, phone: "+99362969614" }, update: { isActive: true } });
+    const suffix = Math.random().toString(36).slice(2, 10);
+    const cafe = await prisma.cafe.create({ data: { name: "Receipt cafe", slug: `receipt-${suffix}` } });
+    const otherCafe = await prisma.cafe.create({ data: { name: "Other receipt cafe", slug: `receipt-other-${suffix}` } });
+    await prisma.cafeMembership.create({ data: { cafeId: cafe.id, userId: merchantId, role: Role.ADMIN } });
+    await prisma.cafeModuleEntitlement.createMany({ data: [
+      { cafeId: cafe.id, key: "ORDERING", enabled: true },
+      { cafeId: otherCafe.id, key: "ORDERING", enabled: true },
+      { cafeId: otherCafe.id, key: "RECEIPTS", enabled: true },
+    ] });
+    const base = `/api/v1/marketplace/merchant/cafes/${cafe.id}/receipts`;
+    const printerInput = { name: "Cash desk", ipAddress: "192.168.151.10", port: 9100, transport: "RAW_TCP" };
+    await request(server).post(`${base}/printers`).set("Authorization", await auth(otherId)).send(printerInput).expect(403);
+    const printer = (await request(server).post(`${base}/printers`).set("Authorization", await auth(merchantId)).send(printerInput).expect(201)).body as { id: string };
+    const legacyPrinters = await request(server).get("/api/v1/catalog/admin/receipt-printers").set("Authorization", await auth(ownerId)).expect(200);
+    expect((legacyPrinters.body as Array<{ id: string }>).some((item) => item.id === printer.id)).toBe(false);
+    await request(server).patch(`/api/v1/catalog/receipt-printers/${printer.id}`).set("Authorization", await auth(ownerId))
+      .send({ name: "Wrong tenant" }).expect(404);
+    await request(server).put(`${base}/config`).set("Authorization", await auth(merchantId))
+      .send({ mainPrinterId: printer.id, mainCopies: 1, businessPhone: "+99362969614", expectedVersion: 0 }).expect(200);
+    const credential = (await request(server).post(`${base}/agent-token/rotate`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1 }).expect(201)).body as { token: string };
+    expect(credential.token.length).toBeGreaterThan(40);
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafe.id}/modules/RECEIPTS`)
+      .set("Authorization", await auth(merchantId)).send({ enabled: true, expectedVersion: 0 }).expect(403);
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafe.id}/modules/RECEIPTS`)
+      .set("Authorization", await auth(ownerId)).send({ enabled: true, expectedVersion: 0 }).expect(200);
+    const category = await prisma.category.create({ data: { cafeId: cafe.id, name: "Receipt menu", slug: `receipt-menu-${suffix}` } });
+    const product = await prisma.product.create({ data: { categoryId: category.id, name: "Receipt meal", slug: `receipt-meal-${suffix}`, description: "Food", price: 25 } });
+    await prisma.branch.create({ data: { cafeId: cafe.id, name: "Kitchen", address: "Street", latitude: 37.96, longitude: 58.33 } });
+    const checkout = await request(server).post("/api/v1/marketplace/checkout/orders").set("Authorization", await auth(otherId))
+      .send({ cafeId: cafe.id, items: [{ productId: product.id, quantity: 1 }], address: "Customer", latitude: 37.96, longitude: 58.33 }).expect(201);
+    const orderId = (checkout.body as { id: string }).id;
+    expect(await prisma.receiptPrintTask.count({ where: { orderId } })).toBe(1);
+    const queue = await request(server).get(`${base}/queue`).set("Authorization", await auth(merchantId)).expect(200);
+    expect((queue.body as { items: Array<{ orderId: string }> }).items.some((item) => item.orderId === orderId)).toBe(true);
+    await request(server).get(`${base}/queue`).set("Authorization", await auth(otherId)).expect(403);
+    const legacy = await request(server).get("/api/v1/receipt-print-tasks").set("Authorization", await auth(ownerId)).expect(200);
+    expect((legacy.body as { items: Array<{ orderId: string }> }).items.some((item) => item.orderId === orderId)).toBe(false);
+    const agentBase = "/api/v1/marketplace/receipt-agent/tasks";
+    const station = "00000000-0000-4000-8000-000000000772";
+    await request(server).post(`${agentBase}/claim`).set("Authorization", "Bearer invalid").set("X-Receipt-Agent-Id", station).send({}).expect(401);
+    const otherToken = `other-${suffix}-secret-token-for-separate-cafe-agent`;
+    await prisma.cafeReceiptConfiguration.create({ data: { cafeId: otherCafe.id, agentTokenHash: createHash("sha256").update(otherToken).digest("hex") } });
+    const foreignClaim = await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${otherToken}`).set("X-Receipt-Agent-Id", station).send({}).expect(201);
+    expect((foreignClaim.body as { task: unknown }).task).toBeNull();
+    const claim = await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${credential.token}`).set("X-Receipt-Agent-Id", station).send({}).expect(201);
+    const task = (claim.body as { task: { id: string; claimToken: string; plan: { mainJob: { printerIp: string }; metadata: { businessPhone: string; cafeName: string } } } }).task;
+    expect(task.plan.mainJob.printerIp).toBe(printerInput.ipAddress);
+    expect(task.plan.metadata.businessPhone).toBe("+99362969614");
+    expect(task.plan.metadata.cafeName).toBe("Receipt cafe");
+    await request(server).post(`${agentBase}/${task.id}/outcome`).set("Authorization", `Bearer ${otherToken}`)
+      .set("X-Receipt-Agent-Id", station).send({ claimToken: task.claimToken, outcome: "DELIVERED" }).expect(404);
+    await request(server).post(`${agentBase}/${task.id}/outcome`).set("Authorization", `Bearer ${credential.token}`)
+      .set("X-Receipt-Agent-Id", station).send({ claimToken: task.claimToken, outcome: "DELIVERED" }).expect(201);
+    expect((await prisma.receiptPrintTask.findUniqueOrThrow({ where: { id: task.id } })).status).toBe("DELIVERED");
+
+    const kitchenPrinter = (await request(server).post(`${base}/printers`).set("Authorization", await auth(merchantId))
+      .send({ name: "Kitchen", ipAddress: "192.168.151.11", port: 9100, transport: "RAW_TCP" }).expect(201)).body as { id: string };
+    const foreignPrinter = await prisma.receiptPrinter.create({ data: { cafeId: otherCafe.id, name: "Foreign", ipAddress: "192.168.151.10", port: 9100 } });
+    await request(server).put(`${base}/products/${product.id}/printer`).set("Authorization", await auth(merchantId))
+      .send({ printerId: foreignPrinter.id, expectedVersion: 1 }).expect(409);
+    await request(server).put(`${base}/products/${product.id}/printer`).set("Authorization", await auth(merchantId))
+      .send({ printerId: kitchenPrinter.id, expectedVersion: 1 }).expect(200);
+    const secondCheckout = await request(server).post("/api/v1/marketplace/checkout/orders").set("Authorization", await auth(otherId))
+      .send({ cafeId: cafe.id, items: [{ productId: product.id, quantity: 1 }], address: "Customer", latitude: 37.96, longitude: 58.33 }).expect(201);
+    const secondOrderId = (secondCheckout.body as { id: string }).id;
+    const secondClaim = await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${credential.token}`).set("X-Receipt-Agent-Id", station).send({}).expect(201);
+    const kitchenTask = (secondClaim.body as { task: { id: string; claimToken: string; dispatchId: string; plan: { jobs: Array<{ printerIp: string }> } } }).task;
+    expect(kitchenTask.plan.jobs.map((job) => job.printerIp)).toContain("192.168.151.11");
+    await request(server).post(`${agentBase}/${kitchenTask.id}/outcome`).set("Authorization", `Bearer ${credential.token}`)
+      .set("X-Receipt-Agent-Id", station).send({ claimToken: kitchenTask.claimToken, outcome: "RETRY", errorCode: "PRINTER_UNAVAILABLE" }).expect(201);
+    await request(server).post(`${base}/queue/${kitchenTask.id}/retry`).set("Authorization", await auth(otherId)).send({}).expect(403);
+    await request(server).post(`${base}/queue/${kitchenTask.id}/retry`).set("Authorization", await auth(merchantId)).send({}).expect(201);
+    const retryClaim = await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${credential.token}`).set("X-Receipt-Agent-Id", station).send({}).expect(201);
+    expect((retryClaim.body as { task: { id: string; dispatchId: string } }).task).toMatchObject({ id: kitchenTask.id, dispatchId: kitchenTask.dispatchId });
+    expect((await prisma.receiptPrintTask.findUniqueOrThrow({ where: { id: kitchenTask.id } })).orderId).toBe(secondOrderId);
+    await request(server).post(`${agentBase}/${kitchenTask.id}/outcome`).set("Authorization", `Bearer ${credential.token}`)
+      .set("X-Receipt-Agent-Id", station).send({ claimToken: (retryClaim.body as { task: { claimToken: string } }).task.claimToken, outcome: "DELIVERED" }).expect(201);
+    const itemId = (await prisma.orderItem.findFirstOrThrow({ where: { orderId: secondOrderId } })).id;
+    await request(server).post(`${base}/orders/${secondOrderId}/reprint`).set("Authorization", await auth(merchantId))
+      .send({ idempotencyKey: "00000000-0000-4000-8000-000000000801", itemRoutes: [{ itemId, printerId: foreignPrinter.id }] }).expect(409);
+    const reprintBody = { idempotencyKey: "00000000-0000-4000-8000-000000000802" };
+    const reprint = await request(server).post(`${base}/orders/${secondOrderId}/reprint`).set("Authorization", await auth(merchantId))
+      .send(reprintBody).expect(201);
+    const duplicate = await request(server).post(`${base}/orders/${secondOrderId}/reprint`).set("Authorization", await auth(merchantId))
+      .send(reprintBody).expect(201);
+    expect((duplicate.body as { id: string }).id).toBe((reprint.body as { id: string }).id);
+    const orderVersion = (await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).version;
+    await request(server).patch(`/api/v1/orders/${orderId}/cancel`).set("Authorization", await auth(ownerId))
+      .send({ version: orderVersion, reason: "Customer cancellation" }).expect(200);
+    expect(await prisma.receiptPrintTask.count({ where: { orderId, documentType: "CANCELLATION" } })).toBe(1);
+    const foreignOrder = await prisma.order.create({ data: { customerId: otherId, cafeId: otherCafe.id, subtotal: 10, total: 10, address: "Other", latitude: 37.96, longitude: 58.33 } });
+    const foreignTask = await prisma.receiptPrintTask.create({ data: { orderId: foreignOrder.id, eventKey: `FOREIGN:${foreignOrder.id}`, documentType: "ORDER", plan: { mainJob: null, jobs: [], unassignedItems: [] } } });
+    await request(server).post(`${base}/queue/${foreignTask.id}/retry`).set("Authorization", await auth(merchantId)).send({}).expect(409);
+    const rotated = (await request(server).post(`${base}/agent-token/rotate`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 2 }).expect(201)).body as { token: string };
+    await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${credential.token}`).set("X-Receipt-Agent-Id", station).send({}).expect(401);
+    const afterRotation = await request(server).post(`${agentBase}/claim`).set("Authorization", `Bearer ${rotated.token}`).set("X-Receipt-Agent-Id", station).send({}).expect(201);
+    expect((afterRotation.body as { task: { plan: { metadata: { cafeName: string } } } }).task.plan.metadata.cafeName).toBe("Receipt cafe");
   });
 
   it("lets only OWNER dispatch an approved platform courier across cafes", async () => {

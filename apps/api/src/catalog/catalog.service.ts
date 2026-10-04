@@ -226,9 +226,9 @@ async function assertActivePrinterReference(
   if (!printerId) return;
   const printer = await tx.receiptPrinter.findUnique({
     where: { id: printerId },
-    select: { isActive: true },
+    select: { isActive: true, cafeId: true },
   });
-  if (!printer?.isActive) {
+  if (!printer?.isActive || printer.cafeId) {
     throw new BadRequestException("Receipt printer is missing or inactive");
   }
 }
@@ -772,6 +772,7 @@ export class CatalogService {
   async receiptPrinters() {
     return toApiResponse(
       await this.prisma.receiptPrinter.findMany({
+        where: { cafeId: null },
         orderBy: [{ isActive: "desc" }, { name: "asc" }],
       }),
     );
@@ -810,7 +811,7 @@ export class CatalogService {
     return this.prisma
       .$transaction(async (tx) => {
         const existing = await tx.receiptPrinter.findUnique({ where: { id } });
-        if (!existing) throw new NotFoundException("Receipt printer not found");
+        if (!existing || existing.cafeId) throw new NotFoundException("Receipt printer not found");
         const printer = await tx.receiptPrinter.update({
           where: { id },
           data: {
@@ -846,7 +847,7 @@ export class CatalogService {
           },
         },
       });
-      if (!printer) throw new NotFoundException("Receipt printer not found");
+      if (!printer || printer.cafeId) throw new NotFoundException("Receipt printer not found");
       if (
         printer._count.categories > 0 ||
         printer._count.products > 0 ||

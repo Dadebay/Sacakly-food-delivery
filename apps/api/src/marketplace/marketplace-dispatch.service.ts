@@ -126,12 +126,19 @@ export class MarketplaceDispatchService implements OnModuleInit, OnModuleDestroy
     try {
       const due = await this.prisma.marketplaceDeliveryRequest.findMany({ where: { mode: MarketplaceDeliveryMode.NETWORK, status: MarketplaceDeliveryStatus.WAITING, offerAt: { lte: now } }, select: { orderId: true }, orderBy: { offerAt: "asc" }, take: 50 });
       for (const { orderId } of due) {
-        const changed = await this.prisma.marketplaceDeliveryRequest.updateMany({ where: { orderId, status: MarketplaceDeliveryStatus.WAITING, order: { status: { in: [OrderStatus.COOKING, OrderStatus.READY] }, courierId: null, cafe: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } } } } }, data: { status: MarketplaceDeliveryStatus.OFFERED, offeredAt: now, version: { increment: 1 } } });
-        if (changed.count !== 1) continue;
-        const request = await this.prisma.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId }, include: { order: { select: { number: true } }, cafe: { select: { name: true } } } });
-        const couriers = await this.prisma.courierApplication.findMany({ where: { status: CourierApplicationStatus.APPROVED, user: { isActive: true, role: Role.COURIER } }, select: { userId: true }, take: 1000 });
-        await Promise.allSettled(couriers.map(({ userId }) => this.notifications.sendDirectPush(userId, { title: `Saçakly · ${request.cafe.name}`, body: `Новый заказ №${request.order.number} доступен для принятия` })));
-        await this.prisma.auditLog.create({ data: { action: "delivery.offer.published", entityType: "Order", entityId: orderId, metadata: { cafeId: request.cafeId, intendedCourierCount: couriers.length } } });
+        const published = await this.prisma.$transaction(async (tx) => {
+          const changed = await tx.marketplaceDeliveryRequest.updateMany({ where: { orderId, status: MarketplaceDeliveryStatus.WAITING, order: { status: { in: [OrderStatus.COOKING, OrderStatus.READY] }, courierId: null, cafe: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } } } } }, data: { status: MarketplaceDeliveryStatus.OFFERED, offeredAt: now, version: { increment: 1 } } });
+          if (changed.count !== 1) return false;
+          const request = await tx.marketplaceDeliveryRequest.findUniqueOrThrow({ where: { orderId }, include: { order: { select: { number: true } }, cafe: { select: { name: true } } } });
+          const couriers = await tx.courierApplication.findMany({ where: { status: CourierApplicationStatus.APPROVED, user: { isActive: true, role: Role.COURIER } }, select: { userId: true }, take: 1000 });
+          if (couriers.length) await tx.directPushEvent.createMany({ data: couriers.map(({ userId }) => ({
+            eventKey: `offer:${orderId}:${request.version}:${userId}`, userId,
+            title: `Saçakly · ${request.cafe.name}`, body: `Новый заказ №${request.order.number} доступен для принятия`, offerOrderId: orderId,
+          })), skipDuplicates: true });
+          await tx.auditLog.create({ data: { action: "delivery.offer.published", entityType: "Order", entityId: orderId, metadata: { cafeId: request.cafeId, intendedCourierCount: couriers.length } } });
+          return true;
+        });
+        if (published) await this.notifications.dispatchDueDirectPushes();
       }
     } finally { this.publishing = false; }
   }

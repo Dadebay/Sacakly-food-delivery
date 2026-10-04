@@ -182,3 +182,24 @@ func TestDirectAPIBaseURLRejectsCredentialsAndQuery(t *testing.T) {
 		}
 	}
 }
+
+func TestDirectAPIMarketplaceScopeUsesCafeQueue(t *testing.T) {
+	var path string
+	api := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		path = request.URL.Path
+		_ = json.NewEncoder(writer).Encode(directClaimResult{Task: nil})
+	}))
+	defer api.Close()
+	status := newDesktopStatus("test", defaultListenAddress)
+	worker, err := newDirectAPIWorker(api.URL+"/api/v1", "sacakly-test-token", "00000000-0000-4000-8000-000000000123", nil, status, slog.Default())
+	if err != nil {
+		t.Fatal(err)
+	}
+	worker.taskPath = "/marketplace/receipt-agent/tasks"
+	if err := worker.consumeOnce(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if path != "/api/v1/marketplace/receipt-agent/tasks/claim" {
+		t.Fatalf("wrong receipt queue path: %s", path)
+	}
+}

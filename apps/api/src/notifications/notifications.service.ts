@@ -15,6 +15,7 @@ import { toApiResponse } from "../common/api-response";
 import type { AuthUser } from "../common/auth.types";
 import {
   AdminPage,
+  DirectPushStatus,
   NotificationAudience,
   NotificationCampaignStatus,
   Prisma,
@@ -44,6 +45,8 @@ const campaignInclude = {
 } as const;
 
 const STALE_SENDING_MS = 15 * 60 * 1000;
+const DIRECT_PUSH_LEASE_MS = 60_000;
+const DIRECT_PUSH_MAX_ATTEMPTS = 5;
 
 @Injectable()
 export class NotificationsService implements OnModuleInit, OnModuleDestroy {
@@ -60,11 +63,15 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     await this.requeueStaleCampaigns();
     this.timer = setInterval(
-      () => void this.dispatchPendingCampaigns(),
+      () => {
+        void this.dispatchPendingCampaigns();
+        void this.dispatchDueDirectPushes().catch((error: unknown) => this.logger.error(error));
+      },
       this.config.get("PUSH_DISPATCH_INTERVAL_MS", { infer: true }),
     );
     this.timer.unref();
     void this.dispatchPendingCampaigns();
+    void this.dispatchDueDirectPushes().catch((error: unknown) => this.logger.error(error));
   }
 
   onModuleDestroy() {
@@ -72,62 +79,101 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
     this.timer = null;
   }
 
-  /**
-   * A best-effort push straight to one user's devices after an order change.
-   * Customer status updates and courier assignments skip the
-   * campaign/delivery bookkeeping built for `ALL_CUSTOMERS` broadcasts
-   * (that machinery always targets every customer, see `dispatchCampaign`)
-   * and just calls the gateway directly. Never throws: a push failure
-   * must not roll back the status change that triggered it.
-   */
+  /** Persist first, then attempt FCM. Provider failures never roll back the order. */
   async sendDirectPush(
     userId: string,
     message: { title: string; body: string },
+    options: { eventKey?: string; offerOrderId?: string } = {},
   ) {
     try {
-      const devices = await this.prisma.pushDevice.findMany({
-        where: { userId, isActive: true, user: { isActive: true } },
-        select: { id: true, installationId: true },
-      });
-      if (!devices.length) return;
-
-      // An event needs its own ID: reusing the device ID makes mobile clients
-      // deduplicate subsequent order notifications on the same installation.
-      const notificationId = randomUUID();
-      const results = await this.push.send(
-        {
-          campaignId: `direct:${userId}:${notificationId}`,
-          title: message.title,
-          body: message.body,
-          deepLink: null,
+      const eventKey = options.eventKey ?? `direct:${randomUUID()}`;
+      const event = await this.prisma.directPushEvent.upsert({
+        where: { eventKey },
+        create: {
+          eventKey, userId, title: message.title, body: message.body,
+          offerOrderId: options.offerOrderId ?? null,
         },
-        devices.map((device) => ({
-          deliveryId: device.id,
-          installationId: device.installationId,
-          notificationId,
-        })),
-      );
-
-      const invalid = results
-        .filter((result) => result.invalidInstallation)
-        .map((result) => result.deliveryId);
-      if (invalid.length) {
-        await this.prisma.pushDevice.updateMany({
-          where: { id: { in: invalid } },
-          data: { isActive: false },
-        });
+        update: {},
+      });
+      if (event.userId !== userId || event.title !== message.title || event.body !== message.body || event.offerOrderId !== (options.offerOrderId ?? null)) {
+        this.logger.warn(`Direct push event key collision: ${eventKey}`);
+        return;
       }
-      const sent = results.filter((result) => result.ok).length;
-      this.logger.log(
-        `Direct push "${message.title}" to user ${userId}: ${sent}/${results.length} delivered`,
-      );
+      await this.deliverDirectPush(event.id);
     } catch (error) {
       const detail =
         error instanceof Error
           ? `${error.name}: ${error.message}`
           : "unknown provider error";
       this.logger.warn(`Direct push to user ${userId} failed: ${detail}`);
-      // Best-effort — the order status change itself already succeeded.
+      // The order transition is committed independently of push delivery.
+    }
+  }
+
+  async dispatchDueDirectPushes(now = new Date()) {
+    await this.prisma.directPushEvent.updateMany({
+      where: { status: DirectPushStatus.PROCESSING, leaseExpiresAt: { lte: now } },
+      data: { status: DirectPushStatus.PENDING, leaseExpiresAt: null, nextAttemptAt: now },
+    });
+    const due = await this.prisma.directPushEvent.findMany({
+      where: { status: DirectPushStatus.PENDING, nextAttemptAt: { lte: now } },
+      select: { id: true }, orderBy: { createdAt: "asc" }, take: 100,
+    });
+    for (let offset = 0; offset < due.length; offset += 10) {
+      await Promise.allSettled(due.slice(offset, offset + 10).map(({ id }) => this.deliverDirectPush(id, now)));
+    }
+  }
+
+  private async deliverDirectPush(id: string, now = new Date()) {
+    const claimed = await this.prisma.directPushEvent.updateMany({
+      where: { id, status: DirectPushStatus.PENDING, nextAttemptAt: { lte: now } },
+      data: { status: DirectPushStatus.PROCESSING, attempts: { increment: 1 }, leaseExpiresAt: new Date(now.getTime() + DIRECT_PUSH_LEASE_MS) },
+    });
+    if (claimed.count !== 1) return;
+    const event = await this.prisma.directPushEvent.findUniqueOrThrow({ where: { id } });
+    try {
+      if (event.offerOrderId) {
+        const offer = await this.prisma.marketplaceDeliveryRequest.findUnique({ where: { orderId: event.offerOrderId }, select: { status: true } });
+        if (offer?.status !== "OFFERED") {
+          await this.prisma.directPushEvent.update({ where: { id }, data: { status: DirectPushStatus.CANCELLED, leaseExpiresAt: null } });
+          return;
+        }
+      }
+      const sentIds = new Set(Array.isArray(event.sentDeviceIds) ? event.sentDeviceIds.filter((value): value is string => typeof value === "string") : []);
+      const devices = await this.prisma.pushDevice.findMany({
+        where: { userId: event.userId, isActive: true, user: { isActive: true } },
+        select: { id: true, installationId: true },
+      });
+      const pending = devices.filter((device) => !sentIds.has(device.id));
+      if (!pending.length) {
+        await this.prisma.directPushEvent.update({ where: { id }, data: { status: sentIds.size ? DirectPushStatus.SENT : DirectPushStatus.FAILED, leaseExpiresAt: null, lastError: sentIds.size ? null : "NO_ACTIVE_DEVICE", sentAt: sentIds.size ? now : null } });
+        return;
+      }
+      const results = await this.push.send(
+        { campaignId: `direct:${event.id}`, title: event.title, body: event.body, deepLink: null },
+        pending.map((device) => ({ deliveryId: device.id, installationId: device.installationId, notificationId: event.notificationId })),
+      );
+      const invalid = results.filter((result) => result.invalidInstallation).map((result) => result.deliveryId);
+      if (invalid.length) await this.prisma.pushDevice.updateMany({ where: { id: { in: invalid } }, data: { isActive: false } });
+      for (const result of results) if (result.ok) sentIds.add(result.deliveryId);
+      const transient = pending.filter((device) => !sentIds.has(device.id) && !invalid.includes(device.id));
+      const shouldRetry = transient.length > 0 && event.attempts < DIRECT_PUSH_MAX_ATTEMPTS;
+      const status = shouldRetry ? DirectPushStatus.PENDING : transient.length || !sentIds.size ? DirectPushStatus.FAILED : DirectPushStatus.SENT;
+      await this.prisma.directPushEvent.update({ where: { id }, data: {
+        status, sentDeviceIds: [...sentIds], leaseExpiresAt: null,
+        nextAttemptAt: new Date(now.getTime() + Math.min(300_000, 2_000 * 2 ** event.attempts)),
+        lastError: transient.length ? (results.find((result) => !result.ok && !result.invalidInstallation)?.errorCode ?? "FCM_UNAVAILABLE") : null,
+        providerMessageId: results.find((result) => result.ok)?.providerMessageId ?? event.providerMessageId,
+        sentAt: status === DirectPushStatus.SENT ? now : null,
+      } });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message.slice(0, 160) : "FCM_UNAVAILABLE";
+      await this.prisma.directPushEvent.update({ where: { id }, data: {
+        status: event.attempts < DIRECT_PUSH_MAX_ATTEMPTS ? DirectPushStatus.PENDING : DirectPushStatus.FAILED,
+        leaseExpiresAt: null,
+        nextAttemptAt: new Date(now.getTime() + Math.min(300_000, 2_000 * 2 ** event.attempts)),
+        lastError: detail,
+      } });
     }
   }
 

@@ -18,6 +18,7 @@ import {
 } from "./marketplace-policy";
 
 import { PLATFORM_OWNER_PHONE } from "./platform-owner";
+import { MarketplaceReceiptsService } from "./marketplace-receipts.service";
 
 function rethrowCreateConflict(error: unknown): never {
   if (
@@ -31,7 +32,7 @@ function rethrowCreateConflict(error: unknown): never {
 
 @Injectable()
 export class MarketplaceService {
-  constructor(private readonly prisma: PrismaService, private readonly orders: OrdersService) {}
+  constructor(private readonly prisma: PrismaService, private readonly orders: OrdersService, private readonly receipts: MarketplaceReceiptsService) {}
 
   publicCafes() {
     return this.prisma.cafe.findMany({
@@ -321,9 +322,10 @@ export class MarketplaceService {
     dto: SetCafeModuleDto,
   ) {
     await this.assertOwner(actor);
-    if (dto.enabled && key !== "ORDERING") {
+    if (dto.enabled && !["ORDERING", "RECEIPTS"].includes(key)) {
       throw new ConflictException("This cafe module is not yet tenant-ready");
     }
+    if (dto.enabled && key === "RECEIPTS") await this.receipts.assertReadyForActivation(cafeId);
     try {
       return await this.prisma.$transaction(async (tx) => {
         const cafe = await tx.cafe.findUnique({ where: { id: cafeId } });

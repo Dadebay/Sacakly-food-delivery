@@ -1,4 +1,4 @@
-# A7-tagam receipt print agent
+# Receipt print agent: A7 legacy and Saçakly cafes
 
 The visible print agent is a standalone HTTPS queue worker and private-LAN
 printer bridge. It does not need the operations website or its user token.
@@ -32,6 +32,26 @@ its own IP, port and transport: standard LAN X-printers normally use `RAW_TCP`
 on port `9100`, while legacy J-Speed WebConfig devices use `JSPEED_HTTP` on
 port `80`. It accepts two sequential jobs for the same endpoint when the main
 and kitchen copies share one physical printer. It does not contain a compiled token.
+
+## Saçakly cafe mode
+
+In the cafe portal, add a private-LAN printer, save it as the main printer,
+create an agent token, and ask the platform OWNER to enable RECEIPTS. Each cafe
+has its own token and queue; the legacy A7 token cannot claim cafe jobs. Start
+the agent on that cafe's workstation with its own persistent dispatch journal:
+
+```bash
+SACAKLY_RECEIPT_AGENT_TOKEN='<token-shown-once-in-cafe-portal>' \
+  go run ./apps/print-agent -api-scope marketplace -api-url 'http://127.0.0.1:4000/api/v1' \
+  -dispatch-dir '/path/to/this-cafe-journal'
+```
+
+Use the platform API origin when it exists. The agent reaches printers on the
+cafe's LAN. A different cafe may use the same private IP on its own LAN. The
+Saçakly receipt header shows the specific cafe name and configured phone,
+without the imported A7 logo or contact numbers. Token rotation revokes the
+old token immediately. Confirm paper output and network recovery on real
+printers before activating a cafe in production.
 
 ## Run locally
 

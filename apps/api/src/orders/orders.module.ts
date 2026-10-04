@@ -34,6 +34,6 @@ import { LoyaltyModule } from "../loyalty/loyalty.module";
     OrderingHoursController,
   ],
   providers: [OrdersService, ReceiptQueueService, ReceiptAgentGuard, OrderingHoursService],
-  exports: [OrdersService],
+  exports: [OrdersService, ReceiptQueueService],
 })
 export class OrdersModule {}

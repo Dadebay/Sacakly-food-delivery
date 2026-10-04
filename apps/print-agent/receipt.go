@@ -36,6 +36,7 @@ var receiptLogo []byte
 
 type receiptMetadata struct {
 	CreatedAt      string `json:"createdAt"`
+	CafeName       string `json:"cafeName"`
 	BusinessPhone  string `json:"businessPhone"`
 	BranchName     string `json:"branchName"`
 	CustomerName   string `json:"customerName"`
@@ -43,6 +44,16 @@ type receiptMetadata struct {
 	Address        string `json:"address"`
 	AddressDetails string `json:"addressDetails"`
 	CustomerNote   string `json:"customerNote"`
+}
+
+func receiptHeader(metadata *receiptMetadata) (string, []string, bool) {
+	if metadata != nil && strings.TrimSpace(metadata.CafeName) != "" {
+		if phone := strings.TrimSpace(metadata.BusinessPhone); phone != "" {
+			return cleanReceiptText(metadata.CafeName), []string{cleanReceiptText(phone)}, false
+		}
+		return cleanReceiptText(metadata.CafeName), nil, false
+	}
+	return "", strings.Split(receiptCafePhones, "\n"), true
 }
 
 type receiptCanvas struct {
@@ -227,18 +238,26 @@ func renderReceipt(job printerJob) (*image.Gray, error) {
 			_ = face.Close()
 		}
 	}()
-	logo, _, err := image.Decode(bytes.NewReader(receiptLogo))
-	if err != nil {
-		return nil, err
+	name, phones, legacyLogo := receiptHeader(job.Metadata)
+	if legacyLogo {
+		logo, _, decodeErr := image.Decode(bytes.NewReader(receiptLogo))
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+		const logoSize, topMargin, logoGap = 180, 8, 8
+		logoLeft := (receiptWidth - logoSize) / 2
+		canvas.draws = append(canvas.draws, func(dst *image.Gray) {
+			xdraw.CatmullRom.Scale(dst, image.Rect(logoLeft, topMargin, logoLeft+logoSize, topMargin+logoSize), logo, logo.Bounds(), draw.Src, nil)
+		})
+		canvas.y = topMargin + logoSize + logoGap
+	} else {
+		canvas.paragraph(name, 31, true, "center")
+		canvas.paragraph("Saçakly", 19, false, "center")
 	}
-	const logoSize, topMargin, logoGap = 180, 8, 8
-	logoLeft := (receiptWidth - logoSize) / 2
-	canvas.draws = append(canvas.draws, func(dst *image.Gray) {
-		xdraw.CatmullRom.Scale(dst, image.Rect(logoLeft, topMargin, logoLeft+logoSize, topMargin+logoSize), logo, logo.Bounds(), draw.Src, nil)
-	})
-	canvas.y = topMargin + logoSize + logoGap
-	canvas.paragraph("Телефон кафе", 20, false, "center")
-	for _, phone := range strings.Split(receiptCafePhones, "\n") {
+	if len(phones) > 0 {
+		canvas.paragraph("Телефон кафе", 20, false, "center")
+	}
+	for _, phone := range phones {
 		canvas.paragraph(phone, 24, true, "center")
 	}
 	metadata := job.Metadata
