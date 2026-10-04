@@ -25,19 +25,21 @@
     "test": "npm --prefix apps/admin test",
     "test:api": "npm --prefix apps/api test",
     "test:print-agent": "cd apps/print-agent && go test ./...",
+    "test:e2e": "npm --prefix apps/api run build && npm --prefix apps/api run e2e:prepare && playwright test",
     "build:print-agent": "bash apps/print-agent/build-release.sh",
-    "test:all": "npm run test:api && npm test && npm --prefix apps/merchant test && npm --prefix apps/web test && npm run test:print-agent",
+    "test:all": "npm run test:api && npm test && npm --prefix apps/merchant test && npm --prefix apps/web test && npm run test:print-agent && npm run test:e2e",
     "api:client": "npm --prefix apps/api run openapi && openapi-typescript apps/api/openapi.json -o packages/api-contract/src/schema.ts"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "concurrently": "10.0.4",
     "openapi-typescript": "7.13.0"
   },
   "overrides": {
     "@redocly/openapi-core": {
-      "js-yaml": "4.3.1"
+      "js-yaml": "4.3.2"
     },
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "esbuild": "0.28.1",
     "fast-uri": "4.1.2",
     "minimatch": "10.2.5",

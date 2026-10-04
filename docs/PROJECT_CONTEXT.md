@@ -131,7 +131,8 @@ required for every read and write. Writes validate the cafe boundary, use
 optimistic versions and audit changes. Slugs are prefixed with the cafe UUID
 to preserve legacy global uniqueness. Existing orders keep their product and
 branch snapshots when the menu changes. Variants, translated menu content,
-media uploads, printer routes and inventory remain outside this new editor.
+media uploads and inventory remain outside this new editor. Cafe printer routes
+are configured in the separate Receipts tab.
 
 ## Tenant boundary
 
@@ -164,6 +165,13 @@ concurrency/idempotency tests, generated API contract and real HTTP checks.
 No imported A7 deployment pipeline may deploy this project.
 
 ## Repository tree
+
+The current behavioral contract lives in this file. Read `docs/CHANGELOG.md`
+for the chronological PR record and `docs/PLAYWRIGHT_E2E.md` for the isolated
+browser test environment. Every pull request must append a dated history entry;
+CI checks that rule. The Playwright suite exercises the local customer web,
+merchant portal and API together, while API tests remain authoritative for
+role matrices, courier races and receipt state transitions.
 
 - apps/api: Existing NestJS API; tenant migration target.
 - apps/api/src/marketplace: Owner, cafe membership, courier application and

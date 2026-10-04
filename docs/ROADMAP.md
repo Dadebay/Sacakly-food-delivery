@@ -16,6 +16,7 @@ The new repository is a migration project. A checked box means the behavior is i
 - [x] Cafe-scoped category, fixed-price product and branch editing in the merchant portal with version conflicts and audit.
 - [x] Cafe-owned receipt printers, main and kitchen routes, separate agent tokens, queue isolation, manual reprint, cancellation and retry; legacy workers cannot claim cafe tasks.
 - [x] New HTTP boundary tests and client tests; source API/admin tests, builds and dependency audits run locally.
+- [x] Chromium Playwright E2E checks exercise the customer website, merchant portal and real local API, including checkout, cafe isolation, automatic external delivery and receipt queue setup. CI requires this suite and a dated PR history entry.
 
 ## Required before onboarding independent cafes
 
