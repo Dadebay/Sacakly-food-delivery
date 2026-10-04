@@ -2760,6 +2760,119 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Manage only this cafe's categories, products and branches */
+        get: operations["MarketplaceCatalogController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceCatalogController_createCategory_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["MarketplaceCatalogController_updateCategory_v1"];
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceCatalogController_createProduct_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["MarketplaceCatalogController_updateProduct_v1"];
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceCatalogController_createBranch_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/catalog/branches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["MarketplaceCatalogController_updateBranch_v1"];
+        trace?: never;
+    };
     "/api/v1/site/pages": {
         parameters: {
             query?: never;
@@ -6146,6 +6259,108 @@ export interface components {
             offeredAt: string;
             /** Format: date-time */
             estimatedReadyAt: string;
+        };
+        CafeProductResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            categoryId: string;
+            name: string;
+            slug: string;
+            description: string;
+            price: string;
+            preparationMinutes: number;
+            sortOrder: number;
+            isActive: boolean;
+            version: number;
+        };
+        CafeCategoryResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cafeId: string;
+            name: string;
+            slug: string;
+            sortOrder: number;
+            isActive: boolean;
+            version: number;
+            products: components["schemas"]["CafeProductResponseDto"][];
+        };
+        CafeBranchResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cafeId: string;
+            name: string;
+            address: string;
+            latitude: string;
+            longitude: string;
+            phone?: string | null;
+            isActive: boolean;
+            version: number;
+        };
+        CafeCatalogResponseDto: {
+            categories: components["schemas"]["CafeCategoryResponseDto"][];
+            branches: components["schemas"]["CafeBranchResponseDto"][];
+        };
+        CreateCafeCategoryDto: {
+            name: string;
+            slug: string;
+            sortOrder?: number;
+        };
+        CafeCategoryItemResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cafeId: string;
+            name: string;
+            slug: string;
+            sortOrder: number;
+            isActive: boolean;
+            version: number;
+        };
+        UpdateCafeCategoryDto: {
+            expectedVersion: number;
+            name?: string;
+            isActive?: boolean;
+            sortOrder?: number;
+        };
+        CreateCafeProductDto: {
+            /** Format: uuid */
+            categoryId: string;
+            name: string;
+            slug: string;
+            description: string;
+            price: number;
+            preparationMinutes: number;
+            sortOrder?: number;
+        };
+        UpdateCafeProductDto: {
+            expectedVersion: number;
+            /** Format: uuid */
+            categoryId?: string;
+            name?: string;
+            description?: string;
+            price?: number;
+            preparationMinutes?: number;
+            isActive?: boolean;
+            sortOrder?: number;
+        };
+        CreateCafeBranchDto: {
+            name: string;
+            address: string;
+            latitude: number;
+            longitude: number;
+            phone?: string;
+        };
+        UpdateCafeBranchDto: {
+            expectedVersion: number;
+            name?: string;
+            address?: string;
+            latitude?: number;
+            longitude?: number;
+            phone?: string;
+            isActive?: boolean;
         };
         SitePageSummaryDto: {
             /** @enum {string} */
@@ -10397,6 +10612,180 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeliveryRequestResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeCatalogResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_createCategory_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCafeCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeCategoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_updateCategory_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCafeCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeCategoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_createProduct_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCafeProductDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeProductResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_updateProduct_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCafeProductDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeProductResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_createBranch_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCafeBranchDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeBranchResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceCatalogController_updateBranch_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCafeBranchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeBranchResponseDto"];
                 };
             };
         };

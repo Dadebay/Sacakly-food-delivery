@@ -11,6 +11,7 @@ Saçakly is a private monorepo for a marketplace of independent cafes and a shar
 - Next.js customer website in `apps/web`: Turkmen/Russian/English, web checkout, public cafes, courier offers, PWA shell and SEO metadata.
 - OWNER-managed localized pages and SEO fields with draft/publish, version conflicts and audit.
 - Cafe-owned couriers or timed external network offers; a 60-minute meal opens to network couriers after 20 minutes, with first-claim reservation and assignment after packing.
+- Cafe-scoped category, fixed-price dish and branch editing in the merchant portal with server permissions, version checks and audit.
 - The imported durable order receipt queue and print agent remain the basis for receipts. New cafe orders are gated out of the legacy shared queue until per-cafe print credentials and routes exist. No fiscal receipt provider was added.
 - API and UI tests for the new boundaries; CI has no production deployment permissions.
 

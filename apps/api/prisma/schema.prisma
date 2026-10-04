@@ -343,6 +343,7 @@ model Category {
   receiptPrinterId String?         @db.Uuid
   receiptPrinterIp String?         @db.VarChar(15)
   sortOrder        Int             @default(0)
+  version          Int             @default(1)
   isActive         Boolean         @default(true)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
@@ -401,6 +402,7 @@ model Product {
   receiptPrinterIp   String?            @db.VarChar(15)
   isActive           Boolean            @default(true)
   sortOrder          Int                @default(0)
+  version            Int                @default(1)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   category           Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
@@ -599,6 +601,7 @@ model Branch {
   phone              String?             @db.VarChar(24)
   isActive           Boolean             @default(true)
   isPrimary          Boolean             @default(false)
+  version            Int                 @default(1)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   orders             Order[]

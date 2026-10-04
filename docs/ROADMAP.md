@@ -12,12 +12,13 @@ The new repository is a migration project. A checked box means the behavior is i
 - [x] Next.js customer website with one-cafe basket, web OTP/checkout, three languages, PWA static shell and SEO routes.
 - [x] OWNER page editor with localized content, SEO fields, draft/publish, version checks and audit.
 - [x] Cafe manager delivery choice: own courier reservation or time-scheduled external offers. The first external claim wins atomically; assignment follows packing confirmation.
+- [x] Cafe-scoped category, fixed-price product and branch editing in the merchant portal with version conflicts and audit.
 - [x] Existing receipt print pipeline identified; marketplace orders are kept out of its global queue until tenant-specific workers are implemented.
 - [x] New HTTP boundary tests and client tests; source API/admin tests, builds and dependency audits run locally.
 
 ## Required before onboarding independent cafes
 
-1. **Tenant catalog and kitchen.** Add cafe-scoped product/category/branch CRUD, order acceptance and cooking actions, and authorization tests for every cross-cafe ID. Scope the legacy operations API or remove it from the platform release.
+1. **Tenant catalog and kitchen.** Extend the new cafe-scoped editor to variants, media and translated content. Add order acceptance and cooking actions, and authorization tests for every cross-cafe ID. Scope the legacy operations API or remove it from the platform release.
 2. **Cafe receipts.** Add cafe-owned printers, per-cafe queue and station credentials, a separate claim/ack scope, main and kitchen routes, and cancellation/retry handling. Test that neither a legacy agent nor another cafe can view or claim a task. Reuse the imported print plan and durable task rules. Only then allow the RECEIPTS module to be activated.
 3. **Courier operations.** Add courier availability/shift data, platform-wide dispatch map and status workflow, merchant pickup details for assigned couriers only, durable notification retry and customer tracking. Preserve the existing order state machine and audited assignment.
 4. **Customer experience.** Update the existing native customer application to browse many cafes, select one cafe, reset or separate the cart when switching cafes, quote, checkout, and show the chosen cafe on the order. Ensure old mixed-cafe checkout routes cannot create new platform orders. Improve the web map/address picker and expose own-order tracking.

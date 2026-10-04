@@ -177,6 +177,51 @@ describe("marketplace HTTP tenant boundaries", () => {
     expect(await prisma.auditLog.count({ where: { action: "site.page.saved", entityId: "ru/about" } })).toBe(2);
   });
 
+  it("keeps merchant catalog and branches inside one cafe with versioned changes", async () => {
+    const base = `/api/v1/marketplace/merchant/cafes/${cafeA}/catalog`;
+    const categoryInput = { name: "Lunch", slug: "lunch" };
+    await request(server).post(`${base}/categories`).send(categoryInput).expect(401);
+    await request(server).post(`${base}/categories`).set("Authorization", await auth(otherId)).send(categoryInput).expect(403);
+    const category = await request(server).post(`${base}/categories`).set("Authorization", await auth(merchantId)).send(categoryInput).expect(201);
+    const categoryId = (category.body as { id: string }).id;
+    expect((category.body as { version: number }).version).toBe(1);
+    await request(server).patch(`${base}/categories/${categoryId}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 2, name: "New Lunch" }).expect(409);
+    await request(server).patch(`${base}/categories/${categoryId}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1, name: "New Lunch" }).expect(200);
+
+    const foreign = await prisma.category.create({ data: { cafeId: cafeB, name: "Foreign", slug: `foreign-${cafeB}` } });
+    await request(server).post(`${base}/products`).set("Authorization", await auth(merchantId))
+      .send({ categoryId: foreign.id, name: "Wrong", slug: "wrong", description: "Food", price: 12, preparationMinutes: 20 }).expect(404);
+    const product = await request(server).post(`${base}/products`).set("Authorization", await auth(merchantId))
+      .send({ categoryId, name: "Soup", slug: "soup", description: "Hot", price: 12.5, preparationMinutes: 20 }).expect(201);
+    const productId = (product.body as { id: string }).id;
+    await request(server).patch(`${base}/products/${productId}`).set("Authorization", await auth(otherId))
+      .send({ expectedVersion: 1, price: 15 }).expect(403);
+    await request(server).patch(`${base}/products/${productId}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1, price: 15 }).expect(200);
+    await request(server).patch(`${base}/products/${productId}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1, price: 17 }).expect(409);
+
+    const branch = await request(server).post(`${base}/branches`).set("Authorization", await auth(merchantId))
+      .send({ name: "Kitchen", address: "Main street", latitude: 37.96, longitude: 58.33 }).expect(201);
+    const branchId = (branch.body as { id: string }).id;
+    const foreignBranch = await prisma.branch.create({ data: { cafeId: cafeB, name: "Foreign kitchen", address: "Other street", latitude: 37.95, longitude: 58.32 } });
+    await request(server).patch(`${base}/branches/${foreignBranch.id}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1, isActive: false }).expect(404);
+    const listed = await request(server).get(base).set("Authorization", await auth(merchantId)).expect(200);
+    const catalog = listed.body as { categories: Array<{ id: string; products: Array<{ id: string; price: string }> }>; branches: Array<{ id: string }> };
+    expect(catalog.categories.find((entry) => entry.id === categoryId)?.products).toEqual(expect.arrayContaining([expect.objectContaining({ id: productId, price: "15" })]));
+    expect(catalog.branches.map((entry) => entry.id)).toContain(branchId);
+    expect(catalog.branches.map((entry) => entry.id)).not.toContain(foreignBranch.id);
+    expect(catalog.categories.map((entry) => entry.id)).not.toContain(foreign.id);
+    await request(server).get(`/api/v1/marketplace/merchant/cafes/${cafeB}/catalog`)
+      .set("Authorization", await auth(merchantId)).expect(403);
+    await request(server).patch(`${base}/branches/${branchId}`).set("Authorization", await auth(merchantId))
+      .send({ expectedVersion: 1, isActive: false }).expect(200);
+    expect(await prisma.auditLog.count({ where: { actorId: merchantId, action: { startsWith: "marketplace.catalog." } } })).toBe(6);
+  });
+
   it("schedules an external offer, awards it to one courier, and assigns only after packing", async () => {
     const suffix = Math.random().toString(36).slice(2, 9);
     const category = await prisma.category.create({ data: { cafeId: cafeA, name: "Delivery test", slug: `delivery-${suffix}` } });

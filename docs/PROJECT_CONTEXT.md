@@ -111,6 +111,15 @@ printing is claimed. Existing global order paths outside the new marketplace
 controllers still need a full tenant authorization audit before onboarding
 independent cafes.
 
+Cafe `ADMIN` and `OPERATOR` members can now manage their own categories,
+fixed-price products and branches in the merchant portal through a dedicated
+marketplace catalog API. The ORDERING entitlement and an active cafe are
+required for every read and write. Writes validate the cafe boundary, use
+optimistic versions and audit changes. Slugs are prefixed with the cafe UUID
+to preserve legacy global uniqueness. Existing orders keep their product and
+branch snapshots when the menu changes. Variants, translated menu content,
+media uploads, printer routes and inventory remain outside this new editor.
+
 ## Tenant boundary
 
 - Cafe becomes the tenant. Category already references it. Branch, staff
@@ -145,7 +154,7 @@ No imported A7 deployment pipeline may deploy this project.
 
 - apps/api: Existing NestJS API; tenant migration target.
 - apps/api/src/marketplace: Owner, cafe membership, courier application and
-  one-cafe checkout and delivery offer HTTP API.
+  one-cafe checkout, catalog management and delivery offer HTTP API.
 - apps/api/src/site-pages: OWNER-managed localized public pages.
 - apps/admin: Imported legacy A7 operations SPA.
 - apps/merchant: Separate cafe and platform OWNER React/Vite portal.
