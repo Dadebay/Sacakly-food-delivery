@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PageManager } from "./page-manager";
-import { api, type Cafe, type CafeMember, type CourierApplication, type DispatchCourier, type DispatchOrder, type Module, type ModuleKey } from "../api/client";
+import { api, type Cafe, type CafeMember, type CafeReadiness, type Cuisine, type CourierApplication, type DispatchCourier, type DispatchOrder, type Module, type ModuleKey } from "../api/client";
+import { cuisineKeys, cuisineLabels } from "./cuisines";
 
 const moduleLabels: Record<ModuleKey, string> = {
   CATALOG: "Каталог", ORDERING: "Заказы", KITCHEN: "Кухня", DELIVERY: "Доставка",
@@ -13,6 +14,7 @@ export function OwnerDashboard() {
   const [selectedCafeId, setSelectedCafeId] = useState("");
   const [modules, setModules] = useState<Module[]>([]);
   const [members, setMembers] = useState<CafeMember[]>([]);
+  const [readiness, setReadiness] = useState<CafeReadiness | null>(null);
   const [applications, setApplications] = useState<CourierApplication[]>([]);
   const [dispatchOrders, setDispatchOrders] = useState<DispatchOrder[]>([]);
   const [dispatchCouriers, setDispatchCouriers] = useState<DispatchCourier[]>([]);
@@ -21,6 +23,10 @@ export function OwnerDashboard() {
   const [memberRole, setMemberRole] = useState<"ADMIN" | "OPERATOR" | "COOK" | "ACCOUNTANT" | "COURIER">("ADMIN");
   const [newCafeName, setNewCafeName] = useState("");
   const [newCafeSlug, setNewCafeSlug] = useState("");
+  const [newCafeCuisines, setNewCafeCuisines] = useState<Cuisine[]>([]);
+  const [profileName, setProfileName] = useState("");
+  const [profileDescription, setProfileDescription] = useState("");
+  const [profileCuisines, setProfileCuisines] = useState<Cuisine[]>([]);
   const [pending, setPending] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -40,13 +46,36 @@ export function OwnerDashboard() {
 
   useEffect(() => {
     if (!selectedCafeId) return;
-    let active = true;
-    Promise.all([api.modules(selectedCafeId), api.members(selectedCafeId)]).then(([loadedModules, loadedMembers]) => {
-      if (active) { setModules(loadedModules); setMembers(loadedMembers); }
+    let active = true; setReadiness(null); setModules([]); setMembers([]);
+    Promise.all([api.modules(selectedCafeId), api.members(selectedCafeId), api.ownerCafeReadiness(selectedCafeId)]).then(([loadedModules, loadedMembers, loadedReadiness]) => {
+      if (active) { setModules(loadedModules); setMembers(loadedMembers); setReadiness(loadedReadiness); }
     })
       .catch((reason: unknown) => { if (active) setError(reason instanceof Error ? reason.message : "Не удалось загрузить модули"); });
     return () => { active = false; };
   }, [selectedCafeId]);
+
+  useEffect(() => {
+    const cafe = cafes.find((entry) => entry.id === selectedCafeId);
+    if (cafe) { setProfileName(cafe.name); setProfileDescription(cafe.description ?? ""); setProfileCuisines(cafe.cuisines); }
+  }, [cafes, selectedCafeId]);
+
+  function toggleCuisine(value: Cuisine, selected: Cuisine[], update: (values: Cuisine[]) => void) {
+    update(selected.includes(value) ? selected.filter((entry) => entry !== value) : [...selected, value]);
+  }
+
+  async function saveCafe(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const cafe = cafes.find((entry) => entry.id === selectedCafeId);
+    if (!cafe) return;
+    setPending("profile"); setError(""); setSuccess("");
+    try {
+      const updated = await api.updateCafe(cafe.id, { expectedVersion: cafe.version, name: profileName.trim(), description: profileDescription.trim(), cuisines: profileCuisines });
+      setCafes((before) => before.map((entry) => entry.id === updated.id ? updated : entry));
+      setReadiness(await api.ownerCafeReadiness(cafe.id));
+      setSuccess("Профиль кафе сохранён");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось сохранить кафе"); }
+    finally { setPending(""); }
+  }
 
   async function toggleModule(key: ModuleKey) {
     const current = modules.find((entry) => entry.key === key);
@@ -90,6 +119,7 @@ export function OwnerDashboard() {
       const previous = members.find((entry) => entry.userId === user.id);
       const updated = await api.grantMember(selectedCafeId, user.id, memberRole, previous?.version ?? 0);
       setMembers((before) => [...before.filter((entry) => entry.userId !== user.id), { ...updated, user }]);
+      setReadiness(await api.ownerCafeReadiness(selectedCafeId));
       setMemberPhone("");
       setSuccess("Сотрудник подключён к выбранному кафе");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось подключить сотрудника"); }
@@ -101,6 +131,7 @@ export function OwnerDashboard() {
     try {
       const updated = await api.grantMember(selectedCafeId, member.userId, member.role as typeof memberRole, member.version, isActive);
       setMembers((before) => before.map((entry) => entry.userId === member.userId ? { ...entry, ...updated } : entry));
+      setReadiness(await api.ownerCafeReadiness(selectedCafeId));
       setSuccess(isActive ? "Доступ восстановлен" : "Доступ отключён");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось изменить доступ"); }
     finally { setPending(""); }
@@ -110,12 +141,12 @@ export function OwnerDashboard() {
     event.preventDefault();
     setPending("cafe"); setError(""); setSuccess("");
     try {
-      const created = await api.createCafe(newCafeName.trim(), newCafeSlug.trim());
+      const created = await api.createCafe(newCafeName.trim(), newCafeSlug.trim(), newCafeCuisines);
       const loaded = await api.cafes();
       setCafes(loaded);
       setSelectedCafeId(created.id);
-      setNewCafeName(""); setNewCafeSlug("");
-      setSuccess("Кафе создано. Включите нужные модули и назначьте сотрудника.");
+      setNewCafeName(""); setNewCafeSlug(""); setNewCafeCuisines([]);
+      setSuccess("Кафе создано. Назначьте администратора; он заполнит меню, филиал и настройки чеков.");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось создать кафе"); }
     finally { setPending(""); }
   }
@@ -124,21 +155,22 @@ export function OwnerDashboard() {
     <div className="section-intro"><div><p className="eyebrow">Управление платформой</p><h2>Центр Saçakly</h2><p>Подключайте кафе, настраивайте модули и проверяйте будущих курьеров.</p></div><span className="owner-chip">OWNER</span></div>
     {error && <p className="notice error" role="alert">{error}</p>}{success && <p className="notice success" role="status">{success}</p>}
     <div className="owner-grid">
-      <div className="panel member-panel"><div className="panel-heading"><h3>Новое кафе</h3><span>Отдельный контур заказов</span></div><form onSubmit={createCafe} className="member-form" data-testid="owner-create-cafe-form"><label>Название<input required minLength={2} maxLength={120} value={newCafeName} onChange={(event) => setNewCafeName(event.target.value)} placeholder="Название кафе" data-testid="owner-new-cafe-name" /></label><label>Адрес в каталоге<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={140} value={newCafeSlug} onChange={(event) => setNewCafeSlug(event.target.value.toLowerCase())} placeholder="cafe-name" data-testid="owner-new-cafe-slug" /></label><button className="primary-button" disabled={Boolean(pending)} data-testid="owner-create-cafe">Создать кафе</button></form></div>
+      <div className="panel member-panel"><div className="panel-heading"><h3>1. Создать кафе</h3><span>Останется скрытым до включения заказов</span></div><form onSubmit={createCafe} className="member-form" data-testid="owner-create-cafe-form"><label>Название<input required minLength={2} maxLength={120} value={newCafeName} onChange={(event) => setNewCafeName(event.target.value)} placeholder="Название кафе" data-testid="owner-new-cafe-name" /></label><label>Адрес в каталоге<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={140} value={newCafeSlug} onChange={(event) => setNewCafeSlug(event.target.value.toLowerCase())} placeholder="cafe-name" data-testid="owner-new-cafe-slug" /></label><fieldset className="cuisine-picker"><legend>Тип кухни</legend>{cuisineKeys.map((value) => <label key={value}><input type="checkbox" data-testid={`owner-new-cafe-cuisine-${value}`} checked={newCafeCuisines.includes(value)} disabled={!newCafeCuisines.includes(value) && newCafeCuisines.length >= 4} onChange={() => toggleCuisine(value, newCafeCuisines, setNewCafeCuisines)} /> {cuisineLabels[value]}</label>)}</fieldset><button className="primary-button" disabled={Boolean(pending)} data-testid="owner-create-cafe">Создать кафе</button></form></div>
       <div className="panel"><div className="panel-heading"><h3>Кафе и модули</h3><span>{cafes.length} подключено</span></div>
         {cafes.length === 0 ? <p className="panel-message">Активных кафе пока нет. Создайте первое кафе выше.</p> : <>
-          <label className="select-label">Выбранное кафе<select value={selectedCafeId} onChange={(event) => setSelectedCafeId(event.target.value)} data-testid="owner-cafe-select">{cafes.map((cafe) => <option key={cafe.id} value={cafe.id}>{cafe.name}</option>)}</select></label>
-          <div className="module-list">{moduleKeys.map((key) => { const active = modules.find((entry) => entry.key === key)?.enabled ?? false; const available = key === "ORDERING" || key === "RECEIPTS"; return <div className="module-row" key={key}><span>{moduleLabels[key]} {!available && <small>скоро</small>}{key === "RECEIPTS" && <small>после настройки принтера и агента в кабинете кафе</small>}</span><button className={active ? "toggle active" : "toggle"} aria-label={`${moduleLabels[key]}: ${active ? "выключить" : available ? "включить" : "пока недоступно"}`} aria-pressed={active} disabled={Boolean(pending) || (!available && !active)} onClick={() => toggleModule(key)} data-testid={`owner-module-${key.toLowerCase()}`}><span /></button></div>; })}</div>
+          <label className="select-label">Выбранное кафе<select value={selectedCafeId} disabled={Boolean(pending)} onChange={(event) => setSelectedCafeId(event.target.value)} data-testid="owner-cafe-select">{cafes.map((cafe) => <option key={cafe.id} value={cafe.id}>{cafe.name}</option>)}</select></label>
+          <div className="module-list">{moduleKeys.map((key) => { const active = modules.find((entry) => entry.key === key)?.enabled ?? false; const available = key === "ORDERING" || key === "RECEIPTS"; const ready = key !== "ORDERING" || active || readiness?.readyForOrdering; return <div className="module-row" key={key}><span>{moduleLabels[key]} {!available && <small>скоро</small>}{key === "RECEIPTS" && <small>после настройки принтера и агента в кабинете кафе</small>}</span><button className={active ? "toggle active" : "toggle"} aria-label={`${moduleLabels[key]}: ${active ? "выключить" : available && ready ? "включить" : "пока недоступно"}`} aria-pressed={active} disabled={Boolean(pending) || (!available && !active) || !ready} onClick={() => toggleModule(key)} data-testid={`owner-module-${key.toLowerCase()}`}><span /></button></div>; })}</div>
         </>}
+      </div>
+      {selectedCafeId && <div className="panel member-panel" data-testid="owner-cafe-setup"><div className="panel-heading"><h3>2. Настройка выбранного кафе</h3><span>{readiness?.readyForOrdering ? "Готово к публикации" : "Подготовка"}</span></div><form className="cafe-profile-form" data-testid="owner-cafe-profile-form" onSubmit={saveCafe}><label>Название<input required minLength={2} maxLength={120} data-testid="owner-cafe-profile-name" value={profileName} onChange={(event) => setProfileName(event.target.value)} /></label><label>Описание<textarea maxLength={1000} data-testid="owner-cafe-profile-description" value={profileDescription} onChange={(event) => setProfileDescription(event.target.value)} /></label><fieldset className="cuisine-picker"><legend>Тип кухни для витрины</legend>{cuisineKeys.map((value) => <label key={value}><input type="checkbox" data-testid={`owner-cafe-profile-cuisine-${value}`} checked={profileCuisines.includes(value)} disabled={!profileCuisines.includes(value) && profileCuisines.length >= 4} onChange={() => toggleCuisine(value, profileCuisines, setProfileCuisines)} /> {cuisineLabels[value]}</label>)}</fieldset><button className="mini-primary" data-testid="owner-cafe-profile-save" disabled={Boolean(pending)}>Сохранить профиль</button></form><ol className="setup-checklist"><li className={readiness?.checks.cuisine ? "done" : ""}>Тип кухни — OWNER</li><li className={readiness?.checks.manager ? "done" : ""}>Администратор — подключить ниже по телефону</li><li className={readiness?.checks.branch ? "done" : ""}>Активный филиал — администратор кафе</li><li className={readiness?.checks.menu ? "done" : ""}>Активное блюдо в разделе меню — администратор кафе</li><li className={readiness?.receiptsConfigured ? "done" : ""}>Принтер и токен агента — для чеков отдельно</li></ol><button className="outline-button" data-testid="owner-cafe-setup-refresh" disabled={Boolean(pending)} onClick={async () => { setPending("readiness"); setError(""); try { setReadiness(await api.ownerCafeReadiness(selectedCafeId)); } catch (reason) { setError(reason instanceof Error ? reason.message : "Не удалось обновить проверку"); } finally { setPending(""); } }}>Обновить проверку</button></div>}
+      <div className="panel member-panel"><div className="panel-heading"><h3>Доступ сотрудников</h3><span>Только выбранное кафе</span></div><p>Сотрудник сначала входит в систему по SMS. Затем подключите его номер к этому кафе.</p><form onSubmit={grantMember} className="member-form" data-testid="owner-member-form"><label>Номер телефона<input type="tel" required placeholder="+993 6X XX XX XX" value={memberPhone} onChange={(event) => setMemberPhone(event.target.value)} data-testid="owner-member-phone" /></label><label>Роль в кафе<select value={memberRole} onChange={(event) => setMemberRole(event.target.value as typeof memberRole)} data-testid="owner-member-role"><option value="ADMIN">Менеджер</option><option value="OPERATOR">Оператор</option><option value="COOK">Кухня</option><option value="ACCOUNTANT">Бухгалтер</option><option value="COURIER">Курьер кафе</option></select></label><button className="primary-button" disabled={Boolean(pending) || !selectedCafeId} data-testid="owner-grant-member">Подключить</button></form>
+        {members.length > 0 && <div className="member-list" data-testid="owner-member-list">{members.map((member) => <div className="application-row" key={member.userId}><div><strong>{member.user.firstName || member.user.phone}</strong><small>{member.user.phone} · {member.role} · {member.isActive ? "активен" : "отключён"}</small></div><div className="application-actions"><button type="button" disabled={Boolean(pending)} onClick={() => changeMember(member, !member.isActive)} data-testid={`owner-member-toggle-${member.userId}`}>{member.isActive ? "Отключить" : "Восстановить"}</button></div></div>)}</div>}
       </div>
       <div className="panel"><div className="panel-heading"><h3>Заявки курьеров</h3><span>{applications.length} ожидают</span></div>
         {applications.length === 0 ? <p className="panel-message">Новых заявок нет.</p> : <div className="application-list">{applications.map((entry) => <article key={entry.userId} className="application-row" data-testid={`owner-application-${entry.userId}`}><div><strong>{[entry.user.firstName, entry.user.lastName].filter(Boolean).join(" ") || "Новый курьер"}</strong><small>{entry.user.phone}</small></div><div className="application-actions"><button disabled={Boolean(pending)} onClick={() => review(entry, "REJECTED")} data-testid={`owner-reject-${entry.userId}`}>Отклонить</button><button className="mini-primary" disabled={Boolean(pending)} onClick={() => review(entry, "APPROVED")} data-testid={`owner-approve-${entry.userId}`}>Одобрить</button></div></article>)}</div>}
       </div>
       <div className="panel member-panel"><div className="panel-heading"><h3>Общая доставка</h3><span>{dispatchOrders.length} заказов к назначению</span></div>
         {dispatchOrders.length === 0 ? <p className="panel-message">Готовых заказов сейчас нет.</p> : <div className="application-list" data-testid="owner-dispatch-list">{dispatchOrders.map((order) => <div className="application-row" key={order.id} data-testid={`owner-dispatch-${order.id}`}><div><strong>№{order.number} · {order.cafe.name}</strong><small>{order.address} · {order.status === "READY" ? "Готов" : "Курьер назначен"}</small></div><div className="dispatch-controls"><select aria-label={`Курьер для заказа №${order.number}`} value={courierSelection[order.id] || dispatchCouriers[0]?.id || ""} onChange={(event) => setCourierSelection((before) => ({ ...before, [order.id]: event.target.value }))} disabled={Boolean(pending) || dispatchCouriers.length === 0} data-testid={`owner-dispatch-courier-${order.id}`}>{dispatchCouriers.length === 0 ? <option value="">Нет курьеров</option> : dispatchCouriers.map((courier) => <option key={courier.id} value={courier.id}>{[courier.firstName, courier.lastName].filter(Boolean).join(" ") || courier.phone}</option>)}</select><button className="mini-primary" disabled={Boolean(pending) || dispatchCouriers.length === 0} onClick={() => assignCourier(order)} data-testid={`owner-dispatch-assign-${order.id}`}>Назначить</button></div></div>)}</div>}
-      </div>
-      <div className="panel member-panel"><div className="panel-heading"><h3>Доступ сотрудников</h3><span>Только выбранное кафе</span></div><p>Сотрудник сначала входит в систему по SMS. Затем подключите его номер к этому кафе.</p><form onSubmit={grantMember} className="member-form" data-testid="owner-member-form"><label>Номер телефона<input type="tel" required placeholder="+993 6X XX XX XX" value={memberPhone} onChange={(event) => setMemberPhone(event.target.value)} data-testid="owner-member-phone" /></label><label>Роль в кафе<select value={memberRole} onChange={(event) => setMemberRole(event.target.value as typeof memberRole)} data-testid="owner-member-role"><option value="ADMIN">Менеджер</option><option value="OPERATOR">Оператор</option><option value="COOK">Кухня</option><option value="ACCOUNTANT">Бухгалтер</option><option value="COURIER">Курьер кафе</option></select></label><button className="primary-button" disabled={Boolean(pending) || !selectedCafeId} data-testid="owner-grant-member">Подключить</button></form>
-        {members.length > 0 && <div className="member-list" data-testid="owner-member-list">{members.map((member) => <div className="application-row" key={member.userId}><div><strong>{member.user.firstName || member.user.phone}</strong><small>{member.user.phone} · {member.role} · {member.isActive ? "активен" : "отключён"}</small></div><div className="application-actions"><button type="button" disabled={Boolean(pending)} onClick={() => changeMember(member, !member.isActive)} data-testid={`owner-member-toggle-${member.userId}`}>{member.isActive ? "Отключить" : "Восстановить"}</button></div></div>)}</div>}
       </div>
     </div>
     <PageManager />

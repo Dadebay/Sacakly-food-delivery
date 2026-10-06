@@ -1,4 +1,14 @@
-# Development notes — 2026-10-03
+# Development notes — 2026-10-06
+
+Current cafe onboarding, cuisine filtering and private reports are documented
+in [CAFE_ONBOARDING_QA.md](CAFE_ONBOARDING_QA.md). The current verification
+record is in [CHANGELOG.md](CHANGELOG.md); release blockers are in
+[ROADMAP.md](ROADMAP.md).
+
+The notes below describe the original import and do not represent current
+feature coverage.
+
+## Historical development notes — 2026-10-03
 
 ## Implemented
 

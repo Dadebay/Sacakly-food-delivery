@@ -80,7 +80,7 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
     {error && <p className="notice error" role="alert">{error}</p>}{message && <p className="notice success" role="status">{message}</p>}
     {loading && <p role="status">Загружаем каталог…</p>}
     {catalog && <div className="catalog-grid">
-      <section className="panel"><h3>Категории</h3><form className="catalog-form" onSubmit={addCategory}>
+      <section className="panel"><h3>Категории</h3><form className="catalog-form" data-testid="catalog-category-form" onSubmit={addCategory}>
         <label>Название<input required minLength={2} maxLength={100} value={categoryName} onChange={(event) => setCategoryName(event.target.value)} /></label>
         <label>Код URL (латиница)<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={80} value={categorySlug} onChange={(event) => setCategorySlug(event.target.value)} placeholder="osnovnye-blyuda" /></label>
         <button type="submit" disabled={busy}>Добавить категорию</button></form>
@@ -88,8 +88,8 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
           {editCategory?.id === category.id && <form className="catalog-inline" onSubmit={async (event) => { event.preventDefault(); if (await mutate(() => api.updateCafeCategory(cafeId, category.id, { expectedVersion: editCategory.version, name: editCategory.name }), "Категория обновлена")) setEditCategory(null); }}><label>Новое название<input required minLength={2} maxLength={100} value={editCategory.name} onChange={(event) => setEditCategory({ ...editCategory, name: event.target.value })} /></label><button disabled={busy}>Сохранить</button><button type="button" onClick={() => setEditCategory(null)}>Отмена</button></form>}
         </article>)}</div>
       </section>
-      <section className="panel"><h3>Блюда</h3><form className="catalog-form" onSubmit={addProduct}>
-        <label>Категория<select required value={productCategoryId} onChange={(event) => setProductCategoryId(event.target.value)}><option value="">Выберите</option>{catalog.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+      <section className="panel"><h3>Блюда</h3><form className="catalog-form" data-testid="catalog-product-form" onSubmit={addProduct}>
+        <label>Категория<select data-testid="catalog-product-category" required value={productCategoryId} onChange={(event) => setProductCategoryId(event.target.value)}><option value="">Выберите</option>{catalog.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
         <label>Название<input required minLength={2} maxLength={160} value={productName} onChange={(event) => setProductName(event.target.value)} /></label>
         <label>Код URL (латиница)<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={80} value={productSlug} onChange={(event) => setProductSlug(event.target.value)} placeholder="palow" /></label>
         <label>Описание<textarea maxLength={2000} value={productDescription} onChange={(event) => setProductDescription(event.target.value)} /></label>
@@ -99,7 +99,7 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
           {editProduct?.id === product.id && <form className="catalog-inline" onSubmit={saveProduct}><label>Категория<select value={editProduct.categoryId} onChange={(event) => setEditProduct({ ...editProduct, categoryId: event.target.value })}>{catalog.categories.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label><label>Название<input required minLength={2} value={editProduct.name} onChange={(event) => setEditProduct({ ...editProduct, name: event.target.value })} /></label><label>Описание<textarea value={editProduct.description} onChange={(event) => setEditProduct({ ...editProduct, description: event.target.value })} /></label><div className="catalog-two"><label>Цена<input required type="number" min="0" step="0.01" value={editProduct.price} onChange={(event) => setEditProduct({ ...editProduct, price: event.target.value })} /></label><label>Минуты<input required type="number" min="0" max="1440" step="1" value={editProduct.preparationMinutes} onChange={(event) => setEditProduct({ ...editProduct, preparationMinutes: event.target.value })} /></label></div><button disabled={busy}>Сохранить</button><button type="button" onClick={() => setEditProduct(null)}>Отмена</button></form>}
         </article>))}</div>
       </section>
-      <section className="panel catalog-branches"><h3>Филиалы и кухни</h3><form className="catalog-form" onSubmit={addBranch}>
+      <section className="panel catalog-branches"><h3>Филиалы и кухни</h3><form className="catalog-form" data-testid="catalog-branch-form" onSubmit={addBranch}>
         <label>Название<input required minLength={2} maxLength={160} value={branchName} onChange={(event) => setBranchName(event.target.value)} /></label><label>Адрес<input required minLength={3} maxLength={500} value={branchAddress} onChange={(event) => setBranchAddress(event.target.value)} /></label>
         <div className="catalog-two"><label>Широта<input required type="number" min="-90" max="90" step="0.0000001" value={latitude} onChange={(event) => setLatitude(event.target.value)} /></label><label>Долгота<input required type="number" min="-180" max="180" step="0.0000001" value={longitude} onChange={(event) => setLongitude(event.target.value)} /></label></div>
         <button type="submit" disabled={busy}>Добавить филиал</button></form>

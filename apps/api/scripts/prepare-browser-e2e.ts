@@ -19,7 +19,7 @@ if (
   target.pathname !== "/sacakly_test" ||
   !local(admin, "5432") ||
   admin.pathname !== "/sacakly" ||
-  !local(redis, "6379") ||
+  !(local(redis, "6379") || local(redis, "6381")) ||
   redis.pathname !== "/15" ||
   process.env.NODE_ENV === "production"
 ) {

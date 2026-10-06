@@ -16,8 +16,11 @@ npm run test:e2e
 docker compose down
 ```
 
-The suite runs Chromium on desktop and explicitly checks the customer site at
-mobile width. It uses local-only test OTP accounts, a non-delivering console
+CI runs Chromium on desktop and checks the customer site, cafe setup and OWNER
+console at a 390 × 844 mobile viewport. The main journey also creates a draft
+cafe, grants its administrator, fills its menu and branch through the portal,
+then publishes it through OWNER and checks the cuisine filter. Cafe reports,
+receipt configuration before publication and tenant boundaries use the real API. It uses local-only test OTP accounts, a non-delivering console
 SMS/push provider and fake private printer addresses. The tested path crosses
 real browser pages and the real NestJS API; the server owns totals, tenant
 access, delivery schedule and receipt queue state. It never sends a real SMS,
@@ -28,3 +31,20 @@ For a new feature, add a focused browser assertion where visual interaction
 or cross-app coordination matters; keep authorization, race and transition
 matrices in API tests. Record new coverage and remaining external acceptance
 work in `CHANGELOG.md` in the same PR.
+
+## Additional local browsers
+
+Run each browser separately: the journey mutates shared fixtures, so every
+run needs its own preparation. Install the chosen Playwright browser first.
+
+```bash
+npx playwright install firefox webkit
+npm run test:e2e -- --browser=firefox
+npm run test:e2e -- --browser=webkit
+```
+
+When another project uses Redis port 6379, start a dedicated test Redis at
+6381 and prefix the command with
+`TEST_REDIS_URL=redis://127.0.0.1:6381/15`. Never use another project's Redis
+instance: fixture preparation clears DB 15. Playwright WebKit is an engine
+check, not verification on physical Safari/iOS devices.

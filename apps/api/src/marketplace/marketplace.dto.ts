@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { ArrayMaxSize, ArrayUnique, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateIf } from "class-validator";
 import { Role } from "../generated/prisma/client";
 import { CreateOrderDto, QuoteOrderDto } from "../orders/orders.dto";
+import { CAFE_CUISINES, type CafeCuisine } from "./cafe-onboarding";
 
 export const CAFE_MODULE_KEYS = [
   "CATALOG", "ORDERING", "KITCHEN", "DELIVERY", "RECEIPTS",
@@ -43,6 +45,7 @@ export class GrantCafeMemberDto {
 
 export class CreateMarketplaceCafeDto {
   @ApiProperty({ minLength: 2, maxLength: 120 })
+  @Transform(({ value }: { value: unknown }) => typeof value === "string" ? value.trim() : value)
   @IsString()
   @MinLength(2)
   @MaxLength(120)
@@ -58,6 +61,51 @@ export class CreateMarketplaceCafeDto {
   @IsString()
   @MaxLength(1000)
   description?: string;
+
+  @ApiPropertyOptional({ enum: CAFE_CUISINES, isArray: true, maxItems: 4, uniqueItems: true })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  @IsIn(CAFE_CUISINES, { each: true })
+  cuisines?: CafeCuisine[];
+}
+
+export class UpdateMarketplaceCafeDto {
+  @ApiProperty({ minimum: 1 })
+  @IsInt()
+  @Min(1)
+  @Max(2147483647)
+  expectedVersion: number;
+
+  @ApiPropertyOptional({ minLength: 2, maxLength: 120 })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @Transform(({ value }: { value: unknown }) => typeof value === "string" ? value.trim() : value)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(120)
+  name?: string;
+
+  @ApiPropertyOptional({ maxLength: 1000 })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({ enum: CAFE_CUISINES, isArray: true, maxItems: 4, uniqueItems: true })
+  @ValidateIf((_object, value: unknown) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  @IsIn(CAFE_CUISINES, { each: true })
+  cuisines?: CafeCuisine[];
+}
+
+export class ListMarketplaceCafesDto {
+  @ApiPropertyOptional({ enum: CAFE_CUISINES })
+  @IsOptional()
+  @IsIn(CAFE_CUISINES)
+  cuisine?: CafeCuisine;
 }
 
 export class LookupMarketplaceUserDto {

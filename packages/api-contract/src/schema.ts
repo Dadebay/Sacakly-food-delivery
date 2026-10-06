@@ -2516,10 +2516,62 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** OWNER lists every cafe, including drafts */
+        get: operations["MarketplaceController_ownerCafes_v1"];
         put?: never;
         /** OWNER creates an independent cafe tenant */
         post: operations["MarketplaceController_createCafe_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/owner/cafes/{cafeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** OWNER updates a cafe profile and cuisine tags with version checking */
+        patch: operations["MarketplaceController_updateCafe_v1"];
+        trace?: never;
+    };
+    "/api/v1/marketplace/owner/cafes/{cafeId}/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** OWNER checks setup before enabling ordering */
+        get: operations["MarketplaceController_ownerCafeReadiness_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cafe member checks setup progress */
+        get: operations["MarketplaceController_merchantCafeReadiness_v1"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2655,6 +2707,23 @@ export interface paths {
         };
         /** List only orders for an enabled member cafe */
         get: operations["MarketplaceController_merchantOrders_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/reports/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cafe ADMIN or ACCOUNTANT reads a cafe-scoped order and cash report */
+        get: operations["MarketplaceController_merchantOrdersReport_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6307,6 +6376,7 @@ export interface components {
             name: string;
             slug: string;
             description?: string;
+            cuisines?: ("SUSHI" | "BURGERS" | "FAST_FOOD" | "PIZZA" | "TURKMEN" | "BAKERY" | "COFFEE" | "OTHER")[];
         };
         MarketplaceCafeResponseDto: {
             /** Format: uuid */
@@ -6316,6 +6386,28 @@ export interface components {
             description?: string | null;
             imageUrl?: string | null;
             isActive: boolean;
+            cuisines: ("SUSHI" | "BURGERS" | "FAST_FOOD" | "PIZZA" | "TURKMEN" | "BAKERY" | "COFFEE" | "OTHER")[];
+            version: number;
+        };
+        UpdateMarketplaceCafeDto: {
+            expectedVersion: number;
+            name?: string;
+            description?: string;
+            cuisines?: ("SUSHI" | "BURGERS" | "FAST_FOOD" | "PIZZA" | "TURKMEN" | "BAKERY" | "COFFEE" | "OTHER")[];
+        };
+        CafeReadinessChecksDto: {
+            cuisine: boolean;
+            manager: boolean;
+            branch: boolean;
+            menu: boolean;
+        };
+        CafeReadinessResponseDto: {
+            /** Format: uuid */
+            cafeId: string;
+            active: boolean;
+            checks: components["schemas"]["CafeReadinessChecksDto"];
+            readyForOrdering: boolean;
+            receiptsConfigured: boolean;
         };
         LookupMarketplaceUserDto: {
             /** @example +99362969614 */
@@ -6441,6 +6533,29 @@ export interface components {
             items: components["schemas"]["MerchantOrderItemResponseDto"][];
             gifts: components["schemas"]["MerchantOrderGiftResponseDto"][];
             deliveryRequest?: components["schemas"]["DeliveryRequestResponseDto"] | null;
+        };
+        CafeBranchReportDto: {
+            /** Format: uuid */
+            branchId: string | null;
+            branchName: string | null;
+            orders: number;
+            orderValue: string;
+            cashCollected: string;
+        };
+        CafeOrdersReportDto: {
+            /** Format: uuid */
+            cafeId: string;
+            from: string;
+            to: string;
+            orders: number;
+            cancelled: number;
+            /** @description Non-cancelled order value, including orders in progress */
+            orderValue: string;
+            /** @description Cash returned or reconciled for orders created in this period */
+            cashCollected: string;
+            /** @description Delivered orders awaiting cash return */
+            deliveredAwaitingCash: string;
+            branches: components["schemas"]["CafeBranchReportDto"][];
         };
         OwnCafeCourierResponseDto: {
             /** Format: uuid */
@@ -10507,6 +10622,25 @@ export interface operations {
             };
         };
     };
+    MarketplaceController_ownerCafes_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceCafeResponseDto"][];
+                };
+            };
+        };
+    };
     MarketplaceController_createCafe_v1: {
         parameters: {
             query?: never;
@@ -10526,6 +10660,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MarketplaceCafeResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceController_updateCafe_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMarketplaceCafeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketplaceCafeResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceController_ownerCafeReadiness_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeReadinessResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceController_merchantCafeReadiness_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeReadinessResponseDto"];
                 };
             };
         };
@@ -10730,9 +10931,37 @@ export interface operations {
             };
         };
     };
+    MarketplaceController_merchantOrdersReport_v1: {
+        parameters: {
+            query: {
+                /** @description First day in Asia/Ashgabat */
+                from: string;
+                /** @description Last day, inclusive, in Asia/Ashgabat */
+                to: string;
+            };
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeOrdersReportDto"];
+                };
+            };
+        };
+    };
     MarketplacePublicController_publicCafes_v1: {
         parameters: {
-            query?: never;
+            query?: {
+                cuisine?: "SUSHI" | "BURGERS" | "FAST_FOOD" | "PIZZA" | "TURKMEN" | "BAKERY" | "COFFEE" | "OTHER";
+            };
             header?: never;
             path?: never;
             cookie?: never;

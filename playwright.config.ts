@@ -5,7 +5,7 @@ const apiEnvironment = {
   DEPLOYMENT_ENVIRONMENT: "development",
   PORT: "4000",
   DATABASE_URL: "postgresql://sacakly:sacakly@127.0.0.1:5432/sacakly_test",
-  REDIS_URL: "redis://127.0.0.1:6379/15",
+  REDIS_URL: process.env.TEST_REDIS_URL ?? "redis://127.0.0.1:6379/15",
   JWT_ACCESS_SECRET: "browser-e2e-jwt-secret-with-at-least-32-characters",
   OTP_PEPPER: "browser-e2e-otp-pepper-with-at-least-32-characters",
   LONG_LIVED_TEST_OTP_ENABLED: "true",

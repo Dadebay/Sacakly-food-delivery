@@ -33,6 +33,12 @@ fresh GitHub runners. The local bucket is created with the API's AWS SDK by
 This affects local/CI containers only; no platform production registry is
 configured.
 
+Browser/API tests can use a separate local Redis listener on port 6381 with
+`TEST_REDIS_URL=redis://127.0.0.1:6381/15` when another project occupies 6379.
+The browser fixture guard accepts only these two local ports and Redis DB 15;
+the normal application Redis port remains 6379. Test processes must not flush
+another project's Redis instance.
+
 The cafe print agent uses the existing print-agent binary with
 `-api-scope marketplace` and a cafe-specific `SACAKLY_RECEIPT_AGENT_TOKEN`
 environment variable. The token is displayed once in the cafe portal and

@@ -44,7 +44,7 @@ export async function seedBrowserE2e() {
       },
     ].entries()) {
       const cafe = await prisma.cafe.create({
-        data: { name: entry.name, slug: entry.slug, sortOrder: index },
+        data: { name: entry.name, slug: entry.slug, sortOrder: index, cuisines: index === 0 ? ["TURKMEN"] : ["FAST_FOOD"] },
       });
       await prisma.cafeModuleEntitlement.create({
         data: { cafeId: cafe.id, key: "ORDERING", enabled: true },

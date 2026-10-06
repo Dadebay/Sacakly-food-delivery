@@ -1,19 +1,21 @@
 import {
-  Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Put,
+  Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Put, Query,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../common/auth.decorators";
 import type { AuthUser } from "../common/auth.types";
 import {
   CafeModuleKeyDto, CreateMarketplaceCafeDto, GrantCafeMemberDto, LookupMarketplaceUserDto,
-  MarketplaceCreateOrderDto, MarketplaceQuoteOrderDto, ReviewCourierDto, SetCafeModuleDto,
+  MarketplaceCreateOrderDto, MarketplaceQuoteOrderDto, ReviewCourierDto, SetCafeModuleDto, UpdateMarketplaceCafeDto,
 } from "./marketplace.dto";
 import { MarketplaceService } from "./marketplace.service";
 import { OrdersService } from "../orders/orders.service";
 import { AssignCourierDto } from "../orders/orders.dto";
+import { CafeOrdersReportDto, CafeReportPeriodDto } from "./marketplace-reports.dto";
+import { MarketplaceReportsService } from "./marketplace-reports.service";
 import { OrderQuoteResponseDto, OrderResponseDto } from "../orders/orders-response.dto";
 import {
-  CafeMembershipResponseDto, CafeMembershipWithUserResponseDto, CafeModuleResponseDto,
+  CafeMembershipResponseDto, CafeMembershipWithUserResponseDto, CafeModuleResponseDto, CafeReadinessResponseDto,
   CourierApplicationResponseDto, DispatchCourierResponseDto, DispatchOrderResponseDto,
   MarketplaceCafeResponseDto, MarketplaceUserResponseDto,
   MemberCafeResponseDto, MerchantOrderResponseDto, OwnerStatusResponseDto,
@@ -27,6 +29,7 @@ export class MarketplaceController {
   constructor(
     private readonly marketplace: MarketplaceService,
     private readonly orders: OrdersService,
+    private readonly reports: MarketplaceReportsService,
   ) {}
 
   @Get("owner/me")
@@ -95,6 +98,32 @@ export class MarketplaceController {
   @ApiCreatedResponse({ type: MarketplaceCafeResponseDto })
   createCafe(@CurrentUser() actor: AuthUser, @Body() dto: CreateMarketplaceCafeDto) {
     return this.marketplace.createCafe(actor, dto);
+  }
+
+  @Get("owner/cafes")
+  @ApiOperation({ summary: "OWNER lists every cafe, including drafts" })
+  @ApiOkResponse({ type: [MarketplaceCafeResponseDto] })
+  ownerCafes(@CurrentUser() actor: AuthUser) { return this.marketplace.ownerCafes(actor); }
+
+  @Patch("owner/cafes/:cafeId")
+  @ApiOperation({ summary: "OWNER updates a cafe profile and cuisine tags with version checking" })
+  @ApiOkResponse({ type: MarketplaceCafeResponseDto })
+  updateCafe(@CurrentUser() actor: AuthUser, @Param("cafeId", ParseUUIDPipe) cafeId: string, @Body() dto: UpdateMarketplaceCafeDto) {
+    return this.marketplace.updateCafe(actor, cafeId, dto);
+  }
+
+  @Get("owner/cafes/:cafeId/readiness")
+  @ApiOperation({ summary: "OWNER checks setup before enabling ordering" })
+  @ApiOkResponse({ type: CafeReadinessResponseDto })
+  ownerCafeReadiness(@CurrentUser() actor: AuthUser, @Param("cafeId", ParseUUIDPipe) cafeId: string) {
+    return this.marketplace.ownerCafeReadiness(actor, cafeId);
+  }
+
+  @Get("merchant/cafes/:cafeId/readiness")
+  @ApiOperation({ summary: "Cafe member checks setup progress" })
+  @ApiOkResponse({ type: CafeReadinessResponseDto })
+  merchantCafeReadiness(@CurrentUser() actor: AuthUser, @Param("cafeId", ParseUUIDPipe) cafeId: string) {
+    return this.marketplace.merchantCafeReadiness(actor, cafeId);
   }
 
   @Post("owner/users/lookup")
@@ -179,5 +208,12 @@ export class MarketplaceController {
     @Param("cafeId", ParseUUIDPipe) cafeId: string,
   ) {
     return this.marketplace.merchantOrders(actor, cafeId);
+  }
+
+  @Get("merchant/cafes/:cafeId/reports/orders")
+  @ApiOperation({ summary: "Cafe ADMIN or ACCOUNTANT reads a cafe-scoped order and cash report" })
+  @ApiOkResponse({ type: CafeOrdersReportDto })
+  merchantOrdersReport(@CurrentUser() actor: AuthUser, @Param("cafeId", ParseUUIDPipe) cafeId: string, @Query() period: CafeReportPeriodDto) {
+    return this.reports.orders(actor, cafeId, period);
   }
 }

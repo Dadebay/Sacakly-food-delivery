@@ -14,13 +14,9 @@ export class MarketplaceReceiptsService {
   constructor(private readonly prisma: PrismaService, private readonly queue: ReceiptQueueService) {}
 
   private async authorize(actor: AuthUser, cafeId: string, manager = false) {
-    const [membership, ordering] = await Promise.all([
-      this.prisma.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } }, include: { cafe: { select: { isActive: true } } } }),
-      this.prisma.cafeModuleEntitlement.findUnique({ where: { cafeId_key: { cafeId, key: "ORDERING" } } }),
-    ]);
+    const membership = await this.prisma.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } }, include: { cafe: { select: { isActive: true } } } });
     assertCafeMember(actor.id, cafeId, membership, manager ? [Role.ADMIN] : [Role.ADMIN, Role.OPERATOR]);
     if (!membership?.cafe.isActive) throw new ForbiddenException("Cafe is inactive");
-    assertModuleEnabled(ordering, cafeId);
   }
 
   async config(actor: AuthUser, cafeId: string) {

@@ -121,11 +121,59 @@ describe("marketplace HTTP tenant boundaries", () => {
       .set("Authorization", await auth(merchantId))
       .expect(200);
     expect((myCafes.body as Array<{ cafeId: string }>).map((entry) => entry.cafeId)).toEqual([cafeA]);
+    await request(server).get(`/api/v1/marketplace/delivery/merchant/cafes/${cafeA}/couriers`)
+      .set("Authorization", await auth(merchantId)).expect(200);
+    await request(server).get(`/api/v1/marketplace/delivery/merchant/cafes/${cafeB}/couriers`)
+      .set("Authorization", await auth(merchantId)).expect(403);
+    const readinessPath = `/api/v1/marketplace/owner/cafes/${cafeA}/readiness`;
+    const before = await request(server).get(readinessPath).set("Authorization", await auth(ownerId)).expect(200);
+    expect((before.body as { readyForOrdering: boolean }).readyForOrdering).toBe(false);
+    await request(server).get(readinessPath).set("Authorization", await auth(merchantId)).expect(403);
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafeA}/modules/ORDERING`)
+      .set("Authorization", await auth(ownerId)).send({ enabled: true, expectedVersion: 0 }).expect(409);
+    await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+      .set("Authorization", await auth(merchantId)).send({ expectedVersion: 1, cuisines: ["SUSHI"] }).expect(403);
+    const profile = await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+      .set("Authorization", await auth(ownerId)).send({ expectedVersion: 1, cuisines: ["SUSHI", "FAST_FOOD"] }).expect(200);
+    expect((profile.body as { version: number }).version).toBe(2);
+    await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+      .set("Authorization", await auth(ownerId)).send({ expectedVersion: 1, cuisines: ["BURGERS"] }).expect(409);
+    await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+      .set("Authorization", await auth(ownerId)).send({ expectedVersion: 2, cuisines: ["NOT_REAL"] }).expect(400);
+    for (const invalid of [{ cuisines: null }, { name: "  " }, { name: null }, { description: null }, { cuisines: ["SUSHI", "SUSHI"] }]) {
+      await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+        .set("Authorization", await auth(ownerId)).send({ expectedVersion: 2, ...invalid }).expect(400);
+    }
+    const catalogBase = `/api/v1/marketplace/merchant/cafes/${cafeA}/catalog`;
+    const category = await request(server).post(`${catalogBase}/categories`).set("Authorization", await auth(merchantId))
+      .send({ name: "Sushi", slug: "sushi" }).expect(201);
+    const draftProduct = await request(server).post(`${catalogBase}/products`).set("Authorization", await auth(merchantId))
+      .send({ categoryId: (category.body as { id: string }).id, name: "Roll", slug: "roll", description: "Fresh", price: 15, preparationMinutes: 20 }).expect(201);
+    await request(server).post(`${catalogBase}/branches`).set("Authorization", await auth(merchantId))
+      .send({ name: "Draft kitchen", address: "Far away street", latitude: 0, longitude: 0 }).expect(201);
+    const ready = await request(server).get(readinessPath).set("Authorization", await auth(ownerId)).expect(200);
+    expect((ready.body as { readyForOrdering: boolean }).readyForOrdering).toBe(true);
     await request(server)
       .put(`/api/v1/marketplace/owner/cafes/${cafeA}/modules/ORDERING`)
       .set("Authorization", await auth(ownerId))
       .send({ enabled: true, expectedVersion: 0 })
       .expect(200);
+    await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafeA}`)
+      .set("Authorization", await auth(ownerId)).send({ expectedVersion: 2, cuisines: [] }).expect(409);
+    for (const [resource, id] of [["categories", (category.body as { id: string }).id], ["products", (draftProduct.body as { id: string }).id]]) {
+      await request(server).patch(`${catalogBase}/${resource}/${id}`).set("Authorization", await auth(merchantId))
+        .send({ expectedVersion: 1, isActive: false }).expect(409);
+    }
+    await request(server).get(`/api/v1/marketplace/merchant/cafes/${cafeA}/readiness`)
+      .set("Authorization", await auth(merchantId)).expect(200);
+    await request(server).get(`/api/v1/marketplace/merchant/cafes/${cafeB}/readiness`)
+      .set("Authorization", await auth(merchantId)).expect(403);
+    const ownerCafes = await request(server).get("/api/v1/marketplace/owner/cafes")
+      .set("Authorization", await auth(ownerId)).expect(200);
+    expect((ownerCafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).toEqual(expect.arrayContaining([cafeA, cafeB]));
+    await request(server).get("/api/v1/marketplace/owner/cafes").set("Authorization", await auth(merchantId)).expect(403);
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafeA}/members`)
+      .set("Authorization", await auth(ownerId)).send({ userId: merchantId, role: Role.ADMIN, isActive: false, expectedVersion: 1 }).expect(409);
     await request(server)
       .put(`/api/v1/marketplace/owner/cafes/${cafeA}/modules/ORDERING`)
       .set("Authorization", await auth(ownerId))
@@ -159,6 +207,11 @@ describe("marketplace HTTP tenant boundaries", () => {
     const cafes = await request(server).get("/api/v1/marketplace/cafes").expect(200);
     expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).toContain(cafeA);
     expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).not.toContain(cafeB);
+    const sushi = await request(server).get("/api/v1/marketplace/cafes?cuisine=SUSHI").expect(200);
+    expect((sushi.body as Array<{ id: string }>).map((cafe) => cafe.id)).toContain(cafeA);
+    const burgers = await request(server).get("/api/v1/marketplace/cafes?cuisine=BURGERS").expect(200);
+    expect((burgers.body as Array<{ id: string }>).map((cafe) => cafe.id)).not.toContain(cafeA);
+    await request(server).get("/api/v1/marketplace/cafes?cuisine=INVALID").expect(400);
 
     const path = "/api/v1/site/owner/pages/ru/about";
     const data = { expectedVersion: 0, title: "О платформе", description: "Доставка из местных кафе Ашхабада", body: "Свежая еда рядом.", published: false };
@@ -176,6 +229,35 @@ describe("marketplace HTTP tenant boundaries", () => {
     const listed = await request(server).get("/api/v1/site/pages").expect(200);
     expect((listed.body as Array<{ slug: string }>).some((page) => page.slug === "about")).toBe(true);
     expect(await prisma.auditLog.count({ where: { action: "site.page.saved", entityId: "ru/about" } })).toBe(2);
+  });
+
+  it("serializes concurrent removal of the final required branches", async () => {
+    const suffix = Math.random().toString(36).slice(2, 10);
+    const cafe = await prisma.cafe.create({ data: { name: "Concurrent setup", slug: `concurrent-${suffix}`, cuisines: ["SUSHI"] } });
+    await prisma.cafeMembership.create({ data: { cafeId: cafe.id, userId: merchantId, role: Role.ADMIN } });
+    const category = await prisma.category.create({ data: { cafeId: cafe.id, name: "Menu", slug: `concurrent-menu-${suffix}` } });
+    await prisma.product.create({ data: { categoryId: category.id, name: "Meal", slug: `concurrent-meal-${suffix}`, description: "Meal", price: 10 } });
+    const branches = await Promise.all(["North", "South"].map((name) => prisma.branch.create({ data: { cafeId: cafe.id, name, address: "Street", latitude: 37.96, longitude: 58.33 } })));
+    await prisma.cafeModuleEntitlement.create({ data: { cafeId: cafe.id, key: "ORDERING", enabled: true } });
+    const authorization = await auth(merchantId);
+    const responses = await Promise.all(branches.map((branch) => request(server)
+      .patch(`/api/v1/marketplace/merchant/cafes/${cafe.id}/catalog/branches/${branch.id}`)
+      .set("Authorization", authorization).send({ expectedVersion: 1, isActive: false })));
+    expect(responses.map((response) => response.status).sort()).toEqual([200, 409]);
+    expect(await prisma.branch.count({ where: { cafeId: cafe.id, isActive: true } })).toBe(1);
+  });
+
+  it("lets an already-enabled imported cafe complete setup in stages", async () => {
+    const suffix = Math.random().toString(36).slice(2, 10);
+    const cafe = await prisma.cafe.create({ data: { name: "Imported cafe", slug: `imported-${suffix}` } });
+    await prisma.cafeModuleEntitlement.create({ data: { cafeId: cafe.id, key: "ORDERING", enabled: true } });
+    await request(server).patch(`/api/v1/marketplace/owner/cafes/${cafe.id}`)
+      .set("Authorization", await auth(ownerId)).send({ expectedVersion: 1, cuisines: ["TURKMEN"] }).expect(200);
+    await request(server).put(`/api/v1/marketplace/owner/cafes/${cafe.id}/members`)
+      .set("Authorization", await auth(ownerId)).send({ userId: merchantId, role: Role.ADMIN, expectedVersion: 0 }).expect(200);
+    const readiness = await request(server).get(`/api/v1/marketplace/owner/cafes/${cafe.id}/readiness`)
+      .set("Authorization", await auth(ownerId)).expect(200);
+    expect(readiness.body).toMatchObject({ readyForOrdering: false, checks: { cuisine: true, manager: true, branch: false, menu: false } });
   });
 
   it("keeps merchant catalog and branches inside one cafe with versioned changes", async () => {
@@ -220,7 +302,7 @@ describe("marketplace HTTP tenant boundaries", () => {
       .set("Authorization", await auth(merchantId)).expect(403);
     await request(server).patch(`${base}/branches/${branchId}`).set("Authorization", await auth(merchantId))
       .send({ expectedVersion: 1, isActive: false }).expect(200);
-    expect(await prisma.auditLog.count({ where: { actorId: merchantId, action: { startsWith: "marketplace.catalog." } } })).toBe(6);
+    expect(await prisma.auditLog.count({ where: { actorId: merchantId, action: { startsWith: "marketplace.catalog." }, entityId: { in: [categoryId, productId, branchId] } } })).toBe(6);
   });
 
   it("schedules an external offer, awards it to one courier, and assigns only after packing", async () => {
@@ -398,6 +480,50 @@ describe("marketplace HTTP tenant boundaries", () => {
       .set("Authorization", await auth(otherId))
       .send({ cafeId: cafeA, items: [{ productId: productB.id, quantity: 1 }], address: "Customer street", latitude: 37.96, longitude: 58.33 })
       .expect(400);
+  });
+
+  it("keeps cafe order and cash reports private, bounded and precise", async () => {
+    const suffix = Math.random().toString(36).slice(2, 10);
+    const cafe = await prisma.cafe.create({ data: { name: "Report cafe", slug: `report-${suffix}` } });
+    const foreign = await prisma.cafe.create({ data: { name: "Foreign report cafe", slug: `foreign-report-${suffix}` } });
+    const accountant = await prisma.user.create({ data: { phone: `+99365004${suffix.slice(0, 4)}`, role: Role.CUSTOMER } });
+    await prisma.cafeMembership.createMany({ data: [
+      { cafeId: cafe.id, userId: merchantId, role: Role.ADMIN },
+      { cafeId: cafe.id, userId: applicantId, role: Role.OPERATOR },
+      { cafeId: cafe.id, userId: accountant.id, role: Role.ACCOUNTANT },
+    ] });
+    const at = new Date("2026-10-05T04:00:00.000Z");
+    for (const [cafeId, status, total] of [
+      [cafe.id, OrderStatus.CASH_RETURNED, 12.5],
+      [cafe.id, OrderStatus.DELIVERED, 7],
+      [cafe.id, OrderStatus.CANCELLED, 9],
+      [foreign.id, OrderStatus.CASH_RETURNED, 999],
+    ] as const) {
+      await prisma.order.create({ data: { cafeId, customerId: otherId, status, subtotal: total, total, address: "Report address", latitude: 37.96, longitude: 58.33, createdAt: at, branchName: "Central" } });
+    }
+    // Ashgabat days start at 19:00 UTC on the previous day; both edges matter.
+    for (const [createdAt, total] of [
+      ["2026-10-04T18:59:59.999Z", "100.00"],
+      ["2026-10-04T19:00:00.000Z", "10.01"],
+      ["2026-10-05T18:59:59.999Z", "0.09"],
+      ["2026-10-05T19:00:00.000Z", "100.00"],
+    ]) {
+      await prisma.order.create({ data: { cafeId: cafe.id, customerId: otherId, status: OrderStatus.RECONCILED, subtotal: total, total, address: "Report address", latitude: 37.96, longitude: 58.33, createdAt: new Date(createdAt!), branchName: "Central" } });
+    }
+    const path = `/api/v1/marketplace/merchant/cafes/${cafe.id}/reports/orders?from=2026-10-05&to=2026-10-05`;
+    const report = await request(server).get(path).set("Authorization", await auth(merchantId)).expect(200);
+    expect(report.body).toMatchObject({ cafeId: cafe.id, orders: 5, cancelled: 1, orderValue: "29.60", cashCollected: "22.60", deliveredAwaitingCash: "7.00" });
+    expect((report.body as { branches: Array<{ cashCollected: string }> }).branches[0]?.cashCollected).toBe("22.60");
+    await request(server).get(path).set("Authorization", await auth(accountant.id)).expect(200);
+    await request(server).get(path).set("Authorization", await auth(applicantId)).expect(403);
+    await request(server).get(path).set("Authorization", await auth(otherId)).expect(403);
+    await request(server).get(path.replace(cafe.id, foreign.id)).set("Authorization", await auth(merchantId)).expect(403);
+    await request(server).get(path.replace("2026-10-05&to=2026-10-05", "2026-02-30&to=2026-10-05"))
+      .set("Authorization", await auth(merchantId)).expect(400);
+    await request(server).get(path.replace("2026-10-05&to=2026-10-05", "2026-10-06&to=2026-10-05"))
+      .set("Authorization", await auth(merchantId)).expect(400);
+    await request(server).get(path.replace("2026-10-05&to=2026-10-05", "2026-01-01&to=2026-10-05"))
+      .set("Authorization", await auth(merchantId)).expect(400);
   });
 
   it("automatically schedules the external network when a new cafe has no active own courier", async () => {

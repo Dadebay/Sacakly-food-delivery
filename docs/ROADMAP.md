@@ -15,6 +15,8 @@ The new repository is a migration project. A checked box means the behavior is i
 - [x] New orders with no active own cafe courier automatically schedule the external offer; timed Firebase pushes persist and retry transient failures without resending successful device tokens.
 - [x] Cafe-scoped category, fixed-price product and branch editing in the merchant portal with version conflicts and audit.
 - [x] Cafe-owned receipt printers, main and kitchen routes, separate agent tokens, queue isolation, manual reprint, cancellation and retry; legacy workers cannot claim cafe tasks.
+- [x] Cuisine tags and server-side cafe filtering; OWNER cafe profile editor, draft readiness checklist and publication gate. Cafe ADMIN can configure branches, menu and receipts before ORDERING is enabled.
+- [x] Cafe-scoped operational order and cash report for ADMIN/ACCOUNTANT, with bounded local-date periods and cross-cafe authorization tests.
 - [x] New HTTP boundary tests and client tests; source API/admin tests, builds and dependency audits run locally.
 - [x] Chromium Playwright E2E checks exercise the customer website, merchant portal and real local API, including checkout, cafe isolation, automatic external delivery and receipt queue setup. CI requires this suite and a dated PR history entry.
 
@@ -24,7 +26,7 @@ The new repository is a migration project. A checked box means the behavior is i
 2. **Cafe receipt acceptance.** Verify the cafe print-agent build and both main/kitchen printers with real hardware in each cafe before enabling RECEIPTS there. Test paper output, network loss, journal replay and cancellation on site; the software boundary is implemented, but hardware delivery is not certified here.
 3. **Courier operations.** Add courier availability/shift data, platform-wide dispatch map and status workflow, merchant pickup details for assigned couriers only, and customer tracking. Preserve the existing order state machine and audited assignment.
 4. **Customer experience.** Update the existing native customer application to browse many cafes, select one cafe, reset or separate the cart when switching cafes, quote, checkout, and show the chosen cafe on the order. Ensure old mixed-cafe checkout routes cannot create new platform orders. Improve the web map/address picker and expose own-order tracking.
-5. **Accounting and inventory.** Scope stock, cash settlement, reports, promos and loyalty by cafe or explicitly define platform-level ownership. Agree commission, payout and refund rules before coding payments.
+5. **Accounting and inventory.** The first private order/cash overview is implemented. Scope stock, cash settlement, full financial reports, promos and loyalty by cafe or explicitly define platform-level ownership. Agree commission, payout and refund rules before coding payments.
 6. **Migration of the two current cafes.** Reconcile branches, products, printer routes, staff and historical mixed-cafe orders. Do not assign legacy money or receipts to a new tenant automatically. Test a dry-run migration and rollback against a copy of data.
 7. **Release.** Provision separate infrastructure, secrets, domain, backups, observability and CI deployment. Run cross-tenant, load, mobile, print-agent and restore checks before public launch.
 
