@@ -8,7 +8,8 @@ Never put customer data, OTP values, agent tokens or other secrets here.
 
 ## 2026-10-06 — Root monorepo workflow
 
-- The root `dev` command now starts the Saçakly API, customer web and cafe/OWNER
+- [PR #7](https://github.com/Guvanch99/sacakly-platform/pull/7): the root `dev`
+  command now starts the Saçakly API, customer web and cafe/OWNER
   portal; `dev:legacy` keeps the imported admin workflow explicit. Added
   `setup:apps` for independent installs, made `test` cover all four JavaScript
   applications, removed duplicate test runs from `test:all`, and added `check`
@@ -20,7 +21,7 @@ Never put customer data, OTP values, agent tokens or other secrets here.
   2 merchant tests, 2 web tests) and root `dev` with HTTP 200 from API, web and
   merchant. Local processes and Compose services stopped after verification.
 - Native customer/courier apps are still planned, and legacy API tenant
-  scoping remains a release blocker. PR link: to be added when opened.
+  scoping remains a release blocker.
 
 ## 2026-10-04 — Handoff for two mobile applications
 
