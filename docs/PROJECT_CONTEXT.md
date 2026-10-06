@@ -25,6 +25,14 @@ release blockers are documented in `docs/mobile/`. In particular, imported
 global order and tracking endpoints need tenant authorization checks before
 they become supported native marketplace workflows.
 
+The root package orchestrates development, builds and tests across the
+monorepo. API, customer web, merchant portal and legacy admin each retain an
+independent npm lockfile and pinned dependencies; they are not collapsed into
+one npm workspace dependency tree. The shared API contract is generated from
+Swagger and consumed by the web clients. The default root `dev` command starts
+the Saçakly API, web and merchant portal; the imported admin has an explicit
+legacy command. See `docs/MONOREPO.md`.
+
 The customer selects one cafe and places one order with products from that
 cafe. Changing cafe starts a separate cart. A merchant sees only its own
 branches, menu, staff, orders, kitchen tickets, receipts and accounting. A
@@ -193,6 +201,7 @@ role matrices, courier races and receipt state transitions.
 - packages/api-contract: Generated API contract.
 - docs/legacy: Previous single-operator context, README and inactive deployment scripts.
 - docs/mobile: Customer and courier application handoff, API coverage and release blockers.
+- docs/MONOREPO.md: Application boundaries and root development/check commands.
 
 The baseline source is the clean origin/main snapshot of Guvanch99/alowalow
 at 0eb18f7. Uncommitted work in that checkout was not copied. The source

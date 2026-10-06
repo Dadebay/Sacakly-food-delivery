@@ -6,6 +6,31 @@ the authority for current business rules. Record the PR URL when available,
 the affected surfaces, verification, migrations, and any release limitation.
 Never put customer data, OTP values, agent tokens or other secrets here.
 
+## 2026-10-06 — Root monorepo workflow
+
+- [PR #7](https://github.com/Guvanch99/sacakly-platform/pull/7): the root `dev`
+  command now starts the Saçakly API, customer web and cafe/OWNER
+  portal; `dev:legacy` keeps the imported admin workflow explicit. Added
+  `setup:apps` for independent installs, made `test` cover all four JavaScript
+  applications, removed duplicate test runs from `test:all`, and added `check`
+  for lint, contract generation, builds and tests.
+- Documented application boundaries and root commands in `docs/MONOREPO.md`
+  and README. Individual pinned dependencies and lockfiles remain independent;
+  no schema migration, API change or production deployment.
+- CI exposed newly published dependency advisories. Pinned patched
+  `source-map-js` 1.2.2 in API, imported admin and merchant lockfiles, and
+  `proxy-addr` 2.0.8 in the API lockfile. Independent low-threshold npm audits
+  now report zero vulnerabilities for each affected package boundary.
+- Verified `setup:apps`, `check` (443 API tests, 203 legacy admin tests,
+  2 merchant tests, 2 web tests) and root `dev` with HTTP 200 from API, web and
+  merchant before the dependency pin update. After that update, all PR CI jobs
+  passed, including API, browser E2E and audits. A repeated local `check` reached
+  the API suite but was stopped after its worker stalled; the clean CI run is
+  the verification for the final lockfiles. Local processes and Compose
+  services were stopped after verification.
+- Native customer/courier apps are still planned, and legacy API tenant
+  scoping remains a release blocker.
+
 ## 2026-10-04 — Handoff for two mobile applications
 
 - [PR #6](https://github.com/Guvanch99/sacakly-platform/pull/6): added Russian

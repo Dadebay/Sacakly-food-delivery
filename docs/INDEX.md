@@ -5,6 +5,7 @@ Start each task with [Project context](PROJECT_CONTEXT.md) and
 runtime and CI changes and [Deployment](DEPLOYMENT.md) before any release work.
 
 - [Roadmap](ROADMAP.md): implemented features and work before onboarding cafes.
+- [Monorepo](MONOREPO.md): application boundaries and root install, run and verification commands.
 - [Browser E2E](PLAYWRIGHT_E2E.md): isolated Playwright setup, coverage and limits.
 - [Mobile handoff](mobile/README.md): two app boundaries, shared API/auth/push rules;
   [customer app](mobile/CUSTOMER_APP.md) and [courier app](mobile/COURIER_APP.md).
