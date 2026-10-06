@@ -19,13 +19,14 @@ export class MarketplaceDispatchService implements OnModuleInit, OnModuleDestroy
   onModuleInit() { this.timer = setInterval(() => void this.publishDue().catch((error: unknown) => this.logger.error(error)), 15_000); this.timer.unref(); }
   onModuleDestroy() { if (this.timer) clearInterval(this.timer); this.timer = null; }
 
-  private async assertManager(actor: AuthUser, cafeId: string) {
+  private async assertManager(actor: AuthUser, cafeId: string, requireOrdering = true) {
     const [membership, module] = await Promise.all([
-      this.prisma.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } } }),
-      this.prisma.cafeModuleEntitlement.findUnique({ where: { cafeId_key: { cafeId, key: "ORDERING" } } }),
+      this.prisma.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } }, include: { cafe: { select: { isActive: true } } } }),
+      requireOrdering ? this.prisma.cafeModuleEntitlement.findUnique({ where: { cafeId_key: { cafeId, key: "ORDERING" } } }) : Promise.resolve(null),
     ]);
     assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR]);
-    assertModuleEnabled(module, cafeId);
+    if (!membership?.cafe.isActive) throw new ForbiddenException("Cafe is inactive");
+    if (requireOrdering) assertModuleEnabled(module, cafeId);
   }
 
   private async assertNetworkCourier(actor: AuthUser) {
@@ -34,7 +35,7 @@ export class MarketplaceDispatchService implements OnModuleInit, OnModuleDestroy
   }
 
   async ownCouriers(actor: AuthUser, cafeId: string) {
-    await this.assertManager(actor, cafeId);
+    await this.assertManager(actor, cafeId, false);
     const members = await this.prisma.cafeMembership.findMany({
       where: { cafeId, role: Role.COURIER, isActive: true, user: { isActive: true, role: Role.COURIER } },
       select: { user: { select: { id: true, phone: true, firstName: true, lastName: true } } },

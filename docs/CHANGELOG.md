@@ -6,6 +6,36 @@ the authority for current business rules. Record the PR URL when available,
 the affected surfaces, verification, migrations, and any release limitation.
 Never put customer data, OTP values, agent tokens or other secrets here.
 
+## 2026-10-06 — Cafe onboarding, cuisine discovery and private reports
+
+[PR #8](https://github.com/Guvanch99/sacakly-platform/pull/8).
+
+- OWNER can list draft cafes, edit a versioned profile, assign up to four cuisine
+  tags and inspect the same readiness checklist as the cafe administrator.
+  Ordering requires an active administrator, branch, menu item and cuisine.
+  Cafe row locks prevent concurrent removal of the final required setup items;
+  already-enabled imported cafes may complete missing setup in stages.
+- Cafe administrators prepare menu, branches and receipt configuration before
+  publication. The customer website filters cafes by cuisine in tk/ru/en.
+  ADMIN and ACCOUNTANT can read only their cafe's operational order/cash report
+  for 1–93 Ashgabat calendar days; this does not implement commissions/payouts.
+- Added additive migration `20261006120000_cafe_cuisines_and_version`, regenerated
+  OpenAPI/shared types and updated onboarding, mobile, QA and test instructions.
+  No new libraries or production deployment. Optional isolated local test Redis
+  on port 6381 is documented; tests still require DB 15 and `sacakly_test`.
+- Final API coverage run: 446 tests in 47 files passed (90.49% statements,
+  78.19% branches, 90.98% functions, 92.51% lines). API and Next.js production
+  builds passed. The migration applied to both local `sacakly` and isolated
+  `sacakly_test` PostgreSQL databases.
+- Verified 2 real-API Playwright journeys in each of Chromium, Firefox and
+  WebKit (6 passing executions), including mobile viewport overflow/focus and
+  application console checks. API/merchant/web lint, merchant production build,
+  2 merchant and 2 web unit tests passed; all three dependency audits reported
+  zero vulnerabilities. No import cycles in 21 web and 12 merchant source modules.
+- Real Firebase reception and physical main/kitchen receipt output require
+  separate device/on-site acceptance. Native apps, complete legacy tenant
+  isolation and the other launch blockers remain in `ROADMAP.md`.
+
 ## 2026-10-06 — Root monorepo workflow
 
 - [PR #7](https://github.com/Guvanch99/sacakly-platform/pull/7): the root `dev`

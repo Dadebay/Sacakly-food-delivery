@@ -12,6 +12,7 @@ import { MarketplaceReceiptsService } from "./marketplace-receipts.service";
 import { MarketplaceReceiptsController } from "./marketplace-receipts.controller";
 import { MarketplaceReceiptAgentController } from "./marketplace-receipt-agent.controller";
 import { MarketplaceReceiptAgentGuard } from "./marketplace-receipt-agent.guard";
+import { MarketplaceReportsService } from "./marketplace-reports.service";
 
-@Module({ imports: [OrdersModule, NotificationsModule], controllers: [MarketplaceController, MarketplacePublicController, MarketplaceDispatchController, MarketplaceCatalogController, MarketplaceReceiptsController, MarketplaceReceiptAgentController], providers: [MarketplaceService, MarketplaceDispatchService, MarketplaceCatalogService, MarketplaceReceiptsService, MarketplaceReceiptAgentGuard], exports: [MarketplaceService] })
+@Module({ imports: [OrdersModule, NotificationsModule], controllers: [MarketplaceController, MarketplacePublicController, MarketplaceDispatchController, MarketplaceCatalogController, MarketplaceReceiptsController, MarketplaceReceiptAgentController], providers: [MarketplaceService, MarketplaceDispatchService, MarketplaceCatalogService, MarketplaceReceiptsService, MarketplaceReceiptAgentGuard, MarketplaceReportsService], exports: [MarketplaceService] })
 export class MarketplaceModule {}

@@ -4,6 +4,26 @@ import { expect, test, type Page } from "@playwright/test";
 const api = "http://127.0.0.1:4000/api/v1";
 const merchantOrigin = "http://127.0.0.1:5174";
 
+function collectBrowserErrors(page: Page, errors: string[], expectOwnerDenial = false) {
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (entry) => {
+    if (!["error", "warning"].includes(entry.type())) return;
+    const message = entry.text();
+    // Firefox emits these for cross-port localhost and Next's development HMR
+    // preloads. Keep them in the test report; all application warnings still fail.
+    const developmentWarning = entry.type() === "warning" && (
+      (message.includes("127.0.0.1") && message.includes("classified as a bounce tracker")) ||
+      (message.includes("http://127.0.0.1:3000/_next/static/chunks/") && message.includes("preloaded with link preload was not used"))
+    );
+    const ownerProbeDenied = expectOwnerDenial && entry.type() === "error" &&
+      entry.location().url === `${merchantOrigin}/api/v1/marketplace/owner/me` &&
+      message.includes("403 (Forbidden)");
+    if (ownerProbeDenied) test.info().annotations.push({ type: "expected-owner-denial", description: message });
+    else if (developmentWarning) test.info().annotations.push({ type: "development-browser-warning", description: message });
+    else errors.push(`${entry.type()}: ${message}`);
+  });
+}
+
 async function signInMerchant(page: Page, phone: string) {
   await page.goto(merchantOrigin);
   await page.getByTestId("merchant-phone-input").fill(phone);
@@ -45,7 +65,7 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
 }) => {
   test.setTimeout(180_000);
   const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+  collectBrowserErrors(page, errors);
 
   const cafesResponse = await request.get(`${api}/marketplace/cafes`);
   expect(cafesResponse.ok()).toBeTruthy();
@@ -56,6 +76,15 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
   }>;
   const gunes = cafes.find((cafe) => cafe.slug === "e2e-gunes")!;
   const nar = cafes.find((cafe) => cafe.slug === "e2e-nar")!;
+
+  await test.step("cuisine filters show only matching cafes", async () => {
+    await page.goto("/ru?cuisine=TURKMEN#cafes");
+    await expect(page.locator(".cafe-grid")).toContainText("E2E Güneş");
+    await expect(page.locator(".cafe-grid")).not.toContainText("E2E Nar");
+    await page.getByTestId("cuisine-filter-FAST_FOOD").click();
+    await expect(page.locator(".cafe-grid")).toContainText("E2E Nar");
+    await expect(page.locator(".cafe-grid")).not.toContainText("E2E Güneş");
+  });
 
   await test.step("switching cafes replaces the basket", async () => {
     await page.goto("/ru");
@@ -78,7 +107,8 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
   expect(firstNumber).toBeGreaterThan(0);
 
   const merchant = await browser.newPage();
-  merchant.on("pageerror", (error) => errors.push(error.message));
+  collectBrowserErrors(merchant, errors, true);
+  let firstOrderTotal = "";
   await test.step("merchant sees only its own order and the automatic external route", async () => {
     await signInMerchant(merchant, "+99365000991");
     await expect(merchant.getByTestId("merchant-dashboard-root")).toBeVisible();
@@ -97,10 +127,12 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
     const orders = (await own.json()) as Array<{
       id: string;
       number: number;
+      total: string;
       createdAt: string;
       deliveryRequest: { mode: string; status: string; offerAt: string };
     }>;
     const order = orders.find((entry) => entry.number === firstNumber)!;
+    firstOrderTotal = Number(order.total).toFixed(2);
     expect(order.deliveryRequest).toMatchObject({
       mode: "NETWORK",
       status: "WAITING",
@@ -119,6 +151,15 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
         )
       ).status(),
     ).toBe(403);
+  });
+
+  await test.step("merchant setup and cafe-only report are available", async () => {
+    await merchant.getByTestId("merchant-tab-setup").click();
+    await expect(merchant.getByTestId("merchant-cafe-setup")).toContainText("Готово к включению заказов");
+    await merchant.getByTestId("merchant-tab-reports").click();
+    await merchant.getByTestId("cafe-report-submit").click();
+    await expect(merchant.getByTestId("merchant-cafe-report")).toContainText("Сумма заказов");
+    await expect(merchant.getByTestId("merchant-cafe-report")).toContainText(`${firstOrderTotal} TMT`);
   });
 
   let agentToken = "";
@@ -161,11 +202,12 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
   });
 
   const owner = await browser.newPage();
-  owner.on("pageerror", (error) => errors.push(error.message));
+  collectBrowserErrors(owner, errors);
   await test.step("OWNER activates receipts only after cafe setup", async () => {
     await signInMerchant(owner, "+99362969614");
     await expect(owner.getByTestId("owner-dashboard-root")).toBeVisible();
     await owner.getByTestId("owner-cafe-select").selectOption(nar.id);
+    await expect(owner.getByTestId("owner-cafe-setup")).toContainText("Готово к публикации");
     const toggle = owner.getByTestId("owner-module-receipts");
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
@@ -240,6 +282,71 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
     await expect(merchant.getByTestId("merchant-receipts-root")).toContainText(
       "Чек возвращён в очередь",
     );
+  });
+
+  await test.step("OWNER and cafe administrator complete onboarding before publication", async () => {
+    await owner.getByTestId("owner-new-cafe-name").fill("E2E Sushi House");
+    await owner.getByTestId("owner-new-cafe-slug").fill("e2e-sushi-house");
+    await owner.getByTestId("owner-new-cafe-cuisine-SUSHI").check();
+    const creation = owner.waitForResponse((response) => response.url().endsWith("/marketplace/owner/cafes") && response.request().method() === "POST");
+    await owner.getByTestId("owner-create-cafe").click();
+    const created = await creation;
+    expect(created.status()).toBe(201);
+    const draft = await created.json() as { id: string };
+    await expect(owner.getByTestId("owner-cafe-select")).toHaveValue(draft.id);
+    await expect(owner.getByTestId("owner-module-ordering")).toBeDisabled();
+    await owner.getByTestId("owner-member-phone").fill("+99365000991");
+    await owner.getByTestId("owner-grant-member").click();
+    await expect(owner.getByTestId("owner-member-list")).toContainText("+99365000991");
+
+    await merchant.reload();
+    await merchant.getByTestId(`merchant-cafe-${draft.id}`).click();
+    await merchant.getByTestId("merchant-tab-setup").click();
+    await expect(merchant.getByTestId("merchant-cafe-setup")).toContainText("добавьте активный филиал");
+    await merchant.getByTestId("cafe-setup-open-receipts").click();
+    await expect(merchant.getByTestId("merchant-receipts-root")).toContainText("Ключ агента: не создан");
+    await merchant.getByTestId("merchant-tab-catalog").click();
+    const categories = merchant.locator("section.panel").filter({ has: merchant.getByRole("heading", { name: "Категории", exact: true }) });
+    await categories.getByLabel("Название", { exact: true }).fill("Роллы");
+    await categories.getByLabel("Код URL (латиница)").fill("rolls");
+    await categories.getByRole("button", { name: "Добавить категорию" }).click();
+    const products = merchant.locator("section.panel").filter({ has: merchant.getByRole("heading", { name: "Блюда", exact: true }) });
+    await products.getByTestId("catalog-product-category").selectOption({ label: "Роллы" });
+    await products.getByLabel("Название", { exact: true }).fill("Ролл с огурцом");
+    await products.getByLabel("Код URL (латиница)").fill("cucumber-roll");
+    await products.getByLabel("Описание").fill("Огурец, рис и нори");
+    await products.getByLabel("Цена, TMT").fill("30");
+    await products.getByRole("button", { name: "Добавить блюдо" }).click();
+    await expect(products).toContainText("Ролл с огурцом");
+    const branches = merchant.locator("section.panel").filter({ has: merchant.getByRole("heading", { name: "Филиалы и кухни", exact: true }) });
+    await branches.getByLabel("Название", { exact: true }).fill("Центральная кухня");
+    await branches.getByLabel("Адрес", { exact: true }).fill("Aşgabat, test kitchen");
+    await branches.getByLabel("Широта").fill("37.96");
+    await branches.getByLabel("Долгота").fill("58.33");
+    await branches.getByRole("button", { name: "Добавить филиал" }).click();
+    await expect(branches).toContainText("Центральная кухня");
+    const beforePublish = await request.get(`${api}/marketplace/cafes?cuisine=SUSHI`);
+    expect(await beforePublish.json()).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: draft.id })]));
+    await owner.getByTestId("owner-cafe-setup-refresh").click();
+    await expect(owner.getByTestId("owner-module-ordering")).toBeEnabled();
+    await owner.getByTestId("owner-module-ordering").click();
+    await expect(owner.getByTestId("owner-module-ordering")).toHaveAttribute("aria-pressed", "true");
+    await page.goto("/ru?cuisine=SUSHI#cafes");
+    await expect(page.locator(".cafe-grid")).toContainText("E2E Sushi House");
+    await expect(page.locator(".cafe-grid")).not.toContainText("E2E Nar");
+  });
+
+  await test.step("merchant and OWNER setup fit a mobile viewport", async () => {
+    for (const surface of [merchant, owner]) {
+      await surface.setViewportSize({ width: 390, height: 844 });
+      expect(await surface.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+    }
+    await merchant.getByTestId("merchant-tab-setup").click();
+    await expect(merchant.getByTestId("merchant-cafe-setup")).toBeVisible();
+    await owner.getByTestId("owner-cafe-profile-name").focus();
+    await expect(owner.getByTestId("owner-cafe-profile-name")).toBeFocused();
+    await owner.screenshot({ path: test.info().outputPath("owner-mobile.png"), fullPage: true });
+    await merchant.screenshot({ path: test.info().outputPath("merchant-mobile.png"), fullPage: true });
   });
 
   expect(errors).toEqual([]);

@@ -22,7 +22,7 @@ async function send<T>(path: string, init: RequestInit = {}, token?: string): Pr
   return response.json() as Promise<T>;
 }
 export const publicApi = {
-  cafes: () => send<Cafe[]>("/marketplace/cafes"),
+  cafes: (cuisine?: Cafe["cuisines"][number]) => send<Cafe[]>(`/marketplace/cafes${cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : ""}`),
   categories: (cafeId: string) => send<Category[]>(`/catalog/categories?cafeId=${encodeURIComponent(cafeId)}`),
   pages: () => send<SitePageSummary[]>("/site/pages"),
   page: (locale: string, slug: string) => send<SitePage>(`/site/pages/${encodeURIComponent(locale)}/${encodeURIComponent(slug)}`),

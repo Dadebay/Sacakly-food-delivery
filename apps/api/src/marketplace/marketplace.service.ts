@@ -10,10 +10,10 @@ import { AssignCourierDto } from "../orders/orders.dto";
 import { OrdersService } from "../orders/orders.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { CreateMarketplaceCafeDto, GrantCafeMemberDto, LookupMarketplaceUserDto, ReviewCourierDto, SetCafeModuleDto } from "./marketplace.dto";
+import { CreateMarketplaceCafeDto, GrantCafeMemberDto, ListMarketplaceCafesDto, LookupMarketplaceUserDto, ReviewCourierDto, SetCafeModuleDto, UpdateMarketplaceCafeDto } from "./marketplace.dto";
+import { assertPublishedCafeReady, cafeReadiness, lockCafeSetup } from "./cafe-onboarding";
 import {
   assertCafeMember,
-  assertModuleEnabled,
   assertPlatformOwner,
 } from "./marketplace-policy";
 
@@ -34,12 +34,35 @@ function rethrowCreateConflict(error: unknown): never {
 export class MarketplaceService {
   constructor(private readonly prisma: PrismaService, private readonly orders: OrdersService, private readonly receipts: MarketplaceReceiptsService) {}
 
-  publicCafes() {
+  publicCafes(query: ListMarketplaceCafesDto = {}) {
     return this.prisma.cafe.findMany({
-      where: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } } },
-      select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true },
+      where: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } }, ...(query.cuisine ? { cuisines: { has: query.cuisine } } : {}) },
+      select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
+  }
+
+  async ownerCafes(actor: AuthUser) {
+    await this.assertOwner(actor);
+    return this.prisma.cafe.findMany({
+      select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+  }
+
+  async ownerCafeReadiness(actor: AuthUser, cafeId: string) {
+    await this.assertOwner(actor);
+    const readiness = await cafeReadiness(this.prisma, cafeId);
+    if (!readiness) throw new NotFoundException("Cafe not found");
+    return readiness;
+  }
+
+  async merchantCafeReadiness(actor: AuthUser, cafeId: string) {
+    const membership = await this.prisma.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } } });
+    assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR, Role.ACCOUNTANT]);
+    const readiness = await cafeReadiness(this.prisma, cafeId);
+    if (!readiness) throw new NotFoundException("Cafe not found");
+    return readiness;
   }
 
   async assertOwner(actor: AuthUser): Promise<void> {
@@ -85,8 +108,8 @@ export class MarketplaceService {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const cafe = await tx.cafe.create({
-          data: { name: dto.name.trim(), slug: dto.slug, description: dto.description?.trim() || null },
-          select: { id: true, name: true, slug: true, description: true, isActive: true },
+          data: { name: dto.name.trim(), slug: dto.slug, description: dto.description?.trim() || null, cuisines: dto.cuisines ?? [] },
+          select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true },
         });
         await tx.auditLog.create({
           data: { actorId: actor.id, action: "cafe.created", entityType: "Cafe", entityId: cafe.id },
@@ -96,6 +119,30 @@ export class MarketplaceService {
     } catch (error) {
       rethrowCreateConflict(error);
     }
+  }
+
+  async updateCafe(actor: AuthUser, cafeId: string, dto: UpdateMarketplaceCafeDto) {
+    await this.assertOwner(actor);
+    return this.prisma.$transaction(async (tx) => {
+      const beforeSetup = await lockCafeSetup(tx, cafeId);
+      const previous = await tx.cafe.findUnique({ where: { id: cafeId } });
+      if (!previous) throw new NotFoundException("Cafe not found");
+      if (previous.version !== dto.expectedVersion) throw new ConflictException("Cafe version changed");
+      const changed = await tx.cafe.updateMany({
+        where: { id: cafeId, version: dto.expectedVersion },
+        data: {
+          ...(dto.name === undefined ? {} : { name: dto.name.trim() }),
+          ...(dto.description === undefined ? {} : { description: dto.description.trim() || null }),
+          ...(dto.cuisines === undefined ? {} : { cuisines: dto.cuisines }),
+          version: { increment: 1 },
+        },
+      });
+      if (changed.count !== 1) throw new ConflictException("Cafe changed");
+      await assertPublishedCafeReady(tx, cafeId, beforeSetup);
+      await tx.auditLog.create({ data: { actorId: actor.id, action: "cafe.profile.changed", entityType: "Cafe", entityId: cafeId,
+        metadata: { beforeVersion: previous.version, afterVersion: previous.version + 1, beforeCuisines: previous.cuisines, afterCuisines: dto.cuisines ?? previous.cuisines } } });
+      return tx.cafe.findUniqueOrThrow({ where: { id: cafeId }, select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true } });
+    });
   }
 
   async lookupUser(actor: AuthUser, dto: LookupMarketplaceUserDto) {
@@ -246,6 +293,7 @@ export class MarketplaceService {
     await this.assertOwner(actor);
     try {
       return await this.prisma.$transaction(async (tx) => {
+        const beforeSetup = await lockCafeSetup(tx, cafeId);
         const cafe = await tx.cafe.findUnique({ where: { id: cafeId } });
         if (!cafe?.isActive) throw new NotFoundException("Active cafe not found");
         const user = await tx.user.findUnique({ where: { id: dto.userId } });
@@ -278,6 +326,7 @@ export class MarketplaceService {
           : await tx.cafeMembership.create({
               data: { cafeId, userId: dto.userId, role: dto.role, isActive: dto.isActive ?? true },
             });
+        await assertPublishedCafeReady(tx, cafeId, beforeSetup);
         await tx.auditLog.create({
           data: {
             actorId: actor.id,
@@ -295,16 +344,10 @@ export class MarketplaceService {
   }
 
   async merchantOrders(actor: AuthUser, cafeId: string) {
-    const [membership, module] = await Promise.all([
-      this.prisma.cafeMembership.findUnique({
-        where: { cafeId_userId: { cafeId, userId: actor.id } },
-      }),
-      this.prisma.cafeModuleEntitlement.findUnique({
-        where: { cafeId_key: { cafeId, key: "ORDERING" } },
-      }),
-    ]);
+    const membership = await this.prisma.cafeMembership.findUnique({
+      where: { cafeId_userId: { cafeId, userId: actor.id } },
+    });
     assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT]);
-    assertModuleEnabled(module, cafeId);
     return this.prisma.order.findMany({
       where: { cafeId },
       select: { id: true, number: true, status: true, version: true, packingConfirmedAt: true, total: true, branchId: true, createdAt: true,
@@ -328,12 +371,18 @@ export class MarketplaceService {
     if (dto.enabled && key === "RECEIPTS") await this.receipts.assertReadyForActivation(cafeId);
     try {
       return await this.prisma.$transaction(async (tx) => {
+        const readiness = await lockCafeSetup(tx, cafeId);
         const cafe = await tx.cafe.findUnique({ where: { id: cafeId } });
         if (!cafe) throw new NotFoundException("Cafe not found");
         const where = { cafeId_key: { cafeId, key } };
         const previous = await tx.cafeModuleEntitlement.findUnique({ where });
         if ((previous?.version ?? 0) !== dto.expectedVersion) {
           throw new ConflictException("Module version changed");
+        }
+        if (dto.enabled && key === "ORDERING" && !previous?.enabled) {
+          if (!readiness?.readyForOrdering) {
+            throw new ConflictException(`Cafe setup is incomplete: ${Object.entries(readiness?.checks ?? {}).filter(([, ready]) => !ready).map(([check]) => check).join(", ") || "inactive cafe"}`);
+          }
         }
         const module = previous
           ? await tx.cafeModuleEntitlement.updateMany({

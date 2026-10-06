@@ -277,6 +277,8 @@ model Cafe {
   name        String     @db.VarChar(120)
   slug        String     @unique @db.VarChar(140)
   description String?    @db.VarChar(1000)
+  cuisines    String[]   @default([])
+  version     Int        @default(1)
   imageUrl    String?
   sortOrder   Int        @default(0)
   isActive    Boolean    @default(true)

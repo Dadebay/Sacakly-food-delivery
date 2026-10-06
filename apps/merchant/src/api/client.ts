@@ -2,7 +2,10 @@ import type { components, operations } from "@sacakly/api-contract";
 
 export type Session = components["schemas"]["AuthSessionResponseDto"];
 export type MemberCafe = components["schemas"]["MemberCafeResponseDto"];
-export type Cafe = components["schemas"]["CatalogCafeResponseDto"];
+export type Cafe = components["schemas"]["MarketplaceCafeResponseDto"];
+export type Cuisine = Cafe["cuisines"][number];
+export type CafeReadiness = components["schemas"]["CafeReadinessResponseDto"];
+export type CafeOrdersReport = components["schemas"]["CafeOrdersReportDto"];
 export type Module = components["schemas"]["CafeModuleResponseDto"];
 export type CourierApplication = components["schemas"]["PendingCourierApplicationResponseDto"];
 export type MerchantOrder = components["schemas"]["MerchantOrderResponseDto"];
@@ -145,8 +148,12 @@ export class ApiClient {
   reprintCafeReceipt(cafeId: string, orderId: string, idempotencyKey: string) { return this.request<components["schemas"]["ReceiptTaskResponseDto"]>(`${this.receiptsPath(cafeId)}/orders/${encodeURIComponent(orderId)}/reprint`, "POST", { idempotencyKey }); }
 
   myCafes() { return this.request<MemberCafe[]>("/marketplace/merchant/cafes/me"); }
+  cafeReadiness(cafeId: string) { return this.request<CafeReadiness>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/readiness`); }
+  cafeOrdersReport(cafeId: string, from: string, to: string) { return this.request<CafeOrdersReport>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/reports/orders?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`); }
   ownerStatus() { return this.request<components["schemas"]["OwnerStatusResponseDto"]>("/marketplace/owner/me"); }
-  cafes() { return this.request<Cafe[]>("/catalog/cafes", "GET", undefined, false); }
+  cafes() { return this.request<Cafe[]>("/marketplace/owner/cafes"); }
+  ownerCafeReadiness(cafeId: string) { return this.request<CafeReadiness>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}/readiness`); }
+  updateCafe(cafeId: string, input: { expectedVersion: number; name?: string; description?: string; cuisines?: Cuisine[] }) { return this.request<Cafe>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}`, "PATCH", input); }
   orders(cafeId: string) { return this.request<MerchantOrder[]>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/orders`); }
   pendingCouriers() { return this.request<CourierApplication[]>("/marketplace/owner/courier-applications"); }
   reviewCourier(userId: string, decision: "APPROVED" | "REJECTED") {
@@ -155,8 +162,8 @@ export class ApiClient {
   modules(cafeId: string) { return this.request<Module[]>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}/modules`); }
   members(cafeId: string) { return this.request<CafeMember[]>(`/marketplace/owner/cafes/${encodeURIComponent(cafeId)}/members`); }
   lookupUser(phone: string) { return this.request<MarketplaceUser>("/marketplace/owner/users/lookup", "POST", { phone }); }
-  createCafe(name: string, slug: string) {
-    return this.request<components["schemas"]["MarketplaceCafeResponseDto"]>("/marketplace/owner/cafes", "POST", { name, slug });
+  createCafe(name: string, slug: string, cuisines: Cuisine[]) {
+    return this.request<Cafe>("/marketplace/owner/cafes", "POST", { name, slug, cuisines });
   }
   dispatchOrders() { return this.request<DispatchOrder[]>("/marketplace/owner/dispatch/orders"); }
   dispatchCouriers() { return this.request<DispatchCourier[]>("/marketplace/owner/dispatch/couriers"); }

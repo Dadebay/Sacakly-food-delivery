@@ -2,7 +2,8 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import type { AuthUser } from "../common/auth.types";
 import { Prisma, Role } from "../generated/prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { assertCafeMember, assertModuleEnabled } from "./marketplace-policy";
+import { assertCafeMember } from "./marketplace-policy";
+import { assertPublishedCafeReady, lockCafeSetup } from "./cafe-onboarding";
 import {
   CreateCafeBranchDto, CreateCafeCategoryDto, CreateCafeProductDto,
   UpdateCafeBranchDto, UpdateCafeCategoryDto, UpdateCafeProductDto,
@@ -20,13 +21,11 @@ export class MarketplaceCatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async assertManager(tx: Prisma.TransactionClient, actor: AuthUser, cafeId: string) {
-    const [membership, module, cafe] = await Promise.all([
+    const [membership, cafe] = await Promise.all([
       tx.cafeMembership.findUnique({ where: { cafeId_userId: { cafeId, userId: actor.id } } }),
-      tx.cafeModuleEntitlement.findUnique({ where: { cafeId_key: { cafeId, key: "ORDERING" } } }),
       tx.cafe.findUnique({ where: { id: cafeId }, select: { id: true, isActive: true } }),
     ]);
     assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR]);
-    assertModuleEnabled(module, cafeId);
     if (!cafe?.isActive) throw new NotFoundException("Active cafe not found");
   }
 
@@ -59,6 +58,7 @@ export class MarketplaceCatalogService {
 
   async updateCategory(actor: AuthUser, cafeId: string, id: string, dto: UpdateCafeCategoryDto) {
     return this.prisma.$transaction(async (tx) => {
+      const beforeSetup = await lockCafeSetup(tx, cafeId);
       await this.assertManager(tx, actor, cafeId);
       const before = await tx.category.findFirst({ where: { id, cafeId } });
       if (!before) throw new NotFoundException("Category not found in this cafe");
@@ -70,6 +70,7 @@ export class MarketplaceCatalogService {
         version: { increment: 1 },
       } });
       if (changed.count !== 1) throw new ConflictException("Category changed");
+      await assertPublishedCafeReady(tx, cafeId, beforeSetup);
       await tx.auditLog.create({ data: { actorId: actor.id, action: "marketplace.catalog.category.updated", entityType: "Category", entityId: id, metadata: { cafeId, beforeVersion: before.version, afterVersion: before.version + 1 } } });
       return tx.category.findUniqueOrThrow({ where: { id } });
     });
@@ -88,6 +89,7 @@ export class MarketplaceCatalogService {
 
   async updateProduct(actor: AuthUser, cafeId: string, id: string, dto: UpdateCafeProductDto) {
     return this.prisma.$transaction(async (tx) => {
+      const beforeSetup = await lockCafeSetup(tx, cafeId);
       await this.assertManager(tx, actor, cafeId);
       const before = await tx.product.findFirst({ where: { id, category: { cafeId } } });
       if (!before) throw new NotFoundException("Product not found in this cafe");
@@ -107,6 +109,7 @@ export class MarketplaceCatalogService {
         version: { increment: 1 },
       } });
       if (changed.count !== 1) throw new ConflictException("Product changed");
+      await assertPublishedCafeReady(tx, cafeId, beforeSetup);
       await tx.auditLog.create({ data: { actorId: actor.id, action: "marketplace.catalog.product.updated", entityType: "Product", entityId: id, metadata: { cafeId, beforeVersion: before.version, afterVersion: before.version + 1 } } });
       return tx.product.findUniqueOrThrow({ where: { id } });
     });
@@ -123,6 +126,7 @@ export class MarketplaceCatalogService {
 
   async updateBranch(actor: AuthUser, cafeId: string, id: string, dto: UpdateCafeBranchDto) {
     return this.prisma.$transaction(async (tx) => {
+      const beforeSetup = await lockCafeSetup(tx, cafeId);
       await this.assertManager(tx, actor, cafeId);
       const before = await tx.branch.findFirst({ where: { id, cafeId } });
       if (!before) throw new NotFoundException("Branch not found in this cafe");
@@ -137,6 +141,7 @@ export class MarketplaceCatalogService {
         version: { increment: 1 },
       } });
       if (changed.count !== 1) throw new ConflictException("Branch changed");
+      await assertPublishedCafeReady(tx, cafeId, beforeSetup);
       await tx.auditLog.create({ data: { actorId: actor.id, action: "marketplace.catalog.branch.updated", entityType: "Branch", entityId: id, metadata: { cafeId, beforeVersion: before.version, afterVersion: before.version + 1 } } });
       return tx.branch.findUniqueOrThrow({ where: { id } });
     });

@@ -139,10 +139,47 @@ No automatic ETA or courier shift/availability system is claimed. Existing globa
 controllers still need a full tenant authorization audit before onboarding
 independent cafes.
 
-Cafe `ADMIN` and `OPERATOR` members can now manage their own categories,
+## Cafe onboarding, cuisine filters and private reports — 2026-10-06
+
+Cafe cuisine tags are independent of menu `Category`. An OWNER may assign up to
+four controlled tags (`SUSHI`, `BURGERS`, `FAST_FOOD`, `PIZZA`, `TURKMEN`,
+`BAKERY`, `COFFEE`, `OTHER`) at creation or through a versioned, audited cafe
+profile update. The public cafe endpoint accepts one validated cuisine filter;
+the three localized storefronts display the same cafe tags. A cafe remains
+invisible until active and explicitly entitled to ORDERING. An OWNER list
+includes unpublished cafes for onboarding.
+
+Before OWNER can enable ORDERING, the cafe must have at least one cuisine tag,
+an active ADMIN membership with an active account, an active branch and an
+active product in an active menu category. OWNER and cafe staff can read the
+same readiness checklist through separately authorized endpoints. The cafe
+catalog editor and receipt setup work while ORDERING is disabled, so an
+administrator can prepare the tenant before publication. Once published,
+versioned profile, membership and catalog updates cannot remove the last
+required onboarding item until ORDERING is disabled. These writes and module
+activation lock the same cafe row, so concurrent removals cannot both pass the
+check. Already-enabled imported cafes can complete missing setup in stages;
+updates preserve every requirement they already satisfy. Receipt activation remains
+separate and requires an active cafe printer and dedicated agent token.
+Physical printer acceptance is still a human on-site release check; software
+configuration alone does not certify paper output.
+
+Cafe ADMIN and ACCOUNTANT memberships can read an order/cash report limited to
+their cafe and a validated 1–93 day date range in Asia/Ashgabat. It counts
+orders by creation date, excludes cancelled orders from order value, treats
+`CASH_RETURNED` and `RECONCILED` as collected cash, and shows `DELIVERED`
+amounts awaiting cash return. It is an operational report, not a commission,
+payout or tax ledger. Staff can inspect historical orders and reports even if
+ORDERING is later disabled; write operations and customer checkout remain
+module-gated. Legacy mixed-cafe orders are excluded because they have no
+independent `cafeId`.
+
+Cafe `ADMIN` and `OPERATOR` members can manage their own categories,
 fixed-price products and branches in the merchant portal through a dedicated
-marketplace catalog API. The ORDERING entitlement and an active cafe are
-required for every read and write. Writes validate the cafe boundary, use
+marketplace catalog API. An active cafe and membership are required; setup
+is available before ORDERING is enabled. The own-courier roster is also
+readable before publication, while delivery mutations still require ORDERING.
+Writes validate the cafe boundary, use
 optimistic versions and audit changes. Slugs are prefixed with the cafe UUID
 to preserve legacy global uniqueness. Existing orders keep their product and
 branch snapshots when the menu changes. Variants, translated menu content,
@@ -190,7 +227,8 @@ role matrices, courier races and receipt state transitions.
 
 - apps/api: Existing NestJS API; tenant migration target.
 - apps/api/src/marketplace: Owner, cafe membership, courier application and
-  one-cafe checkout, catalog management, delivery offers and cafe receipt HTTP API.
+  one-cafe checkout, onboarding readiness, private reports, catalog management,
+  delivery offers and cafe receipt HTTP API.
 - apps/api/src/notifications: Firebase delivery plus a durable direct-push retry outbox.
 - apps/api/src/site-pages: OWNER-managed localized public pages.
 - apps/admin: Imported legacy A7 operations SPA.

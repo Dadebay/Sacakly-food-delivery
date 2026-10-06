@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { CourierApplicationStatus, OrderStatus, Role } from "../generated/prisma/client";
 import { DeliveryRequestResponseDto } from "./marketplace-dispatch.dto";
+import { CAFE_CUISINES, type CafeCuisine } from "./cafe-onboarding";
 
 export class OwnerStatusResponseDto {
   @ApiProperty()
@@ -127,6 +128,27 @@ export class MarketplaceCafeResponseDto {
 
   @ApiProperty()
   isActive: boolean;
+
+  @ApiProperty({ enum: CAFE_CUISINES, isArray: true })
+  cuisines: CafeCuisine[];
+
+  @ApiProperty()
+  version: number;
+}
+
+export class CafeReadinessChecksDto {
+  @ApiProperty() cuisine: boolean;
+  @ApiProperty() manager: boolean;
+  @ApiProperty() branch: boolean;
+  @ApiProperty() menu: boolean;
+}
+
+export class CafeReadinessResponseDto {
+  @ApiProperty({ format: "uuid" }) cafeId: string;
+  @ApiProperty() active: boolean;
+  @ApiProperty({ type: CafeReadinessChecksDto }) checks: CafeReadinessChecksDto;
+  @ApiProperty() readyForOrdering: boolean;
+  @ApiProperty() receiptsConfigured: boolean;
 }
 
 export class DispatchCafeResponseDto {

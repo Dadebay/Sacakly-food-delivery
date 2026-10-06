@@ -6758,6 +6758,152 @@
         "tags": [
           "marketplace"
         ]
+      },
+      "get": {
+        "operationId": "MarketplaceController_ownerCafes_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceCafeResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "OWNER lists every cafe, including drafts",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
+    "/api/v1/marketplace/owner/cafes/{cafeId}": {
+      "patch": {
+        "operationId": "MarketplaceController_updateCafe_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMarketplaceCafeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceCafeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "OWNER updates a cafe profile and cuisine tags with version checking",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
+    "/api/v1/marketplace/owner/cafes/{cafeId}/readiness": {
+      "get": {
+        "operationId": "MarketplaceController_ownerCafeReadiness_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeReadinessResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "OWNER checks setup before enabling ordering",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/readiness": {
+      "get": {
+        "operationId": "MarketplaceController_merchantCafeReadiness_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeReadinessResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cafe member checks setup progress",
+        "tags": [
+          "marketplace"
+        ]
       }
     },
     "/api/v1/marketplace/owner/users/lookup": {
@@ -7129,10 +7275,85 @@
         ]
       }
     },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/reports/orders": {
+      "get": {
+        "operationId": "MarketplaceController_merchantOrdersReport_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "First day in Asia/Ashgabat",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "Last day, inclusive, in Asia/Ashgabat",
+            "schema": {
+              "example": "2026-10-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeOrdersReportDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cafe ADMIN or ACCOUNTANT reads a cafe-scoped order and cash report",
+        "tags": [
+          "marketplace"
+        ]
+      }
+    },
     "/api/v1/marketplace/cafes": {
       "get": {
         "operationId": "MarketplacePublicController_publicCafes_v1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "cuisine",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SUSHI",
+                "BURGERS",
+                "FAST_FOOD",
+                "PIZZA",
+                "TURKMEN",
+                "BAKERY",
+                "COFFEE",
+                "OTHER"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -18959,6 +19180,24 @@
           "description": {
             "type": "string",
             "maxLength": 1000
+          },
+          "cuisines": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUSHI",
+                "BURGERS",
+                "FAST_FOOD",
+                "PIZZA",
+                "TURKMEN",
+                "BAKERY",
+                "COFFEE",
+                "OTHER"
+              ]
+            }
           }
         },
         "required": [
@@ -18989,13 +19228,124 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "cuisines": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUSHI",
+                "BURGERS",
+                "FAST_FOOD",
+                "PIZZA",
+                "TURKMEN",
+                "BAKERY",
+                "COFFEE",
+                "OTHER"
+              ]
+            }
+          },
+          "version": {
+            "type": "number"
           }
         },
         "required": [
           "id",
           "name",
           "slug",
-          "isActive"
+          "isActive",
+          "cuisines",
+          "version"
+        ]
+      },
+      "UpdateMarketplaceCafeDto": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "number",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "cuisines": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUSHI",
+                "BURGERS",
+                "FAST_FOOD",
+                "PIZZA",
+                "TURKMEN",
+                "BAKERY",
+                "COFFEE",
+                "OTHER"
+              ]
+            }
+          }
+        },
+        "required": [
+          "expectedVersion"
+        ]
+      },
+      "CafeReadinessChecksDto": {
+        "type": "object",
+        "properties": {
+          "cuisine": {
+            "type": "boolean"
+          },
+          "manager": {
+            "type": "boolean"
+          },
+          "branch": {
+            "type": "boolean"
+          },
+          "menu": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cuisine",
+          "manager",
+          "branch",
+          "menu"
+        ]
+      },
+      "CafeReadinessResponseDto": {
+        "type": "object",
+        "properties": {
+          "cafeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/CafeReadinessChecksDto"
+          },
+          "readyForOrdering": {
+            "type": "boolean"
+          },
+          "receiptsConfigured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cafeId",
+          "active",
+          "checks",
+          "readyForOrdering",
+          "receiptsConfigured"
         ]
       },
       "LookupMarketplaceUserDto": {
@@ -19439,6 +19789,86 @@
           "createdAt",
           "items",
           "gifts"
+        ]
+      },
+      "CafeBranchReportDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "branchName": {
+            "type": "string",
+            "nullable": true
+          },
+          "orders": {
+            "type": "number"
+          },
+          "orderValue": {
+            "type": "string"
+          },
+          "cashCollected": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "branchId",
+          "branchName",
+          "orders",
+          "orderValue",
+          "cashCollected"
+        ]
+      },
+      "CafeOrdersReportDto": {
+        "type": "object",
+        "properties": {
+          "cafeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "number"
+          },
+          "cancelled": {
+            "type": "number"
+          },
+          "orderValue": {
+            "type": "string",
+            "description": "Non-cancelled order value, including orders in progress"
+          },
+          "cashCollected": {
+            "type": "string",
+            "description": "Cash returned or reconciled for orders created in this period"
+          },
+          "deliveredAwaitingCash": {
+            "type": "string",
+            "description": "Delivered orders awaiting cash return"
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CafeBranchReportDto"
+            }
+          }
+        },
+        "required": [
+          "cafeId",
+          "from",
+          "to",
+          "orders",
+          "cancelled",
+          "orderValue",
+          "cashCollected",
+          "deliveredAwaitingCash",
+          "branches"
         ]
       },
       "OwnCafeCourierResponseDto": {
