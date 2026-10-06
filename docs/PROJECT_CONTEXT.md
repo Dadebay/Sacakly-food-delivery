@@ -52,12 +52,13 @@ action.
 
 Modules are server-owned entitlements scoped to platform or cafe. Disabled
 modules deny the API mutation, not merely hide UI. Initial target modules:
-catalog, ordering, kitchen, delivery, receipts, inventory, loyalty, accounting.
+catalog, ordering, kitchen, delivery, receipts, inventory, loyalty, marketing, accounting.
 Changes use optimistic version checks and audit. Merchant managers configure
 only enabled cafe modules; they cannot activate their own entitlement.
 ORDERING is activatable in the new tenant API. RECEIPTS is activatable only
 after a cafe administrator configures an active cafe printer and rotates a
-dedicated agent token. Other module keys remain reserved until their tenant
+dedicated agent token. MARKETING and LOYALTY are also activatable: the new
+cafe rewards module owns their tenant boundaries. Other module keys remain reserved until their tenant
 boundaries and workflows are implemented.
 
 The platform OWNER may create an independent Cafe, find an already registered
@@ -216,6 +217,36 @@ Every phase needs allowed and forbidden role tests, cross-cafe ID tests,
 concurrency/idempotency tests, generated API contract and real HTTP checks.
 No imported A7 deployment pipeline may deploy this project.
 
+## Cafe promotions and points — 2026-10-06
+
+OWNER enables MARKETING and LOYALTY per cafe. Only an active cafe ADMIN can
+manage its promotions and gifts. Catalog ADMIN/OPERATOR may set points per
+portion, including zero; new cafe products default to zero. The checkout
+backend applies one best eligible automatic promotion, or the explicitly
+entered cafe code instead. Supports percentage/fixed TMT, minimum subtotal,
+maximum discount, dates, total and customer usage limits. Delivery is excluded;
+discounts never stack. Cancelled orders retain promo usage. Transactional cafe
+promotion row locks serialize limits and settings edits; version conflicts are
+reported, and writes are audited. Public offers exclude manual codes.
+
+Points belong to CafeLoyaltyWallet(cafeId,userId), earned from ordered portions
+after delivery and redeemed for gifts with a food order. Stock and balance are
+atomically debited at creation; cancellation refunds them and reverses prior
+earning. Reversals may leave a negative balance if earlier points were spent.
+No cash redemption, cross-cafe transfer or expiry is defined. Disabling modules
+stops new use but honors already snapshotted earning/refunds. New marketplace
+orders always store loyaltyCafeId; historical NULL snapshots, User.pointsBalance
+and legacy gifts/entries preserve old promises without silently redistributing
+balances. Legacy loyalty endpoints exclude new cafe gifts/entries.
+
+The merchant portal exposes module-gated promotion/gift forms, product points,
+discounts and gift packing checkboxes. The tk/ru/en customer web displays
+public offers, promo input, cafe wallet/history, selectable gifts and authoritative
+quote earning/spending/discount. Basket, address, promo or gift changes invalidate
+the quote; session/cafe changes reset checkout state. Existing receipt plans
+include gift names, quantities and point costs as zero-price main receipt lines.
+See `docs/CAFE_REWARDS.md` for exact endpoints, lifecycle and migration rules.
+
 ## Repository tree
 
 The current behavioral contract lives in this file. Read `docs/CHANGELOG.md`
@@ -229,11 +260,14 @@ role matrices, courier races and receipt state transitions.
 - apps/api/src/marketplace: Owner, cafe membership, courier application and
   one-cafe checkout, onboarding readiness, private reports, catalog management,
   delivery offers and cafe receipt HTTP API.
+- apps/api/src/cafe-rewards: Cafe promotions, module-gated gift management,
+  public offers and cafe loyalty wallet; reuses the existing loyalty ledger.
 - apps/api/src/notifications: Firebase delivery plus a durable direct-push retry outbox.
 - apps/api/src/site-pages: OWNER-managed localized public pages.
 - apps/admin: Imported legacy A7 operations SPA.
 - apps/merchant: Separate cafe and platform OWNER React/Vite portal.
-- apps/web: Next.js customer website and PWA with FSD layers.
+- apps/web: Next.js customer website and PWA with FSD layers; `features/cafe-offers`
+  and `features/checkout-rewards` render offers and the scoped customer wallet.
 - apps/print-agent: Imported local receipt bridge.
 - apps/desktop: Imported workstation source, not a merchant release.
 - packages/api-contract: Generated API contract.

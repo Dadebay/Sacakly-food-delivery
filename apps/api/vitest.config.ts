@@ -63,6 +63,7 @@ export default defineConfig({
         "src/users/**/*.ts",
         "src/media/**/*.ts",
         "src/marketplace/**/*.ts",
+        "src/cafe-rewards/**/*.ts",
         "src/notifications/**/*.ts",
         "src/redis/**/*.ts",
         "src/routing/**/*.ts",

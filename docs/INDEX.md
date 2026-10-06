@@ -18,3 +18,6 @@ runtime and CI changes and [Deployment](DEPLOYMENT.md) before any release work.
 
 Feature-specific QA notes are in this directory. The repository's `AGENTS.md`
 requires a new change-history entry in every pull request.
+
+- [Скидки, акции и баллы каждого кафе](CAFE_REWARDS.md) — настройка OWNER/ADMIN, правила, API и совместимость.
+- [QA скидок и баллов](CAFE_REWARDS_QA.md) — браузеры, проверки и ограничения.

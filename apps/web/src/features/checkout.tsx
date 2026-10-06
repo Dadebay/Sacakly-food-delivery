@@ -1,19 +1,74 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { customerApi, type Quote } from "@/shared/api";
-import { writeBasket } from "@/entities/cart";
+import { customerApi, type Quote, type Session } from "@/shared/api";
+import { writeBasket, type Basket } from "@/entities/cart";
 import { useBasket } from "@/entities/use-basket";
 import { useCustomerSession } from "@/entities/use-customer-session";
 import { copy, type Locale } from "@/shared/i18n";
+import { rewardsCopy } from "@/shared/rewards-copy";
 import { OtpLogin } from "@/features/otp-login";
+import { CheckoutRewards } from "@/features/checkout-rewards";
+
 export function Checkout({ locale }: { locale: Locale }) {
-  const t = copy[locale]; const basket = useBasket(); const session = useCustomerSession(); const [address, setAddress] = useState(""); const [latitude, setLatitude] = useState(""); const [longitude, setLongitude] = useState(""); const [quote, setQuote] = useState<Quote | null>(null); const [pending, setPending] = useState(false); const [error, setError] = useState(""); const [placed, setPlaced] = useState<number | null>(null); const [idempotencyKey, setIdempotencyKey] = useState("");
-  const items = basket?.lines.map(({ productId, variantId, quantity }) => ({ productId, ...(variantId ? { variantId } : {}), quantity })) || [];
-  function updateQuantity(index: number, quantity: number) { if (!basket) return; const next = { ...basket, lines: basket.lines.map((line) => ({ ...line })) }; if (quantity <= 0) next.lines.splice(index, 1); else next.lines[index]!.quantity = Math.min(50, quantity); writeBasket(next.lines.length ? next : null); setQuote(null); setIdempotencyKey(""); }
-  function locate() { setError(""); if (!navigator.geolocation) { setError("Geolocation unavailable"); return; } navigator.geolocation.getCurrentPosition(({ coords }) => { setLatitude(String(coords.latitude)); setLongitude(String(coords.longitude)); setQuote(null); setIdempotencyKey(""); }, (reason) => setError(reason.message), { enableHighAccuracy: true, timeout: 12000 }); }
-  async function getQuote(event: FormEvent) { event.preventDefault(); if (!basket || !items.length) return; setPending(true); setError(""); try { const lat = Number(latitude), lon = Number(longitude); if (!Number.isFinite(lat) || !Number.isFinite(lon) || latitude.trim() === "" || longitude.trim() === "") throw new Error("Select delivery coordinates"); setQuote(await customerApi.quote(basket.cafeId, items, lat, lon)); } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setPending(false); } }
-  async function place() { if (!basket || !quote) return; const lat = Number(latitude), lon = Number(longitude); if (!Number.isFinite(lat) || !Number.isFinite(lon) || !address.trim()) return; const key = idempotencyKey || crypto.randomUUID(); setIdempotencyKey(key); setPending(true); setError(""); try { const order = await customerApi.order({ cafeId: basket.cafeId, items, address: address.trim(), latitude: lat, longitude: lon, idempotencyKey: key }); setPlaced(order.number); writeBasket(null); } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); setQuote(null); } finally { setPending(false); } }
+  const t = copy[locale]; const basket = useBasket(); const session = useCustomerSession();
+  const [placed, setPlaced] = useState<number | null>(null);
   if (placed !== null) return <main className="container checkout-page success-page"><span className="success-icon">✓</span><p className="eyebrow">SAÇAKLY</p><h1>{t.ordered}</h1><p>{t.number}: <strong>#{placed}</strong></p><Link className="button button-red" href={`/${locale}`}>{t.cafes} ↗</Link></main>;
-  return <main className="container checkout-page"><Link className="breadcrumbs" href={`/${locale}`}>← {t.back}</Link><div className="section-heading"><div><p className="eyebrow">SAÇAKLY / {t.cart}</p><h1>{t.checkout}</h1></div></div>{!basket?.lines.length ? <div className="empty-panel">{t.empty} <Link href={`/${locale}`}>{t.explore}</Link></div> : <div className="checkout-layout"><div className="checkout-main"><section className="form-panel"><span className="step-label">01 / {t.cart}</span><h2>{basket.cafeName}</h2><ul className="checkout-lines">{basket.lines.map((line, index) => <li key={`${line.productId}:${line.variantId || ""}`}><div><strong>{line.name}</strong><small>{line.unitPrice.toFixed(2)} TMT</small></div><div className="qty"><button type="button" aria-label="Remove one" onClick={() => updateQuantity(index, line.quantity - 1)}>−</button><span>{line.quantity}</span><button type="button" aria-label="Add one" onClick={() => updateQuantity(index, line.quantity + 1)}>+</button></div></li>)}</ul></section><section className="form-panel"><span className="step-label">02 / {t.phone}</span><h2>{t.signIn}</h2>{session ? <p className="signed-in">✓ {session.user.phone}</p> : <OtpLogin locale={locale} onSuccess={() => undefined} />}</section><section className="form-panel"><span className="step-label">03 / {t.delivery}</span><h2>{t.address}</h2><form id="quote-form" onSubmit={getQuote}><label>{t.address}<input value={address} onChange={(event) => { setAddress(event.target.value); setQuote(null); setIdempotencyKey(""); }} maxLength={500} required placeholder={t.address} /></label><button type="button" className="location-button" onClick={locate}>⌖ {t.location}</button><div className="coordinates"><label>{t.latitude}<input inputMode="decimal" type="number" step="any" value={latitude} onChange={(event) => { setLatitude(event.target.value); setQuote(null); setIdempotencyKey(""); }} required /></label><label>{t.longitude}<input inputMode="decimal" type="number" step="any" value={longitude} onChange={(event) => { setLongitude(event.target.value); setQuote(null); setIdempotencyKey(""); }} required /></label></div><p className="input-note">{t.location}. {t.latitude} / {t.longitude}.</p></form></section></div><aside className="checkout-aside"><p className="eyebrow">SAÇAKLY / {t.total}</p><h2>{t.cart}</h2><div className="checkout-summary"><span>{basket.cafeName}</span><strong>{basket.lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0).toFixed(2)} TMT</strong></div>{quote && <><div className="checkout-summary"><span>{t.delivery}</span><strong>{quote.deliveryFee.toFixed(2)} TMT</strong></div><div className="checkout-grand"><span>{t.total}</span><strong>{quote.total.toFixed(2)} TMT</strong></div></>}{error && <p className="error" role="alert">{error}</p>}{!session && <p className="muted">{t.signIn}</p>}<button className="button button-red" type="submit" form="quote-form" disabled={!session || pending}>{pending ? "…" : t.quote}</button><button className="button button-green" disabled={!quote || pending} onClick={place}>{pending ? "…" : t.place}</button><small>{t.quoteNote}</small></aside></div>}</main>;
+  return <main className="container checkout-page"><Link className="breadcrumbs" href={`/${locale}`}>← {t.back}</Link><div className="section-heading"><div><p className="eyebrow">SAÇAKLY / {t.cart}</p><h1>{t.checkout}</h1></div></div>{!basket?.lines.length ? <div className="empty-panel">{t.empty} <Link href={`/${locale}`}>{t.explore}</Link></div> : <CheckoutForm key={`${basket.cafeId}:${session?.user.id ?? "guest"}`} locale={locale} basket={basket} session={session} onPlaced={setPlaced} />}</main>;
+}
+function CheckoutForm({ locale, basket, session, onPlaced }: { locale: Locale; basket: Basket; session: Session | null; onPlaced: (number: number) => void }) {
+  const t = copy[locale]; const r = rewardsCopy[locale];
+  const [address, setAddress] = useState(""); const [latitude, setLatitude] = useState(""); const [longitude, setLongitude] = useState("");
+  const [promoCode, setPromoCode] = useState(""); const [selectedGifts, setSelectedGifts] = useState<string[]>([]);
+  const [priced, setPriced] = useState<{ quote: Quote; fingerprint: string } | null>(null);
+  const [pending, setPending] = useState(false); const [error, setError] = useState(""); const [idempotencyKey, setIdempotencyKey] = useState("");
+  const items = basket.lines.map(({ productId, variantId, quantity }) => ({ productId, ...(variantId ? { variantId } : {}), quantity }));
+  const rewards = { ...(promoCode.trim() ? { promoCode: promoCode.trim() } : {}), gifts: selectedGifts.map((giftId) => ({ giftId, quantity: 1 })) };
+  const fingerprint = JSON.stringify({ cafeId: basket.cafeId, items, address, latitude, longitude, ...rewards });
+  const quote = priced?.fingerprint === fingerprint ? priced.quote : null;
+  function invalidate() { setPriced(null); setIdempotencyKey(""); }
+  function updateQuantity(index: number, quantity: number) {
+    const next = { ...basket, lines: basket.lines.map((line) => ({ ...line })) };
+    if (quantity <= 0) next.lines.splice(index, 1); else next.lines[index]!.quantity = Math.min(50, quantity);
+    writeBasket(next.lines.length ? next : null); invalidate();
+  }
+  function locate() {
+    setError(""); if (!navigator.geolocation) { setError(r.locationError); return; }
+    setPending(true);
+    navigator.geolocation.getCurrentPosition(({ coords }) => { setLatitude(String(coords.latitude)); setLongitude(String(coords.longitude)); invalidate(); setPending(false); }, (reason) => { setError(reason.message); setPending(false); }, { enableHighAccuracy: true, timeout: 12000 });
+  }
+  async function getQuote(event: FormEvent) {
+    event.preventDefault(); if (!items.length || pending) return;
+    setPending(true); setError("");
+    try {
+      const lat = Number(latitude), lon = Number(longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || latitude.trim() === "" || longitude.trim() === "") throw new Error(r.coordinates);
+      setPriced({ quote: await customerApi.quote(basket.cafeId, items, lat, lon, rewards), fingerprint });
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); setPriced(null); }
+    finally { setPending(false); }
+  }
+  async function place() {
+    if (!quote || pending) return;
+    const lat = Number(latitude), lon = Number(longitude); if (!Number.isFinite(lat) || !Number.isFinite(lon) || !address.trim()) return;
+    const key = idempotencyKey || crypto.randomUUID(); setIdempotencyKey(key); setPending(true); setError("");
+    try { const order = await customerApi.order({ cafeId: basket.cafeId, items, address: address.trim(), latitude: lat, longitude: lon, idempotencyKey: key, ...rewards }); onPlaced(order.number); writeBasket(null); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); setPriced(null); }
+    finally { setPending(false); }
+  }
+  return <div className="checkout-layout"><div className="checkout-main">
+    <section className="form-panel"><span className="step-label">01 / {t.cart}</span><h2>{basket.cafeName}</h2><ul className="checkout-lines">{basket.lines.map((line, index) => <li key={`${line.productId}:${line.variantId || ""}`}><div><strong>{line.name}</strong><small>{line.unitPrice.toFixed(2)} TMT</small></div><div className="qty"><button data-testid={`checkout-remove-${line.productId}-${line.variantId || "base"}`} disabled={pending} type="button" aria-label={r.remove} onClick={() => updateQuantity(index, line.quantity - 1)}>−</button><span>{line.quantity}</span><button data-testid={`checkout-add-${line.productId}-${line.variantId || "base"}`} disabled={pending} type="button" aria-label={r.add} onClick={() => updateQuantity(index, line.quantity + 1)}>+</button></div></li>)}</ul></section>
+    <section className="form-panel"><span className="step-label">02 / {t.phone}</span><h2>{t.signIn}</h2>{session ? <p className="signed-in">✓ {session.user.phone}</p> : <OtpLogin locale={locale} onSuccess={() => undefined} />}</section>
+    <section className="form-panel"><span className="step-label">03 / {t.delivery}</span><h2>{t.address}</h2><form id="quote-form" onSubmit={getQuote}>
+      <label>{t.address}<input data-testid="checkout-address" disabled={pending} value={address} onChange={(event) => { setAddress(event.target.value); invalidate(); }} maxLength={500} required placeholder={t.address} /></label>
+      <button data-testid="checkout-locate" disabled={pending} type="button" className="location-button" onClick={locate}>⌖ {t.location}</button>
+      <div className="coordinates"><label>{t.latitude}<input data-testid="checkout-latitude" disabled={pending} inputMode="decimal" type="number" min="-90" max="90" step="any" value={latitude} onChange={(event) => { setLatitude(event.target.value); invalidate(); }} required /></label><label>{t.longitude}<input data-testid="checkout-longitude" disabled={pending} inputMode="decimal" type="number" min="-180" max="180" step="any" value={longitude} onChange={(event) => { setLongitude(event.target.value); invalidate(); }} required /></label></div>
+      <p className="input-note">{t.location}. {t.latitude} / {t.longitude}.</p></form></section>
+    <CheckoutRewards cafeId={basket.cafeId} locale={locale} signedIn={Boolean(session)} pending={pending} code={promoCode} selected={selectedGifts} onCode={(value) => { setPromoCode(value); invalidate(); }} onGifts={(value) => { setSelectedGifts(value); invalidate(); }} />
+  </div><aside className="checkout-aside"><p className="eyebrow">SAÇAKLY / {t.total}</p><h2>{t.cart}</h2>
+    <div className="checkout-summary"><span>{basket.cafeName}</span><strong>{(quote?.subtotal ?? basket.lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0)).toFixed(2)} TMT</strong></div>
+    {quote && <><div className="checkout-summary" data-testid="checkout-discount"><span>{r.discount}{quote.promo && ` · ${quote.promo.code}`}</span><strong>−{quote.discount.toFixed(2)} TMT</strong></div><div className="checkout-summary"><span>{t.delivery}</span><strong>{quote.deliveryFee.toFixed(2)} TMT</strong></div><div className="checkout-grand" data-testid="checkout-total"><span>{t.total}</span><strong>{quote.total.toFixed(2)} TMT</strong></div><div className="checkout-summary" data-testid="checkout-earned"><span>{r.earn}</span><strong>+{quote.loyaltyPointsEarned}</strong></div>{quote.loyaltyPointsSpent > 0 && <div className="checkout-summary" data-testid="checkout-spent"><span>{r.spend}</span><strong>−{quote.loyaltyPointsSpent}</strong></div>}</>}
+    {error && <p className="error" role="alert">{error}</p>}{!session && <p className="muted">{t.signIn}</p>}
+    <button data-testid="checkout-quote" className="button button-red" type="submit" form="quote-form" disabled={!session || pending}>{pending ? "…" : t.quote}</button>
+    <button data-testid="checkout-place" className="button button-green" disabled={!quote || pending} onClick={place}>{pending ? "…" : t.place}</button><small>{t.quoteNote}</small>
+  </aside></div>;
 }

@@ -7,7 +7,7 @@ import { CAFE_CUISINES, type CafeCuisine } from "./cafe-onboarding";
 
 export const CAFE_MODULE_KEYS = [
   "CATALOG", "ORDERING", "KITCHEN", "DELIVERY", "RECEIPTS",
-  "INVENTORY", "LOYALTY", "ACCOUNTING",
+  "INVENTORY", "LOYALTY", "MARKETING", "ACCOUNTING",
 ] as const;
 
 export class ReviewCourierDto {

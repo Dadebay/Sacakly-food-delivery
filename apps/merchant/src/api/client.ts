@@ -5,6 +5,11 @@ export type MemberCafe = components["schemas"]["MemberCafeResponseDto"];
 export type Cafe = components["schemas"]["MarketplaceCafeResponseDto"];
 export type Cuisine = Cafe["cuisines"][number];
 export type CafeReadiness = components["schemas"]["CafeReadinessResponseDto"];
+export type CafeRewards = components["schemas"]["CafeRewardsResponseDto"];
+export type CafePromotion = components["schemas"]["CafePromotionResponseDto"];
+export type CafeGift = components["schemas"]["GiftResponseDto"];
+export type PromotionInput = components["schemas"]["CreateCafePromotionDto"];
+export type GiftInput = components["schemas"]["CreateCafeGiftDto"];
 export type CafeOrdersReport = components["schemas"]["CafeOrdersReportDto"];
 export type Module = components["schemas"]["CafeModuleResponseDto"];
 export type CourierApplication = components["schemas"]["PendingCourierApplicationResponseDto"];
@@ -129,8 +134,8 @@ export class ApiClient {
   cafeCatalog(cafeId: string) { return this.request<CafeCatalog>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog`); }
   createCafeCategory(cafeId: string, input: { name: string; slug: string }) { return this.request<CafeCategory>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/categories`, "POST", input); }
   updateCafeCategory(cafeId: string, id: string, input: { expectedVersion: number; name?: string; isActive?: boolean }) { return this.request<CafeCategory>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/categories/${encodeURIComponent(id)}`, "PATCH", input); }
-  createCafeProduct(cafeId: string, input: { categoryId: string; name: string; slug: string; description: string; price: number; preparationMinutes: number }) { return this.request<CafeProduct>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/products`, "POST", input); }
-  updateCafeProduct(cafeId: string, id: string, input: { expectedVersion: number; categoryId?: string; name?: string; description?: string; price?: number; preparationMinutes?: number; isActive?: boolean }) { return this.request<CafeProduct>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/products/${encodeURIComponent(id)}`, "PATCH", input); }
+  createCafeProduct(cafeId: string, input: { categoryId: string; name: string; slug: string; description: string; price: number; preparationMinutes: number; loyaltyPoints: number }) { return this.request<CafeProduct>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/products`, "POST", input); }
+  updateCafeProduct(cafeId: string, id: string, input: { expectedVersion: number; categoryId?: string; name?: string; description?: string; price?: number; preparationMinutes?: number; loyaltyPoints?: number; isActive?: boolean }) { return this.request<CafeProduct>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/products/${encodeURIComponent(id)}`, "PATCH", input); }
   createCafeBranch(cafeId: string, input: { name: string; address: string; latitude: number; longitude: number }) { return this.request<CafeBranch>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/branches`, "POST", input); }
   updateCafeBranch(cafeId: string, id: string, input: { expectedVersion: number; name?: string; address?: string; latitude?: number; longitude?: number; isActive?: boolean }) { return this.request<CafeBranch>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/branches/${encodeURIComponent(id)}`, "PATCH", input); }
 
@@ -147,6 +152,9 @@ export class ApiClient {
   cancelCafeReceipt(cafeId: string, taskId: string) { return this.request(`${this.receiptsPath(cafeId)}/queue/${encodeURIComponent(taskId)}/cancel`, "POST"); }
   reprintCafeReceipt(cafeId: string, orderId: string, idempotencyKey: string) { return this.request<components["schemas"]["ReceiptTaskResponseDto"]>(`${this.receiptsPath(cafeId)}/orders/${encodeURIComponent(orderId)}/reprint`, "POST", { idempotencyKey }); }
 
+  cafeRewards(cafeId: string) { return this.request<CafeRewards>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/rewards`); }
+  saveCafePromotion(cafeId: string, input: PromotionInput, existing?: { id: string; version: number }) { return this.request<CafePromotion>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/rewards/promotions${existing ? `/${encodeURIComponent(existing.id)}` : ""}`, existing ? "PATCH" : "POST", { ...input, ...(existing ? { expectedVersion: existing.version } : {}) }); }
+  saveCafeGift(cafeId: string, input: GiftInput, existing?: { id: string; version: number }) { return this.request<CafeGift>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/rewards/gifts${existing ? `/${encodeURIComponent(existing.id)}` : ""}`, existing ? "PATCH" : "POST", { ...input, ...(existing ? { expectedVersion: existing.version } : {}) }); }
   myCafes() { return this.request<MemberCafe[]>("/marketplace/merchant/cafes/me"); }
   cafeReadiness(cafeId: string) { return this.request<CafeReadiness>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/readiness`); }
   cafeOrdersReport(cafeId: string, from: string, to: string) { return this.request<CafeOrdersReport>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/reports/orders?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`); }

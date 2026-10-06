@@ -5077,6 +5077,307 @@
         ]
       }
     },
+    "/api/v1/marketplace/cafes/{cafeId}/rewards": {
+      "get": {
+        "operationId": "CafeRewardsController_publicRewards_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeRewardsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/cafes/{cafeId}/loyalty/me": {
+      "get": {
+        "operationId": "CafeRewardsController_wallet_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeWalletResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards": {
+      "get": {
+        "operationId": "CafeRewardsController_manage_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafeRewardsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/promotions": {
+      "post": {
+        "operationId": "CafeRewardsController_createPromotion_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCafePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafePromotionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/promotions/{id}": {
+      "patch": {
+        "operationId": "CafeRewardsController_updatePromotion_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCafePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CafePromotionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/gifts": {
+      "post": {
+        "operationId": "CafeRewardsController_createGift_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCafeGiftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GiftResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/gifts/{id}": {
+      "patch": {
+        "operationId": "CafeRewardsController_updateGift_v1",
+        "parameters": [
+          {
+            "name": "cafeId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCafeGiftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GiftResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "cafe-rewards"
+        ]
+      }
+    },
     "/api/v1/marketing/banners": {
       "get": {
         "operationId": "MarketingController_banners_v1",
@@ -7159,6 +7460,7 @@
                 "RECEIPTS",
                 "INVENTORY",
                 "LOYALTY",
+                "MARKETING",
                 "ACCOUNTING"
               ]
             }
@@ -11307,6 +11609,10 @@
       "OrderResponseDto": {
         "type": "object",
         "properties": {
+          "promotionLabel": {
+            "type": "string",
+            "nullable": true
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -11547,6 +11853,7 @@
           }
         },
         "required": [
+          "promotionLabel",
           "id",
           "number",
           "customerId",
@@ -16988,6 +17295,362 @@
           "version"
         ]
       },
+      "CafePromotionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cafeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAutomatic": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PERCENT",
+              "FIXED"
+            ]
+          },
+          "value": {
+            "type": "number"
+          },
+          "minOrderAmount": {
+            "type": "number"
+          },
+          "maxDiscountAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalUsageLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "perUserLimit": {
+            "type": "number"
+          },
+          "usedCount": {
+            "type": "number"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "startsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "version": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "cafeId",
+          "title",
+          "code",
+          "isAutomatic",
+          "type",
+          "value",
+          "minOrderAmount",
+          "maxDiscountAmount",
+          "totalUsageLimit",
+          "perUserLimit",
+          "usedCount",
+          "isActive",
+          "startsAt",
+          "endsAt",
+          "version"
+        ]
+      },
+      "CafeRewardsResponseDto": {
+        "type": "object",
+        "properties": {
+          "marketingEnabled": {
+            "type": "boolean"
+          },
+          "loyaltyEnabled": {
+            "type": "boolean"
+          },
+          "promotions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CafePromotionResponseDto"
+            }
+          },
+          "gifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GiftResponseDto"
+            }
+          }
+        },
+        "required": [
+          "marketingEnabled",
+          "loyaltyEnabled",
+          "promotions",
+          "gifts"
+        ]
+      },
+      "CafeWalletResponseDto": {
+        "type": "object",
+        "properties": {
+          "pointsBalance": {
+            "type": "number"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoyaltyEntryResponseDto"
+            }
+          },
+          "cafeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "pointsBalance",
+          "entries",
+          "cafeId"
+        ]
+      },
+      "CreateCafePromotionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 40
+          },
+          "isAutomatic": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PERCENT",
+              "FIXED"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 999999.99
+          },
+          "minOrderAmount": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "maxDiscountAmount": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0.01,
+            "maximum": 999999.99
+          },
+          "totalUsageLimit": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "perUserLimit": {
+            "type": "number",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "startsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "title",
+          "isAutomatic",
+          "type",
+          "value"
+        ]
+      },
+      "UpdateCafePromotionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 40
+          },
+          "isAutomatic": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PERCENT",
+              "FIXED"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 999999.99
+          },
+          "minOrderAmount": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999999.99
+          },
+          "maxDiscountAmount": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0.01,
+            "maximum": 999999.99
+          },
+          "totalUsageLimit": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "perUserLimit": {
+            "type": "number",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "startsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "expectedVersion": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "title",
+          "isAutomatic",
+          "type",
+          "value",
+          "expectedVersion"
+        ]
+      },
+      "CreateCafeGiftDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "pointsCost": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "stock": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "pointsCost"
+        ]
+      },
+      "UpdateCafeGiftDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "pointsCost": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "stock": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "expectedVersion": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "pointsCost",
+          "expectedVersion"
+        ]
+      },
       "BannerResponseDto": {
         "type": "object",
         "properties": {
@@ -19649,10 +20312,22 @@
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "totalPoints": {
+            "type": "number"
           }
         },
         "required": [
-          "id"
+          "id",
+          "name",
+          "quantity",
+          "totalPoints"
         ]
       },
       "DeliveryRequestResponseDto": {
@@ -19718,6 +20393,16 @@
       "MerchantOrderResponseDto": {
         "type": "object",
         "properties": {
+          "discount": {
+            "type": "string"
+          },
+          "promotionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "loyaltyPointsSpent": {
+            "type": "number"
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -19781,6 +20466,9 @@
           }
         },
         "required": [
+          "discount",
+          "promotionLabel",
+          "loyaltyPointsSpent",
           "id",
           "number",
           "status",
@@ -19976,6 +20664,9 @@
           "preparationMinutes": {
             "type": "number"
           },
+          "loyaltyPoints": {
+            "type": "number"
+          },
           "sortOrder": {
             "type": "number"
           },
@@ -19999,6 +20690,7 @@
           "description",
           "price",
           "preparationMinutes",
+          "loyaltyPoints",
           "sortOrder",
           "isActive",
           "version"
@@ -20239,6 +20931,12 @@
             "minimum": 0,
             "maximum": 1440
           },
+          "loyaltyPoints": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000,
+            "default": 0
+          },
           "sortOrder": {
             "type": "number",
             "minimum": 0
@@ -20282,6 +20980,11 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1440
+          },
+          "loyaltyPoints": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
           },
           "isActive": {
             "type": "boolean"

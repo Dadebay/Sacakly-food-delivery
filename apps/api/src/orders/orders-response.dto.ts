@@ -462,6 +462,8 @@ export class OrderTransitionResponseDto {
 }
 
 export class OrderResponseDto {
+  @ApiProperty({ type: String, nullable: true })
+  promotionLabel: string | null;
   @ApiProperty({ format: "uuid" })
   id: string;
 

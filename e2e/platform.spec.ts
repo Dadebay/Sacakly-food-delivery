@@ -39,13 +39,11 @@ async function placeWebOrder(page: Page, signIn: boolean) {
     await page.getByRole("button", { name: "Получить код" }).click();
     await page.getByRole("textbox", { name: "Код из SMS" }).fill("1111");
     await page.getByRole("button", { name: "Войти" }).click();
+    await expect(page.locator(".signed-in")).toContainText("+99365000990");
   }
-  await page
-    .locator("#quote-form input")
-    .nth(0)
-    .fill("Aşgabat, browser test street");
-  await page.locator("#quote-form input").nth(1).fill("37.96");
-  await page.locator("#quote-form input").nth(2).fill("58.33");
+  await page.getByTestId("checkout-address").fill("Aşgabat, browser test street");
+  await page.getByTestId("checkout-latitude").fill("37.96");
+  await page.getByTestId("checkout-longitude").fill("58.33");
   await page.getByRole("button", { name: "Рассчитать стоимость" }).click();
   await expect(
     page.getByRole("button", { name: "Подтвердить заказ" }),
@@ -316,6 +314,7 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
     await products.getByLabel("Код URL (латиница)").fill("cucumber-roll");
     await products.getByLabel("Описание").fill("Огурец, рис и нори");
     await products.getByLabel("Цена, TMT").fill("30");
+    await products.getByTestId("catalog-product-points").fill("5");
     await products.getByRole("button", { name: "Добавить блюдо" }).click();
     await expect(products).toContainText("Ролл с огурцом");
     const branches = merchant.locator("section.panel").filter({ has: merchant.getByRole("heading", { name: "Филиалы и кухни", exact: true }) });
@@ -334,6 +333,87 @@ test("web checkout, automatic network dispatch and cafe receipts use the real AP
     await page.goto("/ru?cuisine=SUSHI#cafes");
     await expect(page.locator(".cafe-grid")).toContainText("E2E Sushi House");
     await expect(page.locator(".cafe-grid")).not.toContainText("E2E Nar");
+  });
+
+  await test.step("OWNER enables cafe rewards; merchant configures offers and gifts; checkout uses isolated points", async () => {
+    await owner.getByTestId("owner-cafe-select").selectOption(nar.id);
+    for (const key of ["marketing", "loyalty"]) {
+      const toggle = owner.getByTestId(`owner-module-${key}`);
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    }
+    await merchant.getByTestId(`merchant-cafe-${nar.id}`).click();
+    await merchant.getByTestId("merchant-tab-rewards").click();
+    await merchant.getByTestId("promotion-title").fill("Обед со скидкой");
+    await merchant.getByTestId("promotion-user-limit").fill("100");
+    await merchant.getByTestId("promotion-save").click();
+    await expect(merchant.getByTestId("rewards-promotions").locator(".catalog-list")).toContainText("Обед со скидкой");
+    await merchant.getByTestId("promotion-title").fill("Скидка по коду");
+    await merchant.getByTestId("promotion-automatic").uncheck();
+    await merchant.getByTestId("promotion-code").fill("WEB20");
+    await merchant.getByTestId("promotion-value").fill("20");
+    await merchant.getByTestId("promotion-save").click();
+    await expect(merchant.getByTestId("rewards-promotions").locator(".catalog-list")).toContainText("WEB20");
+    await merchant.getByTestId("gift-name").fill("Чай в подарок");
+    await merchant.getByTestId("gift-description").fill("Чашка зелёного чая");
+    await merchant.getByTestId("gift-points").fill("5");
+    await merchant.getByTestId("gift-stock").fill("10");
+    await merchant.getByTestId("gift-save").click();
+    await expect(merchant.getByTestId("rewards-gifts").locator(".catalog-list")).toContainText("Чай в подарок");
+    await merchant.setViewportSize({ width: 390, height: 844 });
+    expect(await merchant.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+    await merchant.screenshot({ path: test.info().outputPath("rewards-merchant-mobile.png"), fullPage: true });
+    await merchant.setViewportSize({ width: 1280, height: 800 });
+
+    await page.goto(`/ru/cafes/${nar.slug}`);
+    await expect(page.getByTestId("cafe-offers")).toContainText("Обед со скидкой");
+    await expect(page.getByTestId("cafe-offers")).not.toContainText("WEB20");
+    await page.getByRole("button", { name: /В корзину: E2E Manty/ }).click();
+    await page.getByRole("link", { name: /Оформить заказ/ }).click();
+    await page.getByTestId("checkout-address").fill("Aşgabat, rewards street");
+    await page.getByTestId("checkout-latitude").fill("37.96");
+    await page.getByTestId("checkout-longitude").fill("58.33");
+    await expect(page.getByTestId("checkout-points-balance")).toContainText("10");
+    await page.getByTestId("checkout-quote").click();
+    await expect(page.getByTestId("checkout-discount")).toContainText("3.80 TMT");
+    await page.getByTestId("checkout-promo").fill("WEB20");
+    await expect(page.getByTestId("checkout-place")).toBeDisabled();
+    await page.getByLabel(/Чай в подарок/).check();
+    await page.getByTestId("checkout-quote").click();
+    await expect(page.getByTestId("checkout-discount")).toContainText("7.60 TMT");
+    await expect(page.getByTestId("checkout-earned")).toContainText("+5");
+    await expect(page.getByTestId("checkout-spent")).toContainText("−5");
+    await page.getByTestId(/^checkout-add-/).click();
+    await expect(page.getByTestId("checkout-place")).toBeDisabled();
+    await page.getByTestId(/^checkout-remove-/).click();
+    await page.getByTestId("checkout-quote").click();
+    await expect(page.getByTestId("checkout-place")).toBeEnabled();
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: test.info().outputPath("rewards-checkout-mobile.png"), fullPage: true });
+    const creation = page.waitForResponse((response) => response.url().endsWith("/marketplace/checkout/orders") && response.request().method() === "POST");
+    await page.getByTestId("checkout-place").click();
+    const saved = await creation;
+    expect(saved.status()).toBe(201);
+    const order = await saved.json() as { id: string; gifts: Array<{ id: string }> };
+    expect(order).toMatchObject({ discount: 7.6, loyaltyPointsSpent: 5, loyaltyPointsEarned: 5, promotionLabel: "Скидка по коду" });
+    await expect(page.getByRole("heading", { name: "Заказ принят" })).toBeVisible();
+    await merchant.getByTestId("merchant-tab-orders").click();
+    await merchant.getByTestId("merchant-refresh-orders").click();
+    const row = merchant.getByTestId(`merchant-order-${order.id}`);
+    await expect(row).toContainText("Чай в подарок");
+    await expect(row).toContainText("Скидка: 7.60 TMT");
+    await row.getByLabel(/E2E Manty/).check();
+    await row.getByRole("button", { name: "Заказ готов", exact: true }).click();
+    await expect(merchant.getByRole("alert")).toContainText("Отметьте каждое блюдо и подарок");
+    await row.getByTestId(`pack-gift-${order.gifts[0]!.id}`).check();
+    await row.getByRole("button", { name: "Заказ готов", exact: true }).click();
+    await expect(row.locator(".status-pill")).toHaveText("Готов");
+    await page.goto(`/en/cafes/${nar.slug}`);
+    await page.getByRole("button", { name: /Add to basket: E2E Manty/ }).click();
+    await page.getByRole("link", { name: /Checkout/ }).click();
+    await expect(page.getByTestId("checkout-points-balance")).toHaveText("Points at this cafe: 5");
+    await expect(page.getByTestId("checkout-points-history")).toContainText("Gift");
   });
 
   await test.step("merchant and OWNER setup fit a mobile viewport", async () => {

@@ -350,9 +350,9 @@ export class MarketplaceService {
     assertCafeMember(actor.id, cafeId, membership, [Role.ADMIN, Role.OPERATOR, Role.COOK, Role.ACCOUNTANT]);
     return this.prisma.order.findMany({
       where: { cafeId },
-      select: { id: true, number: true, status: true, version: true, packingConfirmedAt: true, total: true, branchId: true, createdAt: true,
+      select: { id: true, number: true, status: true, version: true, packingConfirmedAt: true, total: true, discount: true, promotionLabel: true, loyaltyPointsSpent: true, branchId: true, createdAt: true,
         items: { select: { id: true, productName: true, quantity: true, preparationMinutes: true } },
-        gifts: { select: { id: true } }, deliveryRequest: true },
+        gifts: { select: { id: true, name: true, quantity: true, totalPoints: true } }, deliveryRequest: true },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 100,
     });
@@ -365,7 +365,7 @@ export class MarketplaceService {
     dto: SetCafeModuleDto,
   ) {
     await this.assertOwner(actor);
-    if (dto.enabled && !["ORDERING", "RECEIPTS"].includes(key)) {
+    if (dto.enabled && !["ORDERING", "RECEIPTS", "LOYALTY", "MARKETING"].includes(key)) {
       throw new ConflictException("This cafe module is not yet tenant-ready");
     }
     if (dto.enabled && key === "RECEIPTS") await this.receipts.assertReadyForActivation(cafeId);

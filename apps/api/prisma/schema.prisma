@@ -208,6 +208,7 @@ model User {
   inventoryMovements    InventoryMovement[]    @relation("InventoryMovementActor")
   inventoryDocuments    InventoryDocument[]
   loyaltyEntries        LoyaltyEntry[]
+  cafeLoyaltyWallets     CafeLoyaltyWallet[]
   platformOwner         PlatformOwner?
   cafeMemberships       CafeMembership[]
   courierApplication    CourierApplication? @relation("CourierApplicant")
@@ -292,6 +293,10 @@ model Cafe {
   printers    ReceiptPrinter[]
   receiptConfiguration CafeReceiptConfiguration?
   deliveryRequests MarketplaceDeliveryRequest[]
+  promotions CafePromotion[]
+  loyaltyWallets CafeLoyaltyWallet[]
+  gifts Gift[]
+  loyaltyEntries LoyaltyEntry[]
 
   @@index([isActive, sortOrder])
 }
@@ -662,6 +667,9 @@ model Order {
   cookId               String?                     @db.Uuid
   courierId            String?                     @db.Uuid
   promoCodeId          String?                     @db.Uuid
+  cafePromotionId      String?                     @db.Uuid
+  promotionLabel       String?                     @db.VarChar(160)
+  loyaltyCafeId        String?                     @db.Uuid
   deliveryEtrapId      Int?
   status               OrderStatus                 @default(COOKING)
   source               OrderSource                 @default(CUSTOMER_APP)
@@ -700,6 +708,7 @@ model Order {
   cafe                 Cafe?                       @relation(fields: [cafeId], references: [id], onDelete: Restrict)
   cook                 User?                       @relation("CookOrders", fields: [cookId], references: [id], onDelete: SetNull)
   courier              User?                       @relation("CourierOrders", fields: [courierId], references: [id], onDelete: SetNull)
+  cafePromotion        CafePromotion?              @relation(fields: [cafePromotionId], references: [id], onDelete: Restrict)
   promoCode            PromoCode?                  @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
   deliveryEtrap        Etrap?                      @relation(fields: [deliveryEtrapId], references: [id], onDelete: SetNull)
   items                OrderItem[]
@@ -710,6 +719,7 @@ model Order {
   promoRedemption      PromoRedemption?
   cashSettlement       CashSettlement?
 
+  @@index([cafePromotionId, customerId])
   @@index([createdAt, id])
   @@index([status, createdAt])
   @@index([customerId, createdAt])
@@ -753,6 +763,8 @@ enum LoyaltyEntryKind {
 }
 
 model Gift {
+  cafeId      String?     @db.Uuid
+  cafe        Cafe?       @relation(fields: [cafeId], references: [id], onDelete: Restrict)
   id          String      @id @default(uuid()) @db.Uuid
   name        String      @db.VarChar(160)
   description String      @db.Text
@@ -767,6 +779,7 @@ model Gift {
   orderGifts  OrderGift[]
 
   @@index([isActive, sortOrder])
+  @@index([cafeId, isActive])
 }
 
 model OrderGift {
@@ -786,6 +799,8 @@ model OrderGift {
 }
 
 model LoyaltyEntry {
+  cafeId    String?          @db.Uuid
+  cafe      Cafe?            @relation(fields: [cafeId], references: [id], onDelete: Restrict)
   id        String           @id @default(uuid()) @db.Uuid
   userId    String           @db.Uuid
   orderId   String           @db.Uuid
@@ -797,6 +812,7 @@ model LoyaltyEntry {
 
   @@unique([orderId, kind])
   @@index([userId, createdAt])
+  @@index([cafeId, userId, createdAt])
 }
 
 model OrderTransition {
@@ -1323,4 +1339,42 @@ model OrderCreationRequest {
   order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@id([actorId, key])
+}
+
+model CafePromotion {
+  id                String    @id @default(uuid()) @db.Uuid
+  cafeId            String    @db.Uuid
+  title             String    @db.VarChar(160)
+  code              String?   @db.VarChar(40)
+  isAutomatic       Boolean   @default(false)
+  type              PromoType
+  value             Decimal   @db.Decimal(12, 2)
+  minOrderAmount    Decimal   @default(0) @db.Decimal(12, 2)
+  maxDiscountAmount Decimal?  @db.Decimal(12, 2)
+  totalUsageLimit   Int?
+  perUserLimit      Int       @default(1)
+  usedCount         Int       @default(0)
+  isActive          Boolean   @default(true)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  version           Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  cafe              Cafe      @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  orders            Order[]
+
+  @@unique([cafeId, code])
+  @@index([cafeId, isActive])
+}
+
+model CafeLoyaltyWallet {
+  cafeId    String   @db.Uuid
+  userId    String   @db.Uuid
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([cafeId, userId])
+  @@index([userId])
 }

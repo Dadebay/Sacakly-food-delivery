@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, type CafeBranch, type CafeCatalog, type CafeProduct } from "../api/client";
 
-type ProductEdit = { id: string; version: number; categoryId: string; name: string; description: string; price: string; preparationMinutes: string };
+type ProductEdit = { id: string; version: number; categoryId: string; name: string; description: string; price: string; preparationMinutes: string; loyaltyPoints: string };
 type BranchEdit = { id: string; version: number; name: string; address: string; latitude: string; longitude: string };
 
 export function CatalogManager({ cafeId }: { cafeId: string }) {
@@ -20,6 +20,7 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
   const [productDescription, setProductDescription] = useState("");
   const [price, setPrice] = useState("");
   const [preparationMinutes, setPreparationMinutes] = useState("20");
+  const [loyaltyPoints, setLoyaltyPoints] = useState("0");
   const [editProduct, setEditProduct] = useState<ProductEdit | null>(null);
   const [branchName, setBranchName] = useState("");
   const [branchAddress, setBranchAddress] = useState("");
@@ -52,8 +53,8 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
   }
   async function addProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (await mutate(() => api.createCafeProduct(cafeId, { categoryId: productCategoryId, name: productName, slug: productSlug, description: productDescription, price: Number(price), preparationMinutes: Number(preparationMinutes) }), "Блюдо добавлено")) {
-      setProductName(""); setProductSlug(""); setProductDescription(""); setPrice("");
+    if (await mutate(() => api.createCafeProduct(cafeId, { categoryId: productCategoryId, name: productName, slug: productSlug, description: productDescription, price: Number(price), preparationMinutes: Number(preparationMinutes), loyaltyPoints: Number(loyaltyPoints) }), "Блюдо добавлено")) {
+      setProductName(""); setProductSlug(""); setProductDescription(""); setPrice(""); setLoyaltyPoints("0");
     }
   }
   async function addBranch(event: FormEvent<HTMLFormElement>) {
@@ -65,14 +66,14 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
   async function saveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editProduct) return;
-    if (await mutate(() => api.updateCafeProduct(cafeId, editProduct.id, { expectedVersion: editProduct.version, categoryId: editProduct.categoryId, name: editProduct.name, description: editProduct.description, price: Number(editProduct.price), preparationMinutes: Number(editProduct.preparationMinutes) }), "Блюдо обновлено")) setEditProduct(null);
+    if (await mutate(() => api.updateCafeProduct(cafeId, editProduct.id, { expectedVersion: editProduct.version, categoryId: editProduct.categoryId, name: editProduct.name, description: editProduct.description, price: Number(editProduct.price), preparationMinutes: Number(editProduct.preparationMinutes), loyaltyPoints: Number(editProduct.loyaltyPoints) }), "Блюдо обновлено")) setEditProduct(null);
   }
   async function saveBranch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editBranch) return;
     if (await mutate(() => api.updateCafeBranch(cafeId, editBranch.id, { expectedVersion: editBranch.version, name: editBranch.name, address: editBranch.address, latitude: Number(editBranch.latitude), longitude: Number(editBranch.longitude) }), "Филиал обновлён")) setEditBranch(null);
   }
-  function openProduct(product: CafeProduct) { setEditProduct({ id: product.id, version: product.version, categoryId: product.categoryId, name: product.name, description: product.description, price: product.price, preparationMinutes: String(product.preparationMinutes) }); }
+  function openProduct(product: CafeProduct) { setEditProduct({ id: product.id, version: product.version, categoryId: product.categoryId, name: product.name, description: product.description, price: product.price, preparationMinutes: String(product.preparationMinutes), loyaltyPoints: String(product.loyaltyPoints) }); }
   function openBranch(branch: CafeBranch) { setEditBranch({ id: branch.id, version: branch.version, name: branch.name, address: branch.address, latitude: branch.latitude, longitude: branch.longitude }); }
 
   return <div className="catalog-manager" data-testid="merchant-catalog-root">
@@ -94,9 +95,9 @@ export function CatalogManager({ cafeId }: { cafeId: string }) {
         <label>Код URL (латиница)<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={80} value={productSlug} onChange={(event) => setProductSlug(event.target.value)} placeholder="palow" /></label>
         <label>Описание<textarea maxLength={2000} value={productDescription} onChange={(event) => setProductDescription(event.target.value)} /></label>
         <div className="catalog-two"><label>Цена, TMT<input required type="number" min="0" max="999999.99" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} /></label><label>Приготовление, минут<input required type="number" min="0" max="1440" step="1" value={preparationMinutes} onChange={(event) => setPreparationMinutes(event.target.value)} /></label></div>
-        <button type="submit" disabled={busy || !catalog.categories.length}>Добавить блюдо</button></form>
-        <div className="catalog-list">{catalog.categories.flatMap((category) => category.products.map((product) => <article key={product.id} className="catalog-row"><div><strong>{product.name}</strong><small>{category.name} · {product.price} TMT · {product.preparationMinutes} мин. · v{product.version}</small></div><div className="catalog-actions"><button disabled={busy} onClick={() => openProduct(product)}>Изменить</button><button disabled={busy} onClick={() => mutate(() => api.updateCafeProduct(cafeId, product.id, { expectedVersion: product.version, isActive: !product.isActive }), product.isActive ? "Блюдо скрыто" : "Блюдо опубликовано")}>{product.isActive ? "Скрыть" : "Опубликовать"}</button></div>
-          {editProduct?.id === product.id && <form className="catalog-inline" onSubmit={saveProduct}><label>Категория<select value={editProduct.categoryId} onChange={(event) => setEditProduct({ ...editProduct, categoryId: event.target.value })}>{catalog.categories.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label><label>Название<input required minLength={2} value={editProduct.name} onChange={(event) => setEditProduct({ ...editProduct, name: event.target.value })} /></label><label>Описание<textarea value={editProduct.description} onChange={(event) => setEditProduct({ ...editProduct, description: event.target.value })} /></label><div className="catalog-two"><label>Цена<input required type="number" min="0" step="0.01" value={editProduct.price} onChange={(event) => setEditProduct({ ...editProduct, price: event.target.value })} /></label><label>Минуты<input required type="number" min="0" max="1440" step="1" value={editProduct.preparationMinutes} onChange={(event) => setEditProduct({ ...editProduct, preparationMinutes: event.target.value })} /></label></div><button disabled={busy}>Сохранить</button><button type="button" onClick={() => setEditProduct(null)}>Отмена</button></form>}
+        <label>Баллы за одну порцию после доставки<input data-testid="catalog-product-points" required type="number" min="0" max="1000000" step="1" value={loyaltyPoints} onChange={(event) => setLoyaltyPoints(event.target.value)} /></label><button type="submit" disabled={busy || !catalog.categories.length}>Добавить блюдо</button></form>
+        <div className="catalog-list">{catalog.categories.flatMap((category) => category.products.map((product) => <article key={product.id} className="catalog-row"><div><strong>{product.name}</strong><small>{category.name} · {product.price} TMT · {product.preparationMinutes} мин. · {product.loyaltyPoints} баллов · v{product.version}</small></div><div className="catalog-actions"><button disabled={busy} onClick={() => openProduct(product)}>Изменить</button><button disabled={busy} onClick={() => mutate(() => api.updateCafeProduct(cafeId, product.id, { expectedVersion: product.version, isActive: !product.isActive }), product.isActive ? "Блюдо скрыто" : "Блюдо опубликовано")}>{product.isActive ? "Скрыть" : "Опубликовать"}</button></div>
+          {editProduct?.id === product.id && <form className="catalog-inline" onSubmit={saveProduct}><label>Категория<select value={editProduct.categoryId} onChange={(event) => setEditProduct({ ...editProduct, categoryId: event.target.value })}>{catalog.categories.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label><label>Название<input required minLength={2} value={editProduct.name} onChange={(event) => setEditProduct({ ...editProduct, name: event.target.value })} /></label><label>Описание<textarea value={editProduct.description} onChange={(event) => setEditProduct({ ...editProduct, description: event.target.value })} /></label><div className="catalog-two"><label>Цена<input required type="number" min="0" step="0.01" value={editProduct.price} onChange={(event) => setEditProduct({ ...editProduct, price: event.target.value })} /></label><label>Минуты<input required type="number" min="0" max="1440" step="1" value={editProduct.preparationMinutes} onChange={(event) => setEditProduct({ ...editProduct, preparationMinutes: event.target.value })} /></label></div><label>Баллы за порцию<input data-testid="catalog-edit-product-points" required type="number" min="0" max="1000000" step="1" value={editProduct.loyaltyPoints} onChange={(event) => setEditProduct({ ...editProduct, loyaltyPoints: event.target.value })} /></label><button disabled={busy}>Сохранить</button><button type="button" onClick={() => setEditProduct(null)}>Отмена</button></form>}
         </article>))}</div>
       </section>
       <section className="panel catalog-branches"><h3>Филиалы и кухни</h3><form className="catalog-form" data-testid="catalog-branch-form" onSubmit={addBranch}>

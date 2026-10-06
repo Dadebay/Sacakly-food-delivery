@@ -6,6 +6,36 @@ the authority for current business rules. Record the PR URL when available,
 the affected surfaces, verification, migrations, and any release limitation.
 Never put customer data, OTP values, agent tokens or other secrets here.
 
+## 2026-10-06 — Cafe discounts, promotions and loyalty points
+
+[PR #9](https://github.com/Guvanch99/sacakly-platform/pull/9).
+
+- OWNER can enable MARKETING and LOYALTY per cafe. Cafe ADMIN manages automatic
+  or code discounts (percent/fixed TMT, dates, minimum/cap and usage limits),
+  versioned gifts and availability. No cross-cafe codes, gifts or balances.
+- Checkout chooses one eligible discount, serializes campaign limits, stores
+  immutable labels and awards per-dish points only after delivery. Gifts debit
+  cafe balance/stock atomically; cancellation refunds spending and reverses
+  earning. Existing legacy balances/orders retain their previous scope.
+- Merchant forms configure rewards/product points, show order discounts/gifts
+  and require gift packing confirmation. Customer tk/ru/en web shows offers,
+  scoped wallet/history, promo input, gifts and server quote; changes invalidate
+  confirmation. No new dependencies or production deployment.
+- Added migration `20261006170000_cafe_rewards`, new cafe-rewards API module and
+  generated contracts; documented setup, full rules, mobile endpoints and QA.
+  Migration applied to local sacakly and isolated sacakly_test PostgreSQL.
+- Final API suite: 453 tests in 48 files passed; coverage 90.68% statements,
+  78.70% branches, 91.41% functions and 92.77% lines. API/merchant/web lint,
+  all three production builds, 2 merchant and 2 web unit tests passed.
+- Playwright: 2 real-API journeys passed in each of Chromium, Firefox and
+  WebKit (6 executions); mobile overflow, application console, quote
+  invalidation and gift packing checked. Development and production dependency
+  audits passed with zero vulnerabilities for API/merchant/web. No cycles in
+  24 web and 13 merchant modules; frontend hygiene and diff checks passed.
+- Points currently exchange for gifts within one cafe; there is no shared
+  platform wallet, cash redemption, transfer or expiry. Physical printer/native
+  device acceptance and other platform launch blockers remain separate.
+
 ## 2026-10-06 — Cafe onboarding, cuisine discovery and private reports
 
 [PR #8](https://github.com/Guvanch99/sacakly-platform/pull/8).

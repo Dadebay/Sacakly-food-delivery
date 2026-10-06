@@ -81,7 +81,7 @@ export class MarketplaceCatalogService {
       await this.assertManager(tx, actor, cafeId);
       const category = await tx.category.findFirst({ where: { id: dto.categoryId, cafeId } });
       if (!category) throw new NotFoundException("Category not found in this cafe");
-      const product = await tx.product.create({ data: { categoryId: dto.categoryId, name: dto.name.trim(), slug: `${cafeId}-${dto.slug}`, description: dto.description.trim(), price: dto.price, preparationMinutes: dto.preparationMinutes, sortOrder: dto.sortOrder ?? 0 } });
+      const product = await tx.product.create({ data: { categoryId: dto.categoryId, name: dto.name.trim(), slug: `${cafeId}-${dto.slug}`, description: dto.description.trim(), price: dto.price, preparationMinutes: dto.preparationMinutes, loyaltyPoints: dto.loyaltyPoints ?? 0, sortOrder: dto.sortOrder ?? 0 } });
       await tx.auditLog.create({ data: { actorId: actor.id, action: "marketplace.catalog.product.created", entityType: "Product", entityId: product.id, metadata: { cafeId, categoryId: dto.categoryId } } });
       return product;
     }).catch(rethrowCatalogConflict);
@@ -104,6 +104,7 @@ export class MarketplaceCatalogService {
         ...(dto.description === undefined ? {} : { description: dto.description.trim() }),
         ...(dto.price === undefined ? {} : { price: dto.price }),
         ...(dto.preparationMinutes === undefined ? {} : { preparationMinutes: dto.preparationMinutes }),
+        ...(dto.loyaltyPoints === undefined ? {} : { loyaltyPoints: dto.loyaltyPoints }),
         ...(dto.isActive === undefined ? {} : { isActive: dto.isActive }),
         ...(dto.sortOrder === undefined ? {} : { sortOrder: dto.sortOrder }),
         version: { increment: 1 },

@@ -208,9 +208,15 @@ export class MerchantOrderItemResponseDto {
 
 export class MerchantOrderGiftResponseDto {
   @ApiProperty({ format: "uuid" }) id: string;
+  @ApiProperty() name: string;
+  @ApiProperty() quantity: number;
+  @ApiProperty() totalPoints: number;
 }
 
 export class MerchantOrderResponseDto {
+  @ApiProperty({ type: String }) discount: string;
+  @ApiProperty({ type: String, nullable: true }) promotionLabel: string | null;
+  @ApiProperty() loyaltyPointsSpent: number;
   @ApiProperty({ format: "uuid" })
   id: string;
 

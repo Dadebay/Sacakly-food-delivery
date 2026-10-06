@@ -8,6 +8,9 @@ export type Order = components["schemas"]["OrderResponseDto"];
 export type SitePage = components["schemas"]["SitePageResponseDto"];
 export type SitePageSummary = components["schemas"]["SitePageSummaryDto"];
 export type ExternalOffer = components["schemas"]["ExternalDeliveryOfferResponseDto"];
+export type CafeRewards = components["schemas"]["CafeRewardsResponseDto"];
+export type CafeWallet = components["schemas"]["CafeWalletResponseDto"];
+export type CheckoutRewards = { promoCode?: string; gifts?: { giftId: string; quantity: number }[] };
 export type OrderItem = { productId: string; variantId?: string; quantity: number };
 
 export class ApiError extends Error { constructor(public status: number, message: string) { super(message); } }
@@ -23,6 +26,7 @@ async function send<T>(path: string, init: RequestInit = {}, token?: string): Pr
 }
 export const publicApi = {
   cafes: (cuisine?: Cafe["cuisines"][number]) => send<Cafe[]>(`/marketplace/cafes${cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : ""}`),
+  rewards: (cafeId: string) => send<CafeRewards>(`/marketplace/cafes/${encodeURIComponent(cafeId)}/rewards`),
   categories: (cafeId: string) => send<Category[]>(`/catalog/categories?cafeId=${encodeURIComponent(cafeId)}`),
   pages: () => send<SitePageSummary[]>("/site/pages"),
   page: (locale: string, slug: string) => send<SitePage>(`/site/pages/${encodeURIComponent(locale)}/${encodeURIComponent(slug)}`),
@@ -44,8 +48,9 @@ export class CustomerApi {
   }
   requestOtp(phone: string) { return this.request("/auth/otp/request", { method: "POST", body: JSON.stringify({ phone }) }, false); }
   async verifyOtp(phone: string, code: string) { const session = await this.request<Session>("/auth/otp/verify", { method: "POST", body: JSON.stringify({ phone, code }) }, false); this.save(session); return session; }
-  quote(cafeId: string, items: OrderItem[], latitude?: number, longitude?: number) { return this.request<Quote>("/marketplace/checkout/quote", { method: "POST", body: JSON.stringify({ cafeId, items, latitude, longitude }) }); }
-  order(input: { cafeId: string; items: OrderItem[]; address: string; latitude: number; longitude: number; idempotencyKey: string }) { return this.request<Order>("/marketplace/checkout/orders", { method: "POST", body: JSON.stringify(input) }); }
+  quote(cafeId: string, items: OrderItem[], latitude?: number, longitude?: number, rewards: CheckoutRewards = {}) { return this.request<Quote>("/marketplace/checkout/quote", { method: "POST", body: JSON.stringify({ cafeId, items, latitude, longitude, ...rewards }) }); }
+  wallet(cafeId: string) { return this.request<CafeWallet>(`/marketplace/cafes/${encodeURIComponent(cafeId)}/loyalty/me`); }
+  order(input: CheckoutRewards & { cafeId: string; items: OrderItem[]; address: string; latitude: number; longitude: number; idempotencyKey: string }) { return this.request<Order>("/marketplace/checkout/orders", { method: "POST", body: JSON.stringify(input) }); }
   applyCourier() { return this.request("/marketplace/courier-applications", { method: "POST" }); }
   offers() { return this.request<ExternalOffer[]>("/marketplace/delivery/courier/offers"); }
   claim(orderId: string) { return this.request(`/marketplace/delivery/courier/offers/${encodeURIComponent(orderId)}/claim`, { method: "POST" }); }

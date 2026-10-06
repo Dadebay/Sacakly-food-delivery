@@ -1,3 +1,4 @@
+import { CafeRewardsService } from "../cafe-rewards/cafe-rewards.service";
 import {
   BadRequestException,
   ConflictException,
@@ -271,6 +272,7 @@ export class OrdersService {
     private readonly inventory: InventoryService,
     private readonly orderingHours: OrderingHoursService,
     private readonly loyalty: LoyaltyService,
+    private readonly cafeRewards: CafeRewardsService,
   ) {}
 
   private async assertMarketplaceManager(tx: Prisma.TransactionClient, actor: AuthUser, cafeId: string) {
@@ -302,12 +304,10 @@ export class OrdersService {
         });
         assertModuleEnabled(module, cafeId);
       }
-      const { promo, discount } = await this.resolvePromoPricing(
-        tx,
-        user.id,
-        dto.promoCode,
-        subtotal,
-      );
+      const cafePricing = marketplaceCafeId ? await this.cafeRewards.price(tx, marketplaceCafeId, user.id, subtotal, dto.promoCode) : null;
+      const { promo, discount: legacyDiscount } = marketplaceCafeId ? { promo: null, discount: 0 } : await this.resolvePromoPricing(tx, user.id, dto.promoCode, subtotal);
+      const discount = cafePricing?.discount ?? legacyDiscount;
+      const loyaltyEnabled = await this.loyalty.enabled(tx, marketplaceCafeId ?? null);
       const deliveryPricing = await this.delivery.resolvePricing(
         tx,
         subtotal,
@@ -317,15 +317,12 @@ export class OrdersService {
           ? { latitude: dto.latitude, longitude: dto.longitude }
           : undefined,
       );
-      const redemption = await this.loyalty.prepareRedemption(tx, dto.gifts);
-      const wallet = await tx.user.findUniqueOrThrow({
-        where: { id: user.id },
-        select: { pointsBalance: true },
-      });
-      if (redemption.pointsSpent > wallet.pointsBalance)
+      const redemption = await this.loyalty.prepareRedemption(tx, dto.gifts, marketplaceCafeId ?? null);
+      const pointsBalance = await this.loyalty.balance(tx, user.id, marketplaceCafeId ?? null);
+      if (redemption.pointsSpent > 0 && redemption.pointsSpent > pointsBalance)
         throw new ConflictException("Insufficient loyalty points");
-      const loyaltyPointsEarned = earnedPoints(
-        resolvedItems.map(({ product, quantity }) => ({
+      const loyaltyPointsEarned = this.calculateEarnedPoints(
+        resolvedItems.filter(({ product }) => !marketplaceCafeId || (loyaltyEnabled && product.loyaltyPoints > 0)).map(({ product, quantity }) => ({
           points: product.loyaltyPoints,
           quantity,
         })),
@@ -350,7 +347,7 @@ export class OrdersService {
             productImageUrl:
               variant?.images[0]?.url ?? product.images[0]?.url ?? null,
             quantity,
-            loyaltyPoints: product.loyaltyPoints * quantity,
+            loyaltyPoints: loyaltyEnabled ? product.loyaltyPoints * quantity : 0,
             unitPrice: Number(variant?.price ?? product.price),
             originalLineTotal,
             discount: lineDiscount,
@@ -362,7 +359,7 @@ export class OrdersService {
 
       return toApiResponse({
         items,
-        promo: promo
+        promo: cafePricing?.promotion ? { code: cafePricing.promotion.code ?? cafePricing.promotion.title, type: cafePricing.promotion.type, value: cafePricing.promotion.value, discount } : promo
           ? {
               code: promo.code,
               type: promo.type,
@@ -377,7 +374,7 @@ export class OrdersService {
         total: roundMoney(discountedSubtotal + deliveryPricing.fee),
         loyaltyPointsEarned,
         loyaltyPointsSpent: redemption.pointsSpent,
-        pointsBalance: wallet.pointsBalance,
+        pointsBalance,
         gifts: redemption.gifts.map(({ gift, quantity, totalPoints }) => ({
           giftId: gift.id,
           name: gift.name,
@@ -902,12 +899,10 @@ export class OrdersService {
       });
       assertModuleEnabled(module, cafeId);
     }
-    const { promo, discount } = await this.resolvePromoPricing(
-      tx,
-      customerId,
-      dto.promoCode,
-      subtotal,
-    );
+    const cafePricing = marketplaceCafeId ? await this.cafeRewards.price(tx, marketplaceCafeId, customerId, subtotal, dto.promoCode, true) : null;
+    const { promo, discount: legacyDiscount } = marketplaceCafeId ? { promo: null, discount: 0 } : await this.resolvePromoPricing(tx, customerId, dto.promoCode, subtotal);
+    const discount = cafePricing?.discount ?? legacyDiscount;
+    const loyaltyEnabled = await this.loyalty.enabled(tx, marketplaceCafeId ?? null);
 
     const ignoresSelectedEtrap = await this.delivery.ignoresSelectedEtrap(tx);
     const selectedAddress = await this.addresses.selectForOrder(
@@ -946,9 +941,9 @@ export class OrdersService {
     }
     const deliveryFee = deliveryPricing.fee;
     const total = roundMoney(subtotal - discount + deliveryFee);
-    const redemption = await this.loyalty.prepareRedemption(tx, dto.gifts);
-    const loyaltyPointsEarned = earnedPoints(
-      resolvedItems.map(({ product, quantity }) => ({
+    const redemption = await this.loyalty.prepareRedemption(tx, dto.gifts, marketplaceCafeId ?? null);
+    const loyaltyPointsEarned = this.calculateEarnedPoints(
+      resolvedItems.filter(({ product }) => !marketplaceCafeId || (loyaltyEnabled && product.loyaltyPoints > 0)).map(({ product, quantity }) => ({
         points: product.loyaltyPoints,
         quantity,
       })),
@@ -979,6 +974,9 @@ export class OrdersService {
         status: OrderStatus.COOKING,
         branchId: nearest.branch.id,
         promoCodeId: promo?.id,
+        cafePromotionId: cafePricing?.promotion?.id,
+        promotionLabel: cafePricing?.promotion?.title,
+        loyaltyCafeId: marketplaceCafeId,
         addressId: selectedAddress.id,
         deliveryEtrapId: deliveryPricing.etrap?.id,
         subtotal,
@@ -1014,7 +1012,7 @@ export class OrdersService {
               productName: product.name,
               variantName: variant?.name,
               preparationMinutes: product.preparationMinutes,
-              loyaltyPoints: product.loyaltyPoints * quantity,
+              loyaltyPoints: loyaltyEnabled ? product.loyaltyPoints * quantity : 0,
               receiptPrinterIp: receiptRoute?.receiptPrinterIp,
               receiptPrinterPort: receiptRoute?.receiptPrinterPort,
               receiptPrinterTransport: receiptRoute?.receiptPrinterTransport,
@@ -1076,6 +1074,7 @@ export class OrdersService {
       order.id,
       redemption.gifts,
       redemption.pointsSpent,
+      marketplaceCafeId ?? null,
     );
     await tx.auditLog.create({
       data: {
@@ -1424,6 +1423,7 @@ export class OrdersService {
           order.customerId,
           id,
           order.loyaltyPointsEarned,
+          order.loyaltyCafeId,
         );
       }
 
@@ -1572,6 +1572,7 @@ export class OrdersService {
           order.customerId,
           id,
           order.loyaltyPointsEarned,
+          order.loyaltyCafeId,
         );
       }
       await tx.cashSettlement.create({
@@ -1625,6 +1626,14 @@ export class OrdersService {
       OrderStatus.CASH_RETURNED,
     );
     return response;
+  }
+
+  private calculateEarnedPoints(lines: { points: number; quantity: number }[]) {
+    try { return earnedPoints(lines); }
+    catch (error) {
+      if (error instanceof RangeError) throw new BadRequestException("Order loyalty points exceed the supported range");
+      throw error;
+    }
   }
 
   async adminEdit(user: AuthUser, id: string, dto: AdminEditOrderDto) {
@@ -2212,6 +2221,7 @@ export class OrdersService {
         id,
         order.loyaltyPointsEarned,
         order.loyaltyPointsSpent,
+        order.loyaltyCafeId,
       );
       await tx.orderTransition.create({
         data: {

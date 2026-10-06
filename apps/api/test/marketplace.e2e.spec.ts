@@ -125,6 +125,13 @@ describe("marketplace HTTP tenant boundaries", () => {
       .set("Authorization", await auth(merchantId)).expect(200);
     await request(server).get(`/api/v1/marketplace/delivery/merchant/cafes/${cafeB}/couriers`)
       .set("Authorization", await auth(merchantId)).expect(403);
+    for (const key of ["MARKETING", "LOYALTY"]) {
+      const modulePath = `/api/v1/marketplace/owner/cafes/${cafeA}/modules/${key}`;
+      await request(server).put(modulePath).set("Authorization", await auth(merchantId)).send({ enabled: true, expectedVersion: 0 }).expect(403);
+      await request(server).put(modulePath).set("Authorization", await auth(ownerId)).send({ enabled: true, expectedVersion: 0 }).expect(200);
+      await request(server).put(modulePath).set("Authorization", await auth(ownerId)).send({ enabled: false, expectedVersion: 0 }).expect(409);
+      await request(server).put(modulePath).set("Authorization", await auth(ownerId)).send({ enabled: false, expectedVersion: 1 }).expect(200);
+    }
     const readinessPath = `/api/v1/marketplace/owner/cafes/${cafeA}/readiness`;
     const before = await request(server).get(readinessPath).set("Authorization", await auth(ownerId)).expect(200);
     expect((before.body as { readyForOrdering: boolean }).readyForOrdering).toBe(false);

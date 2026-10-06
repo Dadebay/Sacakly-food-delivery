@@ -1,3 +1,4 @@
+import { CafeRewardsModule } from "../cafe-rewards/cafe-rewards.module";
 import { ReceiptQueueController } from "./receipt-queue.controller";
 import { ReceiptAgentController } from "./receipt-agent.controller";
 import { ReceiptAgentGuard } from "./receipt-agent.guard";
@@ -26,6 +27,7 @@ import { LoyaltyModule } from "../loyalty/loyalty.module";
     NotificationsModule,
     DeliveryModule,
     LoyaltyModule,
+    CafeRewardsModule,
   ],
   controllers: [
     OrdersController,

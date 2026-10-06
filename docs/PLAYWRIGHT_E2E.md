@@ -20,7 +20,12 @@ CI runs Chromium on desktop and checks the customer site, cafe setup and OWNER
 console at a 390 × 844 mobile viewport. The main journey also creates a draft
 cafe, grants its administrator, fills its menu and branch through the portal,
 then publishes it through OWNER and checks the cuisine filter. Cafe reports,
-receipt configuration before publication and tenant boundaries use the real API. It uses local-only test OTP accounts, a non-delivering console
+receipt configuration before publication and tenant boundaries use the real API.
+The rewards journey enables MARKETING/LOYALTY through OWNER, creates automatic
+and code discounts plus gifts in the cafe portal, checks automatic versus explicit
+pricing, wallet isolation, quote invalidation, redemption and gift packing.
+Fixtures include two different cafe balances for one test customer; HTTP API
+coverage separately verifies actual earning, redemption races and refunds. It uses local-only test OTP accounts, a non-delivering console
 SMS/push provider and fake private printer addresses. The tested path crosses
 real browser pages and the real NestJS API; the server owns totals, tenant
 access, delivery schedule and receipt queue state. It never sends a real SMS,

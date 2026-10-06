@@ -1953,6 +1953,118 @@ export interface paths {
         patch: operations["LoyaltyController_updateGift_v1"];
         trace?: never;
     };
+    "/api/v1/marketplace/cafes/{cafeId}/rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CafeRewardsController_publicRewards_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/cafes/{cafeId}/loyalty/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CafeRewardsController_wallet_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CafeRewardsController_manage_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/promotions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CafeRewardsController_createPromotion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/promotions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["CafeRewardsController_updatePromotion_v1"];
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/gifts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CafeRewardsController_createGift_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/rewards/gifts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["CafeRewardsController_updateGift_v1"];
+        trace?: never;
+    };
     "/api/v1/marketing/banners": {
         parameters: {
             query?: never;
@@ -4077,6 +4189,7 @@ export interface components {
             actor: components["schemas"]["OrderTransitionActorResponseDto"];
         };
         OrderResponseDto: {
+            promotionLabel: string | null;
             /** Format: uuid */
             id: string;
             number: number;
@@ -5755,6 +5868,93 @@ export interface components {
             /** @description Current gift version */
             version: number;
         };
+        CafePromotionResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            cafeId: string;
+            title: string;
+            code: string | null;
+            isAutomatic: boolean;
+            /** @enum {string} */
+            type: "PERCENT" | "FIXED";
+            value: number;
+            minOrderAmount: number;
+            maxDiscountAmount: number | null;
+            totalUsageLimit: number | null;
+            perUserLimit: number;
+            usedCount: number;
+            isActive: boolean;
+            /** Format: date-time */
+            startsAt: string | null;
+            /** Format: date-time */
+            endsAt: string | null;
+            version: number;
+        };
+        CafeRewardsResponseDto: {
+            marketingEnabled: boolean;
+            loyaltyEnabled: boolean;
+            promotions: components["schemas"]["CafePromotionResponseDto"][];
+            gifts: components["schemas"]["GiftResponseDto"][];
+        };
+        CafeWalletResponseDto: {
+            pointsBalance: number;
+            entries: components["schemas"]["LoyaltyEntryResponseDto"][];
+            /** Format: uuid */
+            cafeId: string;
+        };
+        CreateCafePromotionDto: {
+            title: string;
+            code?: string | null;
+            isAutomatic: boolean;
+            /** @enum {string} */
+            type: "PERCENT" | "FIXED";
+            value: number;
+            minOrderAmount?: number;
+            maxDiscountAmount?: number | null;
+            totalUsageLimit?: number | null;
+            /** @default 1 */
+            perUserLimit: number;
+            isActive?: boolean;
+            /** Format: date-time */
+            startsAt?: string | null;
+            /** Format: date-time */
+            endsAt?: string | null;
+        };
+        UpdateCafePromotionDto: {
+            title: string;
+            code?: string | null;
+            isAutomatic: boolean;
+            /** @enum {string} */
+            type: "PERCENT" | "FIXED";
+            value: number;
+            minOrderAmount?: number;
+            maxDiscountAmount?: number | null;
+            totalUsageLimit?: number | null;
+            /** @default 1 */
+            perUserLimit: number;
+            isActive?: boolean;
+            /** Format: date-time */
+            startsAt?: string | null;
+            /** Format: date-time */
+            endsAt?: string | null;
+            expectedVersion: number;
+        };
+        CreateCafeGiftDto: {
+            name: string;
+            description: string;
+            pointsCost: number;
+            stock?: number | null;
+            isActive?: boolean;
+        };
+        UpdateCafeGiftDto: {
+            name: string;
+            description: string;
+            pointsCost: number;
+            stock?: number | null;
+            isActive?: boolean;
+            expectedVersion: number;
+        };
         BannerResponseDto: {
             /** Format: uuid */
             id: string;
@@ -6496,6 +6696,9 @@ export interface components {
         MerchantOrderGiftResponseDto: {
             /** Format: uuid */
             id: string;
+            name: string;
+            quantity: number;
+            totalPoints: number;
         };
         DeliveryRequestResponseDto: {
             /** Format: uuid */
@@ -6517,6 +6720,9 @@ export interface components {
             version: number;
         };
         MerchantOrderResponseDto: {
+            discount: string;
+            promotionLabel: string | null;
+            loyaltyPointsSpent: number;
             /** Format: uuid */
             id: string;
             number: number;
@@ -6594,6 +6800,7 @@ export interface components {
             description: string;
             price: string;
             preparationMinutes: number;
+            loyaltyPoints: number;
             sortOrder: number;
             isActive: boolean;
             version: number;
@@ -6663,6 +6870,8 @@ export interface components {
             description: string;
             price: number;
             preparationMinutes: number;
+            /** @default 0 */
+            loyaltyPoints: number;
             sortOrder?: number;
         };
         UpdateCafeProductDto: {
@@ -6673,6 +6882,7 @@ export interface components {
             description?: string;
             price?: number;
             preparationMinutes?: number;
+            loyaltyPoints?: number;
             isActive?: boolean;
             sortOrder?: number;
         };
@@ -9752,6 +9962,171 @@ export interface operations {
             };
         };
     };
+    CafeRewardsController_publicRewards_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeRewardsResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_wallet_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeWalletResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_manage_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeRewardsResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_createPromotion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCafePromotionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafePromotionResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_updatePromotion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCafePromotionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafePromotionResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_createGift_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCafeGiftDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GiftResponseDto"];
+                };
+            };
+        };
+    };
+    CafeRewardsController_updateGift_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCafeGiftDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GiftResponseDto"];
+                };
+            };
+        };
+    };
     MarketingController_banners_v1: {
         parameters: {
             query?: never;
@@ -10869,7 +11244,7 @@ export interface operations {
             header?: never;
             path: {
                 cafeId: string;
-                key: "CATALOG" | "ORDERING" | "KITCHEN" | "DELIVERY" | "RECEIPTS" | "INVENTORY" | "LOYALTY" | "ACCOUNTING";
+                key: "CATALOG" | "ORDERING" | "KITCHEN" | "DELIVERY" | "RECEIPTS" | "INVENTORY" | "LOYALTY" | "MARKETING" | "ACCOUNTING";
             };
             cookie?: never;
         };

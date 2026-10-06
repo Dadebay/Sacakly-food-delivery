@@ -29,6 +29,7 @@ export async function seedBrowserE2e() {
         role: Role.CUSTOMER,
       },
     });
+    const customer = await prisma.user.create({ data: { phone: "+99365000990", role: Role.CUSTOMER } });
     for (const [index, entry] of [
       {
         name: "E2E Güneş",
@@ -46,6 +47,9 @@ export async function seedBrowserE2e() {
       const cafe = await prisma.cafe.create({
         data: { name: entry.name, slug: entry.slug, sortOrder: index, cuisines: index === 0 ? ["TURKMEN"] : ["FAST_FOOD"] },
       });
+      // Existing balances exercise cafe isolation; actual earning/refund is
+      // verified through HTTP in cafe-rewards.e2e.spec.ts.
+      await prisma.cafeLoyaltyWallet.create({ data: { cafeId: cafe.id, userId: customer.id, balance: index === 0 ? 99 : 10 } });
       await prisma.cafeModuleEntitlement.create({
         data: { cafeId: cafe.id, key: "ORDERING", enabled: true },
       });
@@ -73,6 +77,7 @@ export async function seedBrowserE2e() {
           description: "Browser test meal",
           price: index === 0 ? 45 : 38,
           preparationMinutes: entry.preparationMinutes,
+          loyaltyPoints: 5,
         },
       });
       if (index === 1) {

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength } from "class-validator";
+import { IsBoolean, IsInt, IsNumber, IsOptional, ValidateIf, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength } from "class-validator";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -60,6 +60,10 @@ export class CreateCafeProductDto {
   @IsInt() @Min(0) @Max(1440)
   preparationMinutes: number;
 
+  @ApiPropertyOptional({ minimum: 0, maximum: 1000000, default: 0 })
+  @ValidateIf((_object, value: unknown) => value !== undefined) @IsInt() @Min(0) @Max(1000000)
+  loyaltyPoints?: number;
+
   @ApiPropertyOptional({ minimum: 0 })
   @IsOptional() @IsInt() @Min(0)
   sortOrder?: number;
@@ -89,6 +93,10 @@ export class UpdateCafeProductDto {
   @ApiPropertyOptional({ minimum: 0, maximum: 1440 })
   @IsOptional() @IsInt() @Min(0) @Max(1440)
   preparationMinutes?: number;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 1000000 })
+  @ValidateIf((_object, value: unknown) => value !== undefined) @IsInt() @Min(0) @Max(1000000)
+  loyaltyPoints?: number;
 
   @ApiPropertyOptional()
   @IsOptional() @IsBoolean()
@@ -159,6 +167,7 @@ export class CafeProductResponseDto {
   @ApiProperty() description: string;
   @ApiProperty({ type: String }) price: string;
   @ApiProperty() preparationMinutes: number;
+  @ApiProperty() loyaltyPoints: number;
   @ApiProperty() sortOrder: number;
   @ApiProperty() isActive: boolean;
   @ApiProperty() version: number;
