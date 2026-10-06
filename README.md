@@ -26,49 +26,35 @@ Saçakly is a private monorepo for a marketplace of independent cafes and a shar
 | `apps/web` | Next.js customer website, multilingual PWA and SEO |
 | `apps/admin` | Imported single-operator SPA; migration target |
 | `apps/print-agent` | Imported receipt print bridge |
+| `docs/mobile` | Specifications for the two planned native mobile apps |
 | `packages/api-contract` | Generated TypeScript contract from Swagger |
 | `docs/legacy` | Original single-operator context, deployment notes, and README |
 
-Each app keeps its own pinned npm dependencies and lockfile. Node.js 24 and Docker are used for local verification.
+Each app keeps its own pinned npm dependencies and lockfile. The root scripts orchestrate them without npm workspaces; see [monorepo commands](docs/MONOREPO.md). Node.js 24 and Docker are used for local verification.
 
 ## Local development
 
 ```bash
 npm ci
-npm ci --prefix apps/api
-npm ci --prefix apps/merchant
-npm ci --prefix apps/web
+npm run setup:apps
 cp apps/api/.env.example apps/api/.env
 docker compose up -d --wait postgres redis minio
 node apps/api/scripts/init-local-s3.mjs
 npm --prefix apps/api run db:deploy
 npm --prefix apps/api run db:seed:marketplace-demo # optional, local database only
 npm run api:client
-npm run dev:api
-npm run dev:merchant
-npm run dev:web
+npm run dev
 ```
 
-The API listens on `http://localhost:4000`, the customer site on `http://localhost:3000`, and the merchant portal on `http://localhost:5174`. Run the three `dev` commands in separate terminals, or use `npm run dev:platform`. Use only isolated local data. The repository contains no new platform production deployment.
+The API listens on `http://localhost:4000`, the customer site on `http://localhost:3000`, and the merchant portal on `http://localhost:5174`. `npm run dev` starts all three; `npm run dev:legacy` starts the imported admin with the API. Use only isolated local data. The repository contains no new platform production deployment.
 
 The platform OWNER phone is `+99362969614`. Its first successful OTP sign-in in the new platform database creates an audited owner entitlement and sets the current user role to `SUPER_ADMIN`. The protected OWNER API checks both the current authenticated account and the persisted entitlement. A disabled entitlement is not restored by another login.
 
 ## Verification
 
 ```bash
-npm --prefix apps/api run lint
-npm --prefix apps/api run build
-npm --prefix apps/api test
-npm --prefix apps/api audit --audit-level=low
-npm --prefix apps/merchant run lint
-npm --prefix apps/merchant run build
-npm --prefix apps/merchant test
-npm --prefix apps/merchant audit --audit-level=low
-npm --prefix apps/web run lint
-npm --prefix apps/web run build
-npm --prefix apps/web test
-npm --prefix apps/web audit --audit-level=low
-npm run test:e2e # after local Docker services and Chromium are ready
+npm run check       # lint, contract regeneration, builds and app tests
+npm run test:all    # app tests, Go print-agent tests and browser E2E
 ```
 
 The API and Playwright test setups recreate an isolated `sacakly_test` database and apply all migrations. Never run them against a production database. Follow [PLAYWRIGHT_E2E.md](docs/PLAYWRIGHT_E2E.md) for the browser setup. Every pull request adds a dated entry to [CHANGELOG.md](docs/CHANGELOG.md), enforced by CI.
