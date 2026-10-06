@@ -23,7 +23,11 @@ Never put customer data, OTP values, agent tokens or other secrets here.
   now report zero vulnerabilities for each affected package boundary.
 - Verified `setup:apps`, `check` (443 API tests, 203 legacy admin tests,
   2 merchant tests, 2 web tests) and root `dev` with HTTP 200 from API, web and
-  merchant. Local processes and Compose services stopped after verification.
+  merchant before the dependency pin update. After that update, all PR CI jobs
+  passed, including API, browser E2E and audits. A repeated local `check` reached
+  the API suite but was stopped after its worker stalled; the clean CI run is
+  the verification for the final lockfiles. Local processes and Compose
+  services were stopped after verification.
 - Native customer/courier apps are still planned, and legacy API tenant
   scoping remains a release blocker.
 
