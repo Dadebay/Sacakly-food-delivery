@@ -8,6 +8,8 @@ Never put customer data, OTP values, agent tokens or other secrets here.
 
 ## 2026-10-06 — Cafe onboarding, cuisine discovery and private reports
 
+[PR #8](https://github.com/Guvanch99/sacakly-platform/pull/8).
+
 - OWNER can list draft cafes, edit a versioned profile, assign up to four cuisine
   tags and inspect the same readiness checklist as the cafe administrator.
   Ordering requires an active administrator, branch, menu item and cuisine.
