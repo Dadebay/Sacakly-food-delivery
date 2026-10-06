@@ -17,6 +17,10 @@ Never put customer data, OTP values, agent tokens or other secrets here.
 - Documented application boundaries and root commands in `docs/MONOREPO.md`
   and README. Individual pinned dependencies and lockfiles remain independent;
   no schema migration, API change or production deployment.
+- CI exposed newly published dependency advisories. Pinned patched
+  `source-map-js` 1.2.2 in API, imported admin and merchant lockfiles, and
+  `proxy-addr` 2.0.8 in the API lockfile. Independent low-threshold npm audits
+  now report zero vulnerabilities for each affected package boundary.
 - Verified `setup:apps`, `check` (443 API tests, 203 legacy admin tests,
   2 merchant tests, 2 web tests) and root `dev` with HTTP 200 from API, web and
   merchant. Local processes and Compose services stopped after verification.
