@@ -524,6 +524,44 @@ describe("courier assignment notifications", () => {
     });
   });
 
+  it("retries a transient FCM failure only for devices that did not receive the event", async () => {
+    const order = await readyOrder();
+    const failedToken = deviceToken(user(Role.COURIER).id, "second");
+    send.mockImplementation(async (payload, targets) =>
+      (await success(payload, targets)).map((result, index) =>
+        targets[index]?.installationId === failedToken
+          ? { ...result, ok: false, providerMessageId: null, errorCode: "messaging/unavailable" }
+          : result,
+      ),
+    );
+    await assign(order).expect(200);
+    await settlePushes();
+    const event = await prisma.directPushEvent.findFirstOrThrow({
+      where: { userId: user(Role.COURIER).id, title: `Täze sargyt #${order.number}` },
+    });
+    expect(event.status).toBe("PENDING");
+    expect(event.attempts).toBe(1);
+    send.mockClear().mockImplementation(success);
+    await app.get(NotificationsService).dispatchDueDirectPushes(new Date(Date.now() + 60_000));
+    const retryCalls = send.mock.calls.filter(([payload]) => payload.title === `Täze sargyt #${order.number}`);
+    expect(retryCalls).toHaveLength(1);
+    expect(retryCalls[0]![1].map(({ installationId }) => installationId)).toEqual([failedToken]);
+    expect((await prisma.directPushEvent.findUniqueOrThrow({ where: { id: event.id } })).status).toBe("SENT");
+  });
+
+  it("leases one direct push once when retry workers run together", async () => {
+    const title = `Concurrent courier offer ${Date.now()}`;
+    const event = await prisma.directPushEvent.create({ data: {
+      eventKey: `test:${randomUUID()}`, userId: user(Role.COURIER).id,
+      title, body: "Available order",
+    } });
+    send.mockClear().mockImplementation(success);
+    const notifications = app.get(NotificationsService);
+    await Promise.all([notifications.dispatchDueDirectPushes(), notifications.dispatchDueDirectPushes()]);
+    expect(send.mock.calls.filter(([payload]) => payload.title === title)).toHaveLength(1);
+    expect((await prisma.directPushEvent.findUniqueOrThrow({ where: { id: event.id } })).status).toBe("SENT");
+  });
+
   it("deactivates rejected tokens without disabling the courier's other devices", async () => {
     const order = await readyOrder();
     const invalid = deviceToken(user(Role.COURIER).id);

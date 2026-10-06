@@ -18,6 +18,9 @@ export type CafeCatalog = components["schemas"]["CafeCatalogResponseDto"];
 export type CafeCategory = components["schemas"]["CafeCategoryResponseDto"];
 export type CafeProduct = components["schemas"]["CafeProductResponseDto"];
 export type CafeBranch = components["schemas"]["CafeBranchResponseDto"];
+export type CafeReceiptConfig = components["schemas"]["CafeReceiptConfigResponseDto"];
+export type CafeReceiptQueue = components["schemas"]["ReceiptQueueResponseDto"];
+export type CafeReceiptPrinter = { id: string; cafeId: string; name: string; ipAddress: string; port: number; transport: "RAW_TCP" | "JSPEED_HTTP"; isActive: boolean };
 export type ModuleKey = operations["MarketplaceController_setCafeModule_v1"]["parameters"]["path"]["key"];
 
 const SESSION_KEY = "sacakly.merchant.session";
@@ -127,6 +130,19 @@ export class ApiClient {
   updateCafeProduct(cafeId: string, id: string, input: { expectedVersion: number; categoryId?: string; name?: string; description?: string; price?: number; preparationMinutes?: number; isActive?: boolean }) { return this.request<CafeProduct>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/products/${encodeURIComponent(id)}`, "PATCH", input); }
   createCafeBranch(cafeId: string, input: { name: string; address: string; latitude: number; longitude: number }) { return this.request<CafeBranch>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/branches`, "POST", input); }
   updateCafeBranch(cafeId: string, id: string, input: { expectedVersion: number; name?: string; address?: string; latitude?: number; longitude?: number; isActive?: boolean }) { return this.request<CafeBranch>(`/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/catalog/branches/${encodeURIComponent(id)}`, "PATCH", input); }
+
+  private receiptsPath(cafeId: string) { return `/marketplace/merchant/cafes/${encodeURIComponent(cafeId)}/receipts`; }
+  cafeReceiptConfig(cafeId: string) { return this.request<CafeReceiptConfig>(`${this.receiptsPath(cafeId)}/config`); }
+  cafeReceiptPrinters(cafeId: string) { return this.request<CafeReceiptPrinter[]>(`${this.receiptsPath(cafeId)}/printers`); }
+  createCafeReceiptPrinter(cafeId: string, input: { name: string; ipAddress: string; port: number; transport: "RAW_TCP" | "JSPEED_HTTP" }) { return this.request<CafeReceiptPrinter>(`${this.receiptsPath(cafeId)}/printers`, "POST", input); }
+  setCafeReceiptConfig(cafeId: string, input: { mainPrinterId: string; mainCopies: number; businessPhone?: string; expectedVersion: number }) { return this.request<CafeReceiptConfig>(`${this.receiptsPath(cafeId)}/config`, "PUT", input); }
+  rotateCafeReceiptToken(cafeId: string, expectedVersion: number) { return this.request<components["schemas"]["CafeReceiptTokenResponseDto"]>(`${this.receiptsPath(cafeId)}/agent-token/rotate`, "POST", { expectedVersion }); }
+  routeCafeCategoryPrinter(cafeId: string, categoryId: string, printerId: string | null, expectedVersion: number) { return this.request(`${this.receiptsPath(cafeId)}/categories/${encodeURIComponent(categoryId)}/printer`, "PUT", { printerId, expectedVersion }); }
+  routeCafeProductPrinter(cafeId: string, productId: string, printerId: string | null, expectedVersion: number) { return this.request(`${this.receiptsPath(cafeId)}/products/${encodeURIComponent(productId)}/printer`, "PUT", { printerId, expectedVersion }); }
+  cafeReceiptQueue(cafeId: string) { return this.request<CafeReceiptQueue>(`${this.receiptsPath(cafeId)}/queue`); }
+  retryCafeReceipt(cafeId: string, taskId: string) { return this.request(`${this.receiptsPath(cafeId)}/queue/${encodeURIComponent(taskId)}/retry`, "POST"); }
+  cancelCafeReceipt(cafeId: string, taskId: string) { return this.request(`${this.receiptsPath(cafeId)}/queue/${encodeURIComponent(taskId)}/cancel`, "POST"); }
+  reprintCafeReceipt(cafeId: string, orderId: string, idempotencyKey: string) { return this.request<components["schemas"]["ReceiptTaskResponseDto"]>(`${this.receiptsPath(cafeId)}/orders/${encodeURIComponent(orderId)}/reprint`, "POST", { idempotencyKey }); }
 
   myCafes() { return this.request<MemberCafe[]>("/marketplace/merchant/cafes/me"); }
   ownerStatus() { return this.request<components["schemas"]["OwnerStatusResponseDto"]>("/marketplace/owner/me"); }

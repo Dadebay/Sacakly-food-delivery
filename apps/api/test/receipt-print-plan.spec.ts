@@ -77,6 +77,7 @@ describe("receipt print plan", () => {
     );
     expect(metadata).toEqual({
       createdAt: "2026-09-03T10:18:00.000Z",
+      cafeName: null,
       businessPhone: "+99365000999",
       branchName: "Merkez",
       customerName: "Mähri Çaryýewa",

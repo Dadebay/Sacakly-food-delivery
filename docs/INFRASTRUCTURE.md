@@ -32,3 +32,13 @@ fresh GitHub runners. The local bucket is created with the API's AWS SDK by
 `node apps/api/scripts/init-local-s3.mjs`; there is no separate `mc` image.
 This affects local/CI containers only; no platform production registry is
 configured.
+
+The cafe print agent uses the existing print-agent binary with
+`-api-scope marketplace` and a cafe-specific `SACAKLY_RECEIPT_AGENT_TOKEN`
+environment variable. The token is displayed once in the cafe portal and
+stored only as a hash by the API; never copy it into this document or a Git
+file. The legacy mode keeps `A7_TAGAM_RECEIPT_AGENT_TOKEN` and the old API
+path. Each cafe workstation needs its own persistent dispatch journal and
+locally reachable printer IPs; the same RFC1918 IP may be reused at a
+different cafe. No platform production print-agent host or credential is
+configured.

@@ -10,6 +10,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   CashSettlementStatus,
   CourierApplicationStatus,
+  MarketplaceDeliveryMode,
   MarketplaceDeliveryStatus,
   OrderSource,
   OrderStatus,
@@ -25,6 +26,7 @@ import { InventoryService } from "../inventory/inventory.service";
 import { AddressesService } from "../users/addresses.service";
 import { BranchesService } from "../branches/branches.service";
 import { assertApprovedCourier, assertCafeMember, assertModuleEnabled, requireSingleCafe } from "../marketplace/marketplace-policy";
+import { deliveryOfferAt } from "../marketplace/marketplace-dispatch-policy";
 import { PLATFORM_OWNER_PHONE } from "../marketplace/platform-owner";
 import { NotificationsService } from "../notifications/notifications.service";
 import { DeliveryService } from "../delivery/delivery.service";
@@ -83,6 +85,7 @@ type ReceiptPrinterRouteSource = {
   receiptPrinterId: string | null;
   receiptPrinterIp: string | null;
   receiptPrinter: {
+    cafeId: string | null;
     ipAddress: string;
     port: number;
     transport: ReceiptPrinterTransport;
@@ -117,6 +120,21 @@ function productRouteSnapshot(
   product: ReceiptPrinterRouteSource & { category: ReceiptPrinterRouteSource },
 ) {
   return routeSnapshot(product) ?? routeSnapshot(product.category);
+}
+
+function marketplaceProductRouteSnapshot(
+  product: ReceiptPrinterRouteSource & { category: ReceiptPrinterRouteSource },
+  cafeId: string,
+) {
+  const route = (source: ReceiptPrinterRouteSource) =>
+    source.receiptPrinterId && source.receiptPrinter?.isActive && source.receiptPrinter.cafeId === cafeId
+      ? {
+          receiptPrinterIp: source.receiptPrinter.ipAddress,
+          receiptPrinterPort: source.receiptPrinter.port,
+          receiptPrinterTransport: source.receiptPrinter.transport,
+        }
+      : null;
+  return route(product) ?? route(product.category);
 }
 
 const detailInclude = {
@@ -485,9 +503,13 @@ export class OrdersService {
       where: { id: orderId },
       select: { cafeId: true },
     });
-    // The imported print queue has one global worker credential. Keep
-    // marketplace orders out of it until workers and routes are cafe-scoped.
-    if (tenant.cafeId) return null;
+    if (tenant.cafeId) {
+      const [module, config] = await Promise.all([
+        tx.cafeModuleEntitlement.findUnique({ where: { cafeId_key: { cafeId: tenant.cafeId, key: "RECEIPTS" } } }),
+        tx.cafeReceiptConfiguration.findUnique({ where: { cafeId: tenant.cafeId }, include: { mainPrinter: true } }),
+      ]);
+      if (!module?.enabled || !config?.agentTokenHash || !config.mainPrinter?.isActive || config.mainPrinter.cafeId !== tenant.cafeId) return null;
+    }
     const plan = await this.receiptPrintPlan(orderId, tx);
     if (eventKey.startsWith("ORDER_CANCELLED:")) {
       await tx.receiptPrintTask.updateMany({
@@ -982,7 +1004,9 @@ export class OrdersService {
         items: {
           create: resolvedItems.map(({ product, variant, quantity }) => {
             const unitPrice = variant?.price ?? product.price;
-            const receiptRoute = marketplaceCafeId ? null : productRouteSnapshot(product);
+            const receiptRoute = marketplaceCafeId
+              ? marketplaceProductRouteSnapshot(product, marketplaceCafeId)
+              : productRouteSnapshot(product);
             return {
               cafeId: marketplaceCafeId,
               productId: product.id,
@@ -1013,6 +1037,39 @@ export class OrdersService {
       },
       include: detailInclude,
     });
+    if (marketplaceCafeId) {
+      const ownCourierCount = await tx.cafeMembership.count({
+        where: {
+          cafeId: marketplaceCafeId,
+          role: Role.COURIER,
+          isActive: true,
+          user: { role: Role.COURIER, isActive: true },
+        },
+      });
+      if (ownCourierCount === 0) {
+        const offerAt = deliveryOfferAt(
+          order.createdAt,
+          Math.max(0, ...resolvedItems.map(({ product }) => product.preparationMinutes)),
+        );
+        await tx.marketplaceDeliveryRequest.create({
+          data: {
+            orderId: order.id,
+            cafeId: marketplaceCafeId,
+            mode: MarketplaceDeliveryMode.NETWORK,
+            status: MarketplaceDeliveryStatus.WAITING,
+            offerAt,
+          },
+        });
+        await tx.auditLog.create({
+          data: {
+            action: "delivery.route.auto_network",
+            entityType: "Order",
+            entityId: order.id,
+            metadata: { cafeId: marketplaceCafeId, offerAt: offerAt.toISOString() },
+          },
+        });
+      }
+    }
     await this.loyalty.redeem(
       tx,
       customerId,
@@ -1172,6 +1229,7 @@ export class OrdersService {
         select: {
           id: true,
           cafeId: true,
+          cafe: { select: { name: true } },
           number: true,
           status: true,
           cancellationReason: true,
@@ -1219,7 +1277,14 @@ export class OrdersService {
       }),
     ]);
     if (!order) throw new NotFoundException("Order not found");
-    const mainPrinter = order.cafeId ? null : settings?.mainPrinterId
+    const cafeSettings = order.cafeId
+      ? await db.cafeReceiptConfiguration.findUnique({ where: { cafeId: order.cafeId }, include: { mainPrinter: true } })
+      : null;
+    const mainPrinter = order.cafeId
+      ? cafeSettings?.mainPrinter?.isActive && cafeSettings.mainPrinter.cafeId === order.cafeId
+        ? { printerIp: cafeSettings.mainPrinter.ipAddress, printerPort: cafeSettings.mainPrinter.port, transport: cafeSettings.mainPrinter.transport }
+        : null
+      : settings?.mainPrinterId
       ? settings.mainPrinter?.isActive
         ? {
             printerIp: settings.mainPrinter.ipAddress,
@@ -1235,18 +1300,23 @@ export class OrdersService {
           }
         : null;
     const plan = buildReceiptPrintPlan(
-      order.cafeId
-        ? { ...order, items: order.items.map((item) => ({ ...item, receiptPrinterIp: null })) }
-        : order,
+      order,
       mainPrinter,
-      buildReceiptPrintMetadata(order, order.cafeId ? null : (contact?.phone ?? null)),
-      order.status === OrderStatus.CANCELLED ? 1 : (settings?.mainCopies ?? 2),
+      buildReceiptPrintMetadata(order, order.cafeId ? (cafeSettings?.businessPhone ?? null) : (contact?.phone ?? null), order.cafe?.name ?? null),
+      order.status === OrderStatus.CANCELLED ? 1 : (order.cafeId ? (cafeSettings?.mainCopies ?? 1) : (settings?.mainCopies ?? 2)),
     );
     if (order.status === OrderStatus.CANCELLED) {
       plan.jobs = await outstandingKitchenJobs(db, id);
       plan.unassignedItems = [];
     }
     return toApiResponse(plan);
+  }
+
+  async legacyReceiptPrintPlan(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, select: { cafeId: true } });
+    if (!order) throw new NotFoundException("Order not found");
+    if (order.cafeId) throw new ForbiddenException("Cafe receipts require the cafe workspace");
+    return this.receiptPrintPlan(id);
   }
 
   async enqueueLateKitchenCancellation(
@@ -1564,6 +1634,7 @@ export class OrdersService {
         include: { items: true, promoCode: true },
       });
       if (!order) throw new NotFoundException("Order not found");
+      if (order.cafeId) throw new ForbiddenException("Cafe orders require a cafe-scoped edit workflow");
       if (!canAdministratorEditOrder(order.status, user.role)) {
         throw new ForbiddenException(
           "Only an administrator can edit an order before courier pickup",

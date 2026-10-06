@@ -282,6 +282,9 @@ export class ReceiptPrintMetadataResponseDto {
   createdAt: string;
 
   @ApiProperty({ type: String, nullable: true })
+  cafeName: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
   businessPhone: string | null;
 
   @ApiProperty({ type: String, nullable: true })

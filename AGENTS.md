@@ -1,7 +1,13 @@
 # Saçakly Platform repository instructions
 
-Read docs/PROJECT_CONTEXT.md, docs/INFRASTRUCTURE.md, and the nearest
+Read docs/PROJECT_CONTEXT.md, docs/CHANGELOG.md, docs/INFRASTRUCTURE.md, and the nearest
 apps/*/AGENTS.md before changing code. Inspect git status first.
+
+For every pull request, append a dated entry to docs/CHANGELOG.md describing
+the changed behavior, verification, migrations, remaining limitations and PR
+link when available. Update docs/PROJECT_CONTEXT.md in the same PR whenever
+business rules or architecture change. This durable history is required even
+for test-only or documentation-only pull requests; CI enforces a new entry.
 
 This repository is an independent multi-cafe platform. The imported A7-tagam
 code is a compatibility baseline, not a safe multi-tenant service. Never point

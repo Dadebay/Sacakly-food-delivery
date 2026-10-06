@@ -2873,6 +2873,214 @@ export interface paths {
         patch: operations["MarketplaceCatalogController_updateBranch_v1"];
         trace?: never;
     };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceReceiptsController_config_v1"];
+        put: operations["MarketplaceReceiptsController_setConfig_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceReceiptsController_printers_v1"];
+        put?: never;
+        post: operations["MarketplaceReceiptsController_createPrinter_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/categories/{categoryId}/printer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["MarketplaceReceiptsController_routeCategory_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/products/{productId}/printer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["MarketplaceReceiptsController_routeProduct_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/agent-token/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptsController_rotateAgentToken_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceReceiptsController_queue_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/queue/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MarketplaceReceiptsController_history_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/queue/{taskId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptsController_retry_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/queue/{taskId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptsController_cancel_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/merchant/cafes/{cafeId}/receipts/orders/{orderId}/reprint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptsController_reprint_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/receipt-agent/tasks/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptAgentController_claim_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/receipt-agent/tasks/{id}/heartbeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptAgentController_heartbeat_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/receipt-agent/tasks/{id}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MarketplaceReceiptAgentController_outcome_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/site/pages": {
         parameters: {
             query?: never;
@@ -4056,6 +4264,7 @@ export interface components {
         ReceiptPrintMetadataResponseDto: {
             /** Format: date-time */
             createdAt: string;
+            cafeName: string | null;
             businessPhone: string | null;
             branchName: string | null;
             customerName: string | null;
@@ -6273,6 +6482,8 @@ export interface components {
             sortOrder: number;
             isActive: boolean;
             version: number;
+            /** Format: uuid */
+            receiptPrinterId?: string | null;
         };
         CafeCategoryResponseDto: {
             /** Format: uuid */
@@ -6284,6 +6495,8 @@ export interface components {
             sortOrder: number;
             isActive: boolean;
             version: number;
+            /** Format: uuid */
+            receiptPrinterId?: string | null;
             products: components["schemas"]["CafeProductResponseDto"][];
         };
         CafeBranchResponseDto: {
@@ -6318,6 +6531,8 @@ export interface components {
             sortOrder: number;
             isActive: boolean;
             version: number;
+            /** Format: uuid */
+            receiptPrinterId?: string | null;
         };
         UpdateCafeCategoryDto: {
             expectedVersion: number;
@@ -6361,6 +6576,37 @@ export interface components {
             longitude?: number;
             phone?: string;
             isActive?: boolean;
+        };
+        CafeReceiptConfigResponseDto: {
+            /** Format: uuid */
+            cafeId: string;
+            /** Format: uuid */
+            mainPrinterId: string | null;
+            mainCopies: number;
+            businessPhone: string | null;
+            agentConfigured: boolean;
+            version: number;
+        };
+        SetCafeReceiptConfigDto: {
+            /** Format: uuid */
+            mainPrinterId: string;
+            mainCopies: number;
+            /** @description Cafe contact number printed on receipts */
+            businessPhone?: string;
+            expectedVersion: number;
+        };
+        RouteCafeReceiptPrinterDto: {
+            /** Format: uuid */
+            printerId: string | null;
+            expectedVersion: number;
+        };
+        RotateCafeReceiptTokenDto: {
+            expectedVersion: number;
+        };
+        CafeReceiptTokenResponseDto: {
+            /** @description Shown once; configure this token in the cafe print agent */
+            token: string;
+            version: number;
         };
         SitePageSummaryDto: {
             /** @enum {string} */
@@ -10786,6 +11032,357 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CafeBranchResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_config_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeReceiptConfigResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_setConfig_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCafeReceiptConfigDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeReceiptConfigResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_printers_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MarketplaceReceiptsController_createPrinter_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReceiptPrinterDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MarketplaceReceiptsController_routeCategory_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RouteCafeReceiptPrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MarketplaceReceiptsController_routeProduct_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RouteCafeReceiptPrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MarketplaceReceiptsController_rotateAgentToken_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RotateCafeReceiptTokenDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CafeReceiptTokenResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_queue_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptQueueResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_history_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptQueueHistoryResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_retry_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptActionResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_cancel_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptTaskResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptsController_reprint_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cafeId: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReprintReceiptDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptTaskResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptAgentController_claim_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Receipt-Agent-Id": string;
+                "x-receipt-agent-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptClaimResultDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptAgentController_heartbeat_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Receipt-Agent-Id": string;
+                "x-receipt-agent-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiptAgentLeaseDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptActionResponseDto"];
+                };
+            };
+        };
+    };
+    MarketplaceReceiptAgentController_outcome_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Receipt-Agent-Id": string;
+                "x-receipt-agent-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiptAgentOutcomeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceiptTaskResponseDto"];
                 };
             };
         };

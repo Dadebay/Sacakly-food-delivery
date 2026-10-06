@@ -2601,20 +2601,18 @@ describe("backend security and critical workflow", () => {
       },
     });
     const [categoryPrinter, productPrinter, mainPrinter] = await Promise.all([
-      prisma.receiptPrinter.findUniqueOrThrow({
+      prisma.receiptPrinter.findFirstOrThrow({
         where: {
-          ipAddress_port: {
-            ipAddress: "192.168.123.100",
-            port: 9100,
-          },
+          cafeId: null,
+          ipAddress: "192.168.123.100",
+          port: 9100,
         },
       }),
-      prisma.receiptPrinter.findUniqueOrThrow({
+      prisma.receiptPrinter.findFirstOrThrow({
         where: {
-          ipAddress_port: {
-            ipAddress: "192.168.123.101",
-            port: 9100,
-          },
+          cafeId: null,
+          ipAddress: "192.168.123.101",
+          port: 9100,
         },
       }),
       prisma.receiptPrinter.create({

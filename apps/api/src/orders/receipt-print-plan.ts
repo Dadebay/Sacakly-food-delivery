@@ -61,6 +61,7 @@ export type ReceiptPrinterEndpoint = Omit<ReceiptPrinterJob, "items">;
 
 export type ReceiptPrintMetadata = {
   createdAt: string;
+  cafeName: string | null;
   businessPhone: string | null;
   branchName: string | null;
   customerName: string | null;
@@ -109,9 +110,11 @@ export function buildReceiptPrintMetadata(
     customerNote: string | null;
   },
   businessPhone: string | null,
+  cafeName: string | null = null,
 ): ReceiptPrintMetadata {
   return {
     createdAt: order.createdAt.toISOString(),
+    cafeName,
     businessPhone,
     branchName: order.branchName,
     customerName:

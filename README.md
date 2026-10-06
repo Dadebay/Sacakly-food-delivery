@@ -10,12 +10,12 @@ Saçakly is a private monorepo for a marketplace of independent cafes and a shar
 - Separate React/Vite merchant and OWNER portal in `apps/merchant`; it uses the generated API contract and protected API calls.
 - Next.js customer website in `apps/web`: Turkmen/Russian/English, web checkout, public cafes, courier offers, PWA shell and SEO metadata.
 - OWNER-managed localized pages and SEO fields with draft/publish, version conflicts and audit.
-- Cafe-owned couriers or timed external network offers; a 60-minute meal opens to network couriers after 20 minutes, with first-claim reservation and assignment after packing.
+- Cafe-owned couriers or timed external network offers; orders without an active own courier enter the external route automatically. A 60-minute meal opens to network couriers after 20 minutes, with first-claim reservation and assignment after packing. Firebase direct pushes have a durable retry outbox.
 - Cafe-scoped category, fixed-price dish and branch editing in the merchant portal with server permissions, version checks and audit.
-- The imported durable order receipt queue and print agent remain the basis for receipts. New cafe orders are gated out of the legacy shared queue until per-cafe print credentials and routes exist. No fiscal receipt provider was added.
-- API and UI tests for the new boundaries; CI has no production deployment permissions.
+- Cafe-owned printers, kitchen routes, agent tokens and an isolated receipt queue reuse the imported durable print engine. OWNER may activate RECEIPTS after a cafe configures a printer and token. No fiscal receipt provider was added.
+- API, UI and real-stack Playwright browser tests for the new boundaries; CI has no production deployment permissions.
 
-**Release status:** This is a foundation, not a production-ready multi-tenant marketplace. The imported `apps/admin` and other legacy endpoints still need cafe scoping. Printer routes, accounting, inventory, courier shifts, and every legacy mutation need tenant-aware integration and end-to-end validation before independent cafes can join. See [PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) and [ROADMAP.md](docs/ROADMAP.md).
+**Release status:** This is a foundation, not a production-ready multi-tenant marketplace. The imported `apps/admin` and other legacy endpoints still need cafe scoping. Accounting, inventory, courier shifts and every legacy mutation need tenant-aware integration before independent cafes can join. Cafe print output also needs real hardware acceptance. See [PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md), [ROADMAP.md](docs/ROADMAP.md) and the [change history](docs/CHANGELOG.md).
 
 ## Monorepo
 
@@ -68,6 +68,7 @@ npm --prefix apps/web run lint
 npm --prefix apps/web run build
 npm --prefix apps/web test
 npm --prefix apps/web audit --audit-level=low
+npm run test:e2e # after local Docker services and Chromium are ready
 ```
 
-The API test setup recreates an isolated `sacakly_test` database and applies all migrations. Never run it against a production database.
+The API and Playwright test setups recreate an isolated `sacakly_test` database and apply all migrations. Never run them against a production database. Follow [PLAYWRIGHT_E2E.md](docs/PLAYWRIGHT_E2E.md) for the browser setup. Every pull request adds a dated entry to [CHANGELOG.md](docs/CHANGELOG.md), enforced by CI.

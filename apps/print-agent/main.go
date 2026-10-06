@@ -160,6 +160,7 @@ func main() {
 	openSettings := flag.Bool("open", false, "open optional local network diagnostics")
 	dispatchDirectory := flag.String("dispatch-dir", "", "persistent receipt delivery journal directory")
 	apiBaseURL := flag.String("api-url", defaultAPIBaseURL, "A7-tagam API base URL")
+	apiScope := flag.String("api-scope", "legacy", "receipt queue scope: legacy or marketplace")
 	logDirectory := flag.String("log-dir", "", "override the per-user diagnostic log directory")
 	exportLogs := flag.Bool("export-logs", false, "collect diagnostic logs into a ZIP and exit without printing")
 	exportOutput := flag.String("export-output", "", "output ZIP path for -export-logs; defaults to a timestamped file")
@@ -243,7 +244,13 @@ func main() {
 		ioTimeout:   8 * time.Second,
 	})
 	statusView := newDesktopStatus(version, *listenAddress)
+	if *apiScope != "legacy" && *apiScope != "marketplace" {
+		log.Fatal("-api-scope must be legacy or marketplace")
+	}
 	directAPIToken := os.Getenv("A7_TAGAM_RECEIPT_AGENT_TOKEN")
+	if *apiScope == "marketplace" {
+		directAPIToken = os.Getenv("SACAKLY_RECEIPT_AGENT_TOKEN")
+	}
 	statusView.apiConfigured(strings.TrimSpace(directAPIToken) != "")
 	handler.(*agentServer).desktopStatus = statusView
 	handler.(*agentServer).network = manager
@@ -321,6 +328,9 @@ func main() {
 		if workerErr != nil {
 			listener.Close()
 			log.Fatal("Не удалось настроить прямую связь с API: ", workerErr)
+		}
+		if *apiScope == "marketplace" {
+			worker.taskPath = "/marketplace/receipt-agent/tasks"
 		}
 		go func() {
 			defer close(workerDone)
@@ -500,7 +510,7 @@ func validatePrintRequest(payload printRequest) error {
 			value string
 			limit int
 		}{
-			{metadata.BusinessPhone, 64}, {metadata.BranchName, 160},
+			{metadata.CafeName, 120}, {metadata.BusinessPhone, 64}, {metadata.BranchName, 160},
 			{metadata.CustomerName, 321}, {metadata.CustomerPhone, 64},
 			{metadata.Address, 500}, {metadata.AddressDetails, 160}, {metadata.CustomerNote, 500},
 		} {

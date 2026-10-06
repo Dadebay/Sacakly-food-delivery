@@ -213,6 +213,17 @@ func TestReceiptDoesNotDuplicateSiteContactPhone(t *testing.T) {
 	}
 }
 
+func TestMarketplaceReceiptHeaderUsesCafeIdentity(t *testing.T) {
+	name, phones, legacyLogo := receiptHeader(&receiptMetadata{CafeName: "Cafe B", BusinessPhone: "+99365000111"})
+	if name != "Cafe B" || len(phones) != 1 || phones[0] != "+99365000111" || legacyLogo {
+		t.Fatalf("marketplace receipt leaked legacy header: %q, %v, %t", name, phones, legacyLogo)
+	}
+	_, legacyPhones, legacy := receiptHeader(nil)
+	if !legacy || len(legacyPhones) == 0 {
+		t.Fatal("legacy receipt lost its existing header")
+	}
+}
+
 func TestReceiptCustomerPhoneAddressAndCommentAppearOnEveryCopy(t *testing.T) {
 	for _, copyType := range []string{"MAIN", "KITCHEN", ""} {
 		for _, documentType := range []string{documentTypeOrder, documentTypeCancel} {

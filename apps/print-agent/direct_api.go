@@ -54,6 +54,7 @@ type directOutcome struct {
 
 type directAPIWorker struct {
 	baseURL         string
+	taskPath        string
 	token           string
 	stationID       string
 	client          *http.Client
@@ -76,7 +77,7 @@ func newDirectAPIWorker(baseURL, token, stationID string, agent *agentServer, st
 		return nil, errors.New("не найден постоянный ID программы печати")
 	}
 	return &directAPIWorker{
-		baseURL: normalized, token: token, stationID: stationID,
+		baseURL: normalized, taskPath: "/receipt-agent/tasks", token: token, stationID: stationID,
 		client: &http.Client{Timeout: 15 * time.Second}, agent: agent,
 		status: status, logger: logger, pollInterval: directAPIPollInterval,
 		heartbeatPeriod: directAPIHeartbeatPeriod,
@@ -127,7 +128,7 @@ func safeAPIError(err error) string {
 
 func (worker *directAPIWorker) consumeOnce(ctx context.Context) error {
 	var claim directClaimResult
-	if err := worker.requestJSON(ctx, http.MethodPost, "/receipt-agent/tasks/claim", struct{}{}, &claim); err != nil {
+	if err := worker.requestJSON(ctx, http.MethodPost, worker.taskPath+"/claim", struct{}{}, &claim); err != nil {
 		return err
 	}
 	worker.status.apiConnected()
@@ -165,7 +166,7 @@ func (worker *directAPIWorker) consumeOnce(ctx context.Context) error {
 	}
 	stopHeartbeat()
 	<-heartbeatDone
-	if err := worker.requestJSON(ctx, http.MethodPost, "/receipt-agent/tasks/"+url.PathEscape(task.ID)+"/outcome", outcome, nil); err != nil {
+	if err := worker.requestJSON(ctx, http.MethodPost, worker.taskPath+"/"+url.PathEscape(task.ID)+"/outcome", outcome, nil); err != nil {
 		return err
 	}
 	worker.status.apiConnected()
@@ -183,7 +184,7 @@ func (worker *directAPIWorker) heartbeat(ctx context.Context, task *directReceip
 			body := struct {
 				ClaimToken string `json:"claimToken"`
 			}{ClaimToken: task.ClaimToken}
-			if err := worker.requestJSON(ctx, http.MethodPost, "/receipt-agent/tasks/"+url.PathEscape(task.ID)+"/heartbeat", body, nil); err != nil && worker.logger != nil {
+			if err := worker.requestJSON(ctx, http.MethodPost, worker.taskPath+"/"+url.PathEscape(task.ID)+"/heartbeat", body, nil); err != nil && worker.logger != nil {
 				worker.logger.Warn("receipt_api_heartbeat_failed", "error", safeAPIError(err))
 			}
 		}

@@ -109,6 +109,7 @@ export class ReceiptQueueService {
     const [items, pending, needsAttention] = await Promise.all([
       this.prisma.receiptPrintTask.findMany({
         where: {
+          order: { cafeId: null },
           status: { in: ["PENDING", "PROCESSING", "FAILED", "UNCERTAIN"] },
         },
         include: { order: { select: { number: true } } },
@@ -116,10 +117,10 @@ export class ReceiptQueueService {
         take: 50,
       }),
       this.prisma.receiptPrintTask.count({
-        where: { status: { in: waiting } },
+        where: { order: { cafeId: null }, status: { in: waiting } },
       }),
       this.prisma.receiptPrintTask.count({
-        where: { status: { in: ["FAILED", "UNCERTAIN"] } },
+        where: { order: { cafeId: null }, status: { in: ["FAILED", "UNCERTAIN"] } },
       }),
     ]);
     return {
@@ -136,6 +137,7 @@ export class ReceiptQueueService {
     return {
       items: (
         await this.prisma.receiptPrintTask.findMany({
+          where: { order: { cafeId: null } },
           include: { order: { select: { number: true } } },
           orderBy: { sequence: "desc" },
           take: 100,
@@ -143,19 +145,38 @@ export class ReceiptQueueService {
       ).map((task) => this.view(task)),
     };
   }
+
+  async listCafe(cafeId: string) {
+    const where = { order: { cafeId } };
+    const [items, pending, needsAttention] = await Promise.all([
+      this.prisma.receiptPrintTask.findMany({ where: { ...where, status: { in: ["PENDING", "PROCESSING", "FAILED", "UNCERTAIN"] } }, include: { order: { select: { number: true } } }, orderBy: { sequence: "asc" }, take: 50 }),
+      this.prisma.receiptPrintTask.count({ where: { ...where, status: { in: waiting } } }),
+      this.prisma.receiptPrintTask.count({ where: { ...where, status: { in: ["FAILED", "UNCERTAIN"] } } }),
+    ]);
+    return { items: items.map((task) => this.view(task)), pending, needsAttention, consumerMode: "DIRECT_AGENT" as const };
+  }
+
+  async historyCafe(cafeId: string) {
+    const items = await this.prisma.receiptPrintTask.findMany({ where: { order: { cafeId } }, include: { order: { select: { number: true } } }, orderBy: { sequence: "desc" }, take: 100 });
+    return { items: items.map((task) => this.view(task)) };
+  }
   async claim(actor: AuthUser, stationId: string) {
     this.authorize(actor);
     // Once the dedicated print key is configured, the browser may still
     // inspect/retry the queue but can no longer become a second worker.
     if (this.directAgentEnabled()) return { task: null };
-    return this.claimFor(stationId, actor.id);
+    return this.claimFor(stationId, actor.id, null);
   }
 
   claimAgent(stationId: string) {
-    return this.claimFor(stationId, stationId);
+    return this.claimFor(stationId, stationId, null);
   }
 
-  private async claimFor(stationId: string, claimedBy: string) {
+  claimCafeAgent(cafeId: string, stationId: string) {
+    return this.claimFor(stationId, stationId, cafeId);
+  }
+
+  private async claimFor(stationId: string, claimedBy: string, cafeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
       const now = new Date();
@@ -164,17 +185,17 @@ export class ReceiptQueueService {
           status: "PROCESSING",
           leaseExpiresAt: { lte: now },
           documentType: "ORDER",
-          order: { status: "CANCELLED" },
+          order: { cafeId, status: "CANCELLED" },
         },
         data: { status: "UNCERTAIN", lastError: "ORDER_CANCELLED_DURING_SEND" },
       });
       await tx.receiptPrintTask.updateMany({
-        where: { status: "PROCESSING", leaseExpiresAt: { lte: now } },
+        where: { status: "PROCESSING", leaseExpiresAt: { lte: now }, order: { cafeId } },
         data: { status: "PENDING", lastError: "AGENT_UNAVAILABLE" },
       });
       if (
         await tx.receiptPrintTask.findFirst({
-          where: { status: "PROCESSING" },
+          where: { status: "PROCESSING", order: { cafeId } },
           select: { id: true },
         })
       )
@@ -184,6 +205,7 @@ export class ReceiptQueueService {
       const next = await tx.receiptPrintTask.findFirst({
         where: {
           status: "PENDING",
+          order: { cafeId },
           nextAttemptAt: { lte: now },
           OR: [{ stationId: null }, { stationId }],
         },
@@ -215,11 +237,15 @@ export class ReceiptQueueService {
   }
   async heartbeat(actor: AuthUser, id: string, dto: ReceiptLeaseDto) {
     this.authorize(actor);
-    return this.heartbeatFor(actor.id, id, dto.stationId, dto.claimToken);
+    return this.heartbeatFor(actor.id, id, dto.stationId, dto.claimToken, null);
   }
 
   heartbeatAgent(stationId: string, id: string, dto: ReceiptAgentLeaseDto) {
-    return this.heartbeatFor(stationId, id, stationId, dto.claimToken);
+    return this.heartbeatFor(stationId, id, stationId, dto.claimToken, null);
+  }
+
+  heartbeatCafeAgent(cafeId: string, stationId: string, id: string, dto: ReceiptAgentLeaseDto) {
+    return this.heartbeatFor(stationId, id, stationId, dto.claimToken, cafeId);
   }
 
   private async heartbeatFor(
@@ -227,10 +253,12 @@ export class ReceiptQueueService {
     id: string,
     stationId: string,
     claimToken: string,
+    cafeId: string | null,
   ) {
     const result = await this.prisma.receiptPrintTask.updateMany({
       where: {
         id,
+        order: { cafeId },
         stationId,
         claimToken,
         claimedBy,
@@ -247,11 +275,15 @@ export class ReceiptQueueService {
   }
   async acknowledge(actor: AuthUser, id: string, dto: ReceiptOutcomeDto) {
     this.authorize(actor);
-    return this.acknowledgeFor(actor.id, actor.id, id, dto.stationId, dto);
+    return this.acknowledgeFor(actor.id, actor.id, id, dto.stationId, dto, null);
   }
 
   acknowledgeAgent(stationId: string, id: string, dto: ReceiptAgentOutcomeDto) {
-    return this.acknowledgeFor(stationId, null, id, stationId, dto);
+    return this.acknowledgeFor(stationId, null, id, stationId, dto, null);
+  }
+
+  acknowledgeCafeAgent(cafeId: string, stationId: string, id: string, dto: ReceiptAgentOutcomeDto) {
+    return this.acknowledgeFor(stationId, null, id, stationId, dto, cafeId);
   }
 
   private async acknowledgeFor(
@@ -260,11 +292,12 @@ export class ReceiptQueueService {
     id: string,
     stationId: string,
     dto: ReceiptAgentOutcomeDto,
+    cafeId: string | null,
   ) {
     return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
-      const task = await tx.receiptPrintTask.findUnique({
-        where: { id },
+      const task = await tx.receiptPrintTask.findFirst({
+        where: { id, order: { cafeId } },
         include: { order: { select: { number: true, status: true } } },
       });
       if (!task) throw new NotFoundException("Receipt task not found");
@@ -344,11 +377,20 @@ export class ReceiptQueueService {
   }
   async retry(actor: AuthUser, id: string) {
     this.authorize(actor);
+    return this.retryFor(actor, id, null);
+  }
+
+  retryCafe(actor: AuthUser, cafeId: string, id: string) {
+    return this.retryFor(actor, id, cafeId);
+  }
+
+  private async retryFor(actor: AuthUser, id: string, cafeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
       const result = await tx.receiptPrintTask.updateMany({
         where: {
           id,
+          order: { cafeId },
           NOT: { documentType: "ORDER", order: { status: "CANCELLED" } },
           OR: [
             { status: "FAILED" },
@@ -368,6 +410,7 @@ export class ReceiptQueueService {
           action: "receipt.retry_requested",
           entityType: "ReceiptPrintTask",
           entityId: id,
+          metadata: { cafeId },
         },
       });
       return { ok: true };
@@ -377,10 +420,18 @@ export class ReceiptQueueService {
   async cancel(actor: AuthUser, id: string) {
     if (actor.role !== Role.ADMIN && actor.role !== Role.SUPER_ADMIN)
       throw new ForbiddenException("Only administrators may cancel a receipt");
+    return this.cancelFor(actor, id, null);
+  }
+
+  cancelCafe(actor: AuthUser, cafeId: string, id: string) {
+    return this.cancelFor(actor, id, cafeId);
+  }
+
+  private async cancelFor(actor: AuthUser, id: string, cafeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
-      const task = await tx.receiptPrintTask.findUnique({
-        where: { id },
+      const task = await tx.receiptPrintTask.findFirst({
+        where: { id, order: { cafeId } },
         include: { order: { select: { number: true } } },
       });
       if (!task) throw new NotFoundException("Receipt task not found");
@@ -397,7 +448,7 @@ export class ReceiptQueueService {
           action: "receipt.manually_cancelled",
           entityType: "ReceiptPrintTask",
           entityId: id,
-          metadata: { orderId: task.orderId, previousStatus: task.status },
+          metadata: { orderId: task.orderId, cafeId, previousStatus: task.status },
         },
       });
       return this.view(updated);
@@ -406,10 +457,24 @@ export class ReceiptQueueService {
 
   async reprint(actor: AuthUser, orderId: string, dto: ReprintReceiptDto) {
     this.authorize(actor);
+    return this.reprintFor(actor, orderId, dto, null);
+  }
+
+  reprintCafe(actor: AuthUser, cafeId: string, orderId: string, dto: ReprintReceiptDto) {
+    return this.reprintFor(actor, orderId, dto, cafeId);
+  }
+
+  private async reprintFor(actor: AuthUser, orderId: string, dto: ReprintReceiptDto, cafeId: string | null) {
     const eventKey = `MANUAL:${actor.id}:${dto.idempotencyKey}`;
     const requestHash = manualSelectionHash(dto);
     return this.prisma.$transaction(async (tx) => {
       await this.lock(tx);
+      const target = await tx.order.findUnique({ where: { id: orderId }, select: { cafeId: true } });
+      if (!target) throw new NotFoundException("Receipt order not found in this queue");
+      if (target.cafeId !== cafeId) {
+        if (cafeId === null) throw new ConflictException("Cafe receipt printing is not configured in the tenant queue");
+        throw new NotFoundException("Receipt order not found in this cafe");
+      }
       const prior = await tx.receiptPrintTask.findUnique({
         where: { eventKey },
         include: { order: { select: { number: true } } },
@@ -427,13 +492,6 @@ export class ReceiptQueueService {
           );
         return this.view(prior);
       }
-      const target = await tx.order.findUnique({
-        where: { id: orderId },
-        select: { cafeId: true },
-      });
-      if (target?.cafeId) {
-        throw new ConflictException("Cafe receipt printing is not configured in the tenant queue");
-      }
       const processing = await tx.receiptPrintTask.count({
         where: { orderId, status: "PROCESSING" },
       });
@@ -443,7 +501,7 @@ export class ReceiptQueueService {
         );
       const plan = await this.orders.receiptPrintPlan(orderId, tx);
       const routes = dto.itemRoutes ?? [];
-      if ((routes.length || dto.mainCopies !== undefined) && actor.role !== Role.ADMIN && actor.role !== Role.SUPER_ADMIN)
+      if ((routes.length || dto.mainCopies !== undefined) && cafeId === null && actor.role !== Role.ADMIN && actor.role !== Role.SUPER_ADMIN)
         throw new ForbiddenException(
           "Only administrators may change receipt routes or copies",
         );
@@ -533,7 +591,7 @@ export class ReceiptQueueService {
         ),
       ];
       const printers = await tx.receiptPrinter.findMany({
-        where: { id: { in: printerIds }, isActive: true },
+        where: { id: { in: printerIds }, isActive: true, cafeId },
       });
       if (printers.length !== printerIds.length)
         throw new ConflictException("Selected receipt printer is unavailable");
@@ -623,6 +681,7 @@ export class ReceiptQueueService {
           entityId: task.id,
           metadata: {
             orderId,
+            cafeId,
             cancelledAutomaticTasks: cancelled.count,
             mainCopies: plan.mainJob ? plan.mainCopies : 0,
             itemRoutes: routes.map(({ itemId, printerId, skip }) => ({

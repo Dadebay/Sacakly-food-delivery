@@ -121,6 +121,14 @@ enum NotificationDeliveryStatus {
   FAILED
 }
 
+enum DirectPushStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  CANCELLED
+}
+
 enum ReceiptPrinterTransport {
   RAW_TCP
   JSPEED_HTTP
@@ -191,6 +199,7 @@ model User {
   cashHandoffsSubmitted CashHandoff[]          @relation("CashHandoffSubmitter")
   cashHandoffsConfirmed CashHandoff[]          @relation("CashHandoffConfirmer")
   pushDevices           PushDevice[]
+  directPushEvents       DirectPushEvent[]
   notifications         UserNotification[]
   campaignsMade         NotificationCampaign[] @relation("NotificationCampaignCreator")
   favorites             Favorite[]
@@ -279,6 +288,7 @@ model Cafe {
   memberships CafeMembership[]
   modules     CafeModuleEntitlement[]
   printers    ReceiptPrinter[]
+  receiptConfiguration CafeReceiptConfiguration?
   deliveryRequests MarketplaceDeliveryRequest[]
 
   @@index([isActive, sortOrder])
@@ -367,6 +377,22 @@ model ReceiptPrintSettings {
   @@index([mainPrinterId])
 }
 
+model CafeReceiptConfiguration {
+  cafeId          String          @id @db.Uuid
+  mainPrinterId   String?         @db.Uuid
+  mainCopies      Int             @default(1)
+  businessPhone   String?         @db.VarChar(24)
+  agentTokenHash  String?         @unique @db.VarChar(64)
+  tokenIssuedAt   DateTime?
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  cafe            Cafe            @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  mainPrinter     ReceiptPrinter? @relation("CafeMainReceiptPrinter", fields: [mainPrinterId], references: [id], onDelete: SetNull)
+
+  @@index([mainPrinterId])
+}
+
 model ReceiptPrinter {
   id           String                  @id @default(uuid()) @db.Uuid
   cafeId       String?                 @db.Uuid
@@ -380,9 +406,10 @@ model ReceiptPrinter {
   categories   Category[]              @relation("CategoryReceiptPrinter")
   products     Product[]               @relation("ProductReceiptPrinter")
   mainSettings ReceiptPrintSettings[]  @relation("MainReceiptPrinter")
+  cafeMainSettings CafeReceiptConfiguration[] @relation("CafeMainReceiptPrinter")
   cafe         Cafe?                   @relation(fields: [cafeId], references: [id], onDelete: Restrict)
 
-  @@unique([ipAddress, port])
+  @@unique([cafeId, ipAddress, port])
   @@index([isActive, name])
   @@index([cafeId, isActive])
 }
@@ -1137,6 +1164,30 @@ model PushDevice {
 
   @@index([userId, isActive, lastSeenAt])
   @@index([isActive, lastSeenAt])
+}
+
+model DirectPushEvent {
+  id                String           @id @default(uuid()) @db.Uuid
+  eventKey          String           @unique @db.VarChar(200)
+  userId            String           @db.Uuid
+  title             String           @db.VarChar(160)
+  body              String           @db.VarChar(1000)
+  offerOrderId      String?          @db.Uuid
+  notificationId    String           @default(uuid()) @db.Uuid
+  status            DirectPushStatus @default(PENDING)
+  attempts          Int              @default(0)
+  sentDeviceIds     Json             @default("[]")
+  nextAttemptAt     DateTime         @default(now())
+  leaseExpiresAt    DateTime?
+  providerMessageId String?          @db.VarChar(500)
+  lastError         String?          @db.VarChar(160)
+  sentAt            DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([offerOrderId, status])
 }
 
 // Unconfigured platforms have no row: mobile clients fail open on HTTP 404.

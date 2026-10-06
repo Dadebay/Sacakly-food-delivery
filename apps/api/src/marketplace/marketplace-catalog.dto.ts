@@ -162,6 +162,7 @@ export class CafeProductResponseDto {
   @ApiProperty() sortOrder: number;
   @ApiProperty() isActive: boolean;
   @ApiProperty() version: number;
+  @ApiPropertyOptional({ type: String, format: "uuid", nullable: true }) receiptPrinterId: string | null;
 }
 
 export class CafeCategoryItemResponseDto {
@@ -172,6 +173,7 @@ export class CafeCategoryItemResponseDto {
   @ApiProperty() sortOrder: number;
   @ApiProperty() isActive: boolean;
   @ApiProperty() version: number;
+  @ApiPropertyOptional({ type: String, format: "uuid", nullable: true }) receiptPrinterId: string | null;
 }
 
 export class CafeCategoryResponseDto extends CafeCategoryItemResponseDto {

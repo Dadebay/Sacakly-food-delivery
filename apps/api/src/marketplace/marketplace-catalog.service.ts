@@ -35,8 +35,8 @@ export class MarketplaceCatalogService {
     const [categories, branches] = await Promise.all([
       this.prisma.category.findMany({
         where: { cafeId },
-        select: { id: true, cafeId: true, name: true, slug: true, sortOrder: true, isActive: true, version: true,
-          products: { select: { id: true, categoryId: true, name: true, slug: true, description: true, price: true, preparationMinutes: true, sortOrder: true, isActive: true, version: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] } },
+        select: { id: true, cafeId: true, name: true, slug: true, sortOrder: true, isActive: true, version: true, receiptPrinterId: true,
+          products: { select: { id: true, categoryId: true, name: true, slug: true, description: true, price: true, preparationMinutes: true, sortOrder: true, isActive: true, version: true, receiptPrinterId: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] } },
         orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       }),
       this.prisma.branch.findMany({
