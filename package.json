@@ -8,7 +8,10 @@
   "scripts": {
     "dev": "npm run dev:platform",
     "dev:legacy": "concurrently -n admin,api -c magenta,cyan \"npm run dev:admin\" \"npm run dev:api\"",
+    "dev:demo": "env -u NO_COLOR FORCE_COLOR=1 concurrently -n api,admin,merchant -c cyan,magenta,green \"npm run dev:api\" \"npm run dev:admin\" \"npm run dev:merchant\"",
+    "demo:seed": "npm --prefix apps/api run db:seed:marketplace-demo",
     "dev:admin": "npm --prefix apps/admin run dev",
+    "dev:customer": "cd apps/customer && flutter run",
     "dev:merchant": "npm --prefix apps/merchant run dev",
     "dev:web": "npm --prefix apps/web run dev",
     "dev:platform": "concurrently -n api,web,merchant -c cyan,green,magenta \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:merchant\"",
@@ -48,7 +51,7 @@
     "minimatch": "10.2.5",
     "nanoid": "3.3.17",
     "postcss": "8.5.23",
-    "shell-quote": "1.10.0",
+    "shell-quote": "1.11.0",
     "undici": "8.9.0",
     "ws": "8.21.1"
   },

@@ -415,7 +415,7 @@ rollout may restore the previous images only before incompatible data exists.
 The 2026-09-04 receipt queue migration/API/admin and updated workstation agent
 form one coordinated release authorized by the user. Close old frontend tabs,
 preserve agent journals and use the new Windows/Mac build. No historical orders
-are backfilled. See [RECEIPT_QUEUE.md](RECEIPT_QUEUE.md) for failure semantics and
+are backfilled. See [RECEIPT_QUEUE.md](../RECEIPT_QUEUE.md) for failure semantics and
 rollout/rollback.
 
 ## Inventory rollout and rollback

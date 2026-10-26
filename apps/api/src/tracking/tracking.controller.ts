@@ -22,6 +22,7 @@ import { AdminPage, Role } from "../generated/prisma/client";
 import {
   DispatchSnapshotDto,
   DispatchLiveEventDto,
+  CustomerCourierRouteResponseDto,
   StopCourierLocationResponseDto,
   UpdateCourierLocationDto,
   UpdateCourierLocationResponseDto,
@@ -78,6 +79,17 @@ export class TrackingController {
     @Param("orderId", ParseUUIDPipe) orderId: string,
   ) {
     return this.tracking.customerCourierLocation(customer, orderId);
+  }
+
+  @Get("orders/:orderId/route")
+  @Roles(Role.CUSTOMER)
+  @ApiOperation({ summary: "Get the remaining road route for the customer's active delivery" })
+  @ApiOkResponse({ type: CustomerCourierRouteResponseDto })
+  customerCourierRoute(
+    @CurrentUser() customer: AuthUser,
+    @Param("orderId", ParseUUIDPipe) orderId: string,
+  ) {
+    return this.tracking.customerCourierRoute(customer, orderId);
   }
 
   @Sse("dispatch/live")

@@ -214,6 +214,9 @@ describe("marketplace HTTP tenant boundaries", () => {
     const cafes = await request(server).get("/api/v1/marketplace/cafes").expect(200);
     expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).toContain(cafeA);
     expect((cafes.body as Array<{ id: string }>).map((cafe) => cafe.id)).not.toContain(cafeB);
+    expect(cafes.body).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: cafeA, location: "Far away street" }),
+    ]));
     const sushi = await request(server).get("/api/v1/marketplace/cafes?cuisine=SUSHI").expect(200);
     expect((sushi.body as Array<{ id: string }>).map((cafe) => cafe.id)).toContain(cafeA);
     const burgers = await request(server).get("/api/v1/marketplace/cafes?cuisine=BURGERS").expect(200);

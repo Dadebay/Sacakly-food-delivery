@@ -8,6 +8,7 @@ import {
   Max,
   Min,
 } from "class-validator";
+import { CourierRouteGeometryResponseDto } from "../orders/orders-response.dto";
 
 export class UpdateCourierLocationDto {
   @ApiProperty({ example: 37.9601 })
@@ -93,6 +94,20 @@ export class UpdateCourierLocationResponseDto {
 export class StopCourierLocationResponseDto {
   @ApiProperty({ example: true })
   success: boolean;
+}
+
+export class CustomerCourierRouteResponseDto {
+  @ApiProperty({ enum: ["READY", "NO_COURIER", "UNAVAILABLE"] })
+  routingStatus: "READY" | "NO_COURIER" | "UNAVAILABLE";
+
+  @ApiProperty({ type: CourierRouteGeometryResponseDto, nullable: true })
+  geometry: CourierRouteGeometryResponseDto | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  distanceMeters: number | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  durationSeconds: number | null;
 }
 
 export class DispatchBranchDto {

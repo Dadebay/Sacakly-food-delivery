@@ -11,7 +11,7 @@ A7-tagam продолжает работать из прежнего репоз�
 Существующая operations-админка и остальные старые API ещё относятся к
 одному оператору; **этот код не готов к подключению независимых кафе или
 публичному запуску**. Дальнейшие шаги и границы данных описаны в
-[контексте платформы](docs/PROJECT_CONTEXT.md).
+[контексте платформы](../PROJECT_CONTEXT.md).
 
 Доступ OWNER выдаётся существующему аккаунту после успешного OTP-входа:
 запустите dry run команды `npm --prefix apps/api run platform:owner`, затем
@@ -105,14 +105,14 @@ npm run dev
 
 Первый `npm run maps:up` скачивает региональный MBTiles Туркменистана, стили и
 шрифты, затем запускает изолированный TileServer GL. Подробности и обновление
-карты: [`maps/README.md`](maps/README.md).
+карты: [Saçakly maps](../MAPS.md).
 
 Первый `npm run routing:up` скачивает OSM-экстракт Туркменистана и строит
 локальный автомобильный граф. Защищённая ручка
 `GET /api/v1/orders/courier/route` объединяет текущую GPS-точку курьера,
 уникальные филиалы выдачи и все назначенные адреса, затем возвращает настоящую
 GeoJSON-линию дорог, расстояние, время и манёвры. Инструкция мобильщикам:
-[`docs/MOBILE_MAP_AND_ROUTING.md`](docs/MOBILE_MAP_AND_ROUTING.md).
+[Saçakly mobile map and routing](../MOBILE_MAP_AND_ROUTING.md).
 
 В development при `SMS_PROVIDER=console` ответ
 `POST /api/v1/auth/otp/request` содержит `devCode`. В production код в ответ
@@ -148,7 +148,7 @@ Pull-задания AES-256-GCM-зашифрованы в Redis. Для producti
 Других production SMS-провайдеров backend не поддерживает.
 Полная инструкция для готовой Android-программы, включая JSON-контракт,
 heartbeat, подтверждения и обработку ошибок:
-[`docs/ANDROID_SMS_GATEWAY.md`](docs/ANDROID_SMS_GATEWAY.md).
+[Android SMS gateway](../ANDROID_SMS_GATEWAY.md).
 
 Push-уведомления создают только администратор и главный администратор в разделе
 «Уведомления». Backend сохраняет кампанию и inbox каждого активного клиента в
@@ -158,7 +158,7 @@ Firebase Cloud Messaging. Firebase используется только для 
 и история работают без отправки на телефон; для настоящего устройства нужен
 `PUSH_PROVIDER=fcm` и server-only `FCM_SERVICE_ACCOUNT_BASE64`. Инструкция для
 мобильщиков и полный список endpoint:
-[`docs/MOBILE_PUSH_NOTIFICATIONS.md`](docs/MOBILE_PUSH_NOTIFICATIONS.md).
+[Mobile push notifications](../MOBILE_PUSH_NOTIFICATIONS.md).
 
 Адреса клиента доступны через `/api/v1/users/me/addresses`. Новый адрес
 становится активным автоматически. Если заказ создаётся с `addressId`, этот
@@ -247,8 +247,8 @@ GitHub-hosted runner пока не достигает domestic SSH-порта 22
 согласованный транспорт; это не превращает runtime обратно в DEV.
 
 Полная настройка веток, GitHub secrets/variables, сервера и reverse proxy:
-[`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md) и
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+[Saçakly infrastructure](../INFRASTRUCTURE.md) и
+[deployment](../DEPLOYMENT.md).
 
 При деплое сначала выполняется `prisma migrate deploy`. Новый API запускается
 только после успешной миграции и healthcheck. Если обновление не стало healthy,

@@ -404,7 +404,7 @@ their audit cannot be saved. If the audit database itself is unavailable, reject
 request audit persistence is best effort and emits a sanitized server error.
 Physical stock accuracy and actions by a database owner require operational
 inventory reconciliation; these application controls do not prove absence of
-theft. See [inventory QA and case matrix](INVENTORY_QA.md).
+theft. See [inventory QA and case matrix](../INVENTORY_QA.md).
 
 `/meal-config` (sidebar «Склад и рецептуры») has four focused views selected
 by the `view=stock|ingredients|recipes|flow` query parameter. Old
@@ -492,7 +492,7 @@ pre-existing orders without snapshots fall back to order-level totals.
 Historical recipe versions before this release are unknown and are not
 backfilled.
 
-Research and source comparisons: [inventory flow research](INVENTORY_FLOW_RESEARCH.md).
+Research and source comparisons: [inventory flow research](../INVENTORY_FLOW_RESEARCH.md).
 
 ## Order state machine
 

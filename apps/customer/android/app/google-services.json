@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "747385042590",
+    "project_id": "sacakly-customer-2026",
+    "storage_bucket": "sacakly-customer-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747385042590:android:1900c657b2a1306ac9ad8f",
+        "android_client_info": {
+          "package_name": "tm.sacakly.sacakly_customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWQVtoH9fwPwa7bxwmeYwwih8GYjf-smo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

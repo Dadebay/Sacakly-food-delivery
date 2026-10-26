@@ -19,11 +19,27 @@ complete. Native mobile clients may have separate release artifacts, but their
 backend contract is generated from this API.
 
 The mobile handoff defines **two separate applications**, one for customers and
-one for couriers. Cafe staff and OWNER use the web portal. The native clients
-are planned releases, not existing Saçakly apps; their current API coverage and
-release blockers are documented in `docs/mobile/`. In particular, imported
-global order and tracking endpoints need tenant authorization checks before
-they become supported native marketplace workflows.
+one for couriers. Cafe staff and OWNER use the web portal. A new Flutter
+customer prototype lives in `apps/customer`: cafe-scoped menu, OTP login,
+server quote, cash checkout and order list use this repository's API.
+Its code follows the prior Flutter client's `core/` and `modules/` layout;
+`main.dart` initializes services, `app.dart` configures the app, and feature
+screens live in their own modules. This is a structural refactor of the
+prototype, not a change to its API or business rules.
+Checkout now chooses a delivery point from the local map or authenticated
+geocoding search instead of asking for manual coordinates. The customer order
+screen polls owner-scoped courier GPS and a new owner-scoped remaining road
+route only while the order is active. A road duration is shown only when OSRM
+returns a route from a courier point recorded within 90 seconds.
+It includes the older app's local visual assets and a local-only seed for its
+demo menu. A Saçakly courier app is still planned. Current API coverage and
+release blockers are documented in `docs/mobile/`; imported global order and
+tracking endpoints still need tenant authorization audits before a supported
+native release.
+The Flutter customer UI offers Turkmen, Russian and English, opens in Turkmen
+on a fresh install, persists the customer's explicit choice and sends that
+choice when registering the FCM device. API-supplied catalog text is displayed
+as provided by the server.
 
 The root package orchestrates development, builds and tests across the
 monorepo. API, customer web, merchant portal and legacy admin each retain an

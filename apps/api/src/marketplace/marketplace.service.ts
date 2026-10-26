@@ -34,12 +34,21 @@ function rethrowCreateConflict(error: unknown): never {
 export class MarketplaceService {
   constructor(private readonly prisma: PrismaService, private readonly orders: OrdersService, private readonly receipts: MarketplaceReceiptsService) {}
 
-  publicCafes(query: ListMarketplaceCafesDto = {}) {
-    return this.prisma.cafe.findMany({
+  async publicCafes(query: ListMarketplaceCafesDto = {}) {
+    const cafes = await this.prisma.cafe.findMany({
       where: { isActive: true, modules: { some: { key: "ORDERING", enabled: true } }, ...(query.cuisine ? { cuisines: { has: query.cuisine } } : {}) },
-      select: { id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true },
+      select: {
+        id: true, name: true, slug: true, description: true, imageUrl: true, isActive: true, cuisines: true, version: true,
+        branches: {
+          where: { isActive: true },
+          orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
+          take: 1,
+          select: { address: true },
+        },
+      },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
+    return cafes.map(({ branches, ...cafe }) => ({ ...cafe, location: branches[0]?.address ?? null }));
   }
 
   async ownerCafes(actor: AuthUser) {

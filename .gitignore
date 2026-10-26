@@ -48,3 +48,7 @@ dist/
 /outputs/
 /work/
 /apps/api/src/generated/
+
+# Local-only catalogue import inputs (JSON and images copied from another
+# installation). Never commit these; see apps/api/prisma/seed-catalog-import.ts.
+/apps/api/prisma/seed-data/

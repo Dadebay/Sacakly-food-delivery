@@ -1529,6 +1529,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tracking/orders/{orderId}/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the remaining road route for the customer's active delivery */
+        get: operations["TrackingController_customerCourierRoute_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tracking/dispatch/live": {
         parameters: {
             query?: never;
@@ -5408,6 +5425,13 @@ export interface components {
             branches: components["schemas"]["DispatchBranchDto"][];
             couriers: components["schemas"]["DispatchCourierDto"][];
         };
+        CustomerCourierRouteResponseDto: {
+            /** @enum {string} */
+            routingStatus: "READY" | "NO_COURIER" | "UNAVAILABLE";
+            geometry: components["schemas"]["CourierRouteGeometryResponseDto"] | null;
+            distanceMeters: number | null;
+            durationSeconds: number | null;
+        };
         DispatchLiveEventDto: {
             /** @enum {string} */
             type: "courier.location" | "heartbeat";
@@ -6762,6 +6786,19 @@ export interface components {
             /** @description Delivered orders awaiting cash return */
             deliveredAwaitingCash: string;
             branches: components["schemas"]["CafeBranchReportDto"][];
+        };
+        PublicMarketplaceCafeResponseDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            slug: string;
+            description?: string | null;
+            imageUrl?: string | null;
+            isActive: boolean;
+            cuisines: ("SUSHI" | "BURGERS" | "FAST_FOOD" | "PIZZA" | "TURKMEN" | "BAKERY" | "COFFEE" | "OTHER")[];
+            version: number;
+            /** @description Address of the primary active cafe branch, or its first active branch */
+            location?: string | null;
         };
         OwnCafeCourierResponseDto: {
             /** Format: uuid */
@@ -9379,6 +9416,27 @@ export interface operations {
             };
         };
     };
+    TrackingController_customerCourierRoute_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerCourierRouteResponseDto"];
+                };
+            };
+        };
+    };
     TrackingController_dispatchLive_v1: {
         parameters: {
             query?: never;
@@ -11348,7 +11406,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MarketplaceCafeResponseDto"][];
+                    "application/json": components["schemas"]["PublicMarketplaceCafeResponseDto"][];
                 };
             };
         };

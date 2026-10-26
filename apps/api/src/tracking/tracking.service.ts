@@ -15,6 +15,7 @@ import {
   type UpdateCourierLocationResponseDto,
 } from "./tracking.dto";
 import { TrackingLiveService } from "./tracking-live.service";
+import { RoutingService, RoutingUnavailableError } from "../routing/routing.service";
 
 const COURIER_UPDATE_INTERVAL_SECONDS = 15;
 const LOCATION_TTL_SECONDS = 15 * 60;
@@ -48,6 +49,7 @@ export class TrackingService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly live: TrackingLiveService,
+    private readonly routing: RoutingService,
   ) {}
 
   async updateLocation(
@@ -122,17 +124,53 @@ export class TrackingService {
   async customerCourierLocation(customer: AuthUser, orderId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, customerId: customer.id },
-      select: { courierId: true },
+      select: { courierId: true, status: true },
     });
     if (!order) {
       throw new UnprocessableEntityException(
         "Order is not available for this customer",
       );
     }
-    const location = order.courierId
+    const location = order.courierId && order.status === OrderStatus.OUT_FOR_DELIVERY
       ? await this.getCourierLocation(order.courierId)
       : null;
-    return { location };
+    return { location: location && Date.now() - Date.parse(location.recordedAt) <= 90_000
+      ? location : null };
+  }
+
+  async customerCourierRoute(customer: AuthUser, orderId: string) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, customerId: customer.id },
+      select: { courierId: true, status: true, latitude: true, longitude: true },
+    });
+    if (!order) {
+      throw new UnprocessableEntityException("Order is not available for this customer");
+    }
+    const unavailable = (routingStatus: "NO_COURIER" | "UNAVAILABLE") => ({
+      routingStatus, geometry: null, distanceMeters: null, durationSeconds: null,
+    });
+    if (order.status !== OrderStatus.OUT_FOR_DELIVERY || !order.courierId) {
+      return unavailable("NO_COURIER");
+    }
+    const courier = await this.getCourierLocation(order.courierId);
+    if (!courier || Date.now() - Date.parse(courier.recordedAt) > 90_000) {
+      return unavailable("NO_COURIER");
+    }
+    try {
+      const route = await this.routing.planDrivingRoute([
+        { latitude: courier.latitude, longitude: courier.longitude },
+        { latitude: Number(order.latitude), longitude: Number(order.longitude) },
+      ]);
+      return {
+        routingStatus: "READY" as const,
+        geometry: route.geometry,
+        distanceMeters: route.distanceMeters,
+        durationSeconds: route.durationSeconds,
+      };
+    } catch (error) {
+      if (!(error instanceof RoutingUnavailableError)) throw error;
+      return unavailable("UNAVAILABLE");
+    }
   }
 
   async getDispatchSnapshot(): Promise<DispatchSnapshotDto> {

@@ -1,0 +1,56 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Android phone on USB. The app's default API address is
+            // http://127.0.0.1:4000/api/v1/, which on a phone points at the
+            // phone itself, so the pre-launch task forwards the phone's
+            // port 4000 to the Mac's API. The pre-launch task starts the API
+            // when needed and keeps this Flutter session in debug mode.
+            "name": "customer (USB phone, local API, hot reload)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "preLaunchTask": "Prepare customer USB debug"
+        },
+        {
+            // Phone (or emulator) on the same Wi-Fi as the Mac. Asks for the
+            // Mac's LAN IP each time, e.g. 192.168.1.20.
+            "name": "customer (Wi-Fi, local API)",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define=API_BASE_URL=http://${input:macIp}:4000/api/v1/"
+            ]
+        },
+        {
+            // iOS Simulator or desktop: 127.0.0.1 already reaches the Mac.
+            "name": "customer",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "customer (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "customer (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "macIp",
+            "type": "promptString",
+            "description": "Mac's LAN IP address (run: ipconfig getifaddr en0)",
+            "default": "192.168.1.20"
+        }
+    ]
+}

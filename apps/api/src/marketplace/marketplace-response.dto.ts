@@ -136,6 +136,11 @@ export class MarketplaceCafeResponseDto {
   version: number;
 }
 
+export class PublicMarketplaceCafeResponseDto extends MarketplaceCafeResponseDto {
+  @ApiPropertyOptional({ type: String, nullable: true, description: "Address of the primary active cafe branch, or its first active branch" })
+  location: string | null;
+}
+
 export class CafeReadinessChecksDto {
   @ApiProperty() cuisine: boolean;
   @ApiProperty() manager: boolean;

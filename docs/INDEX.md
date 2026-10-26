@@ -4,6 +4,12 @@ Start each task with [Project context](PROJECT_CONTEXT.md) and
 [Change history](CHANGELOG.md). Read [Infrastructure](INFRASTRUCTURE.md) for
 runtime and CI changes and [Deployment](DEPLOYMENT.md) before any release work.
 
+The [repository overview](OVERVIEW.md) contains the project layout and local
+development commands. Component guides are collected here as well:
+[Flutter customer app](CUSTOMER_FLUTTER.md), [print agent](PRINT_AGENT.md),
+[maps](MAPS.md), and [routing](ROUTING.md). The generated iOS launch image
+[note](IOS_LAUNCH_IMAGE.md) is kept here with the other documentation.
+
 - [Cafe onboarding](CAFE_ONBOARDING.md): OWNER setup, merchant preparation, publication, reports and printer acceptance.
 - [Onboarding QA](CAFE_ONBOARDING_QA.md): browser checks and verification evidence.
 - [Roadmap](ROADMAP.md): implemented features and work before onboarding cafes.

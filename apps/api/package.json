@@ -22,6 +22,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:seed:marketplace-demo": "tsx prisma/seed-marketplace-demo.ts",
+    "db:seed:catalog-import": "tsx prisma/seed-catalog-import.ts",
     "catalog:seed": "tsx prisma/import-catalog-seed.ts",
     "demo:couriers": "node scripts/local-courier-flow-demo.mjs setup",
     "openapi": "npm run build --silent && node scripts/generate-openapi.mjs"
@@ -47,7 +48,7 @@
     "redis": "6.1.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
-    "sharp": "0.35.4"
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

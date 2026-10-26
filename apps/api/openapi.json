@@ -4111,6 +4111,42 @@
         ]
       }
     },
+    "/api/v1/tracking/orders/{orderId}/route": {
+      "get": {
+        "operationId": "TrackingController_customerCourierRoute_v1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerCourierRouteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the remaining road route for the customer's active delivery",
+        "tags": [
+          "tracking"
+        ]
+      }
+    },
     "/api/v1/tracking/dispatch/live": {
       "get": {
         "operationId": "TrackingController_dispatchLive_v1",
@@ -7664,7 +7700,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MarketplaceCafeResponseDto"
+                    "$ref": "#/components/schemas/PublicMarketplaceCafeResponseDto"
                   }
                 }
               }
@@ -15726,6 +15762,42 @@
           "couriers"
         ]
       },
+      "CustomerCourierRouteResponseDto": {
+        "type": "object",
+        "properties": {
+          "routingStatus": {
+            "type": "string",
+            "enum": [
+              "READY",
+              "NO_COURIER",
+              "UNAVAILABLE"
+            ]
+          },
+          "geometry": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CourierRouteGeometryResponseDto"
+              }
+            ]
+          },
+          "distanceMeters": {
+            "type": "number",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "routingStatus",
+          "geometry",
+          "distanceMeters",
+          "durationSeconds"
+        ]
+      },
       "DispatchLiveEventDto": {
         "type": "object",
         "properties": {
@@ -20557,6 +20629,64 @@
           "cashCollected",
           "deliveredAwaitingCash",
           "branches"
+        ]
+      },
+      "PublicMarketplaceCafeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "cuisines": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUSHI",
+                "BURGERS",
+                "FAST_FOOD",
+                "PIZZA",
+                "TURKMEN",
+                "BAKERY",
+                "COFFEE",
+                "OTHER"
+              ]
+            }
+          },
+          "version": {
+            "type": "number"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "description": "Address of the primary active cafe branch, or its first active branch"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "isActive",
+          "cuisines",
+          "version"
         ]
       },
       "OwnCafeCourierResponseDto": {
